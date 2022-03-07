@@ -128,7 +128,7 @@ let contracts = {
 let constructors
   = {
   nix_string_hack
-    | Array (contracts.NixStringFragment) -> contracts.NixString
+    | Array contracts.NixStringFragment -> contracts.NixString
     | doc m%%"
         Nickel doesn't have a mechanism like Nix
         [string contexts](https://shealevy.com/blog/2018/08/05/understanding-nixs-string-context/) yet.
