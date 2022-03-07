@@ -58,7 +58,7 @@ let
     in
     nickelWithImports;
 
-  # Extract the inputs declared in the nickel-nix file.
+  # Extract the inputs declared in the Nickel expression.
   extractInputs = {runCommand, nickel, system}: nickelFile:
     let
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
@@ -72,7 +72,7 @@ let
     in
     (builtins.fromJSON (builtins.readFile result));
 
-  # Process the inputs declared in the nickel-nix file, fetch the corresponding
+  # Process the inputs declared in the Nickel expression, fetch the corresponding
   # Nix values, and export them to JSON to be directly usable by the nickel-nix
   # file
   exportInputs = system: lib: { declaredInputs, flakeInputs }:
@@ -96,7 +96,7 @@ let
             ''
         else
           builtins.throw ''
-            The nickel-nix file requires an input `${inputName}` for package
+            The Nickel expression requires an input `${inputName}` for package
             `${name}`, but no such input was forwaded to importNcl on the nix
             side. Forwarded inputs: ${
                  builtins.toString (builtins.attrNames flakeInputs)
@@ -105,7 +105,7 @@ let
     in
     lib.lists.foldr addPackage {} (builtins.attrNames declaredInputs);
 
-  # Call Nickel on a given nickel-nix file with the inputs declared in it.
+  # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
   callNickel = { runCommand, nickel, system, lib, ... }@args: { nickelFile, flakeInputs }:
     let
@@ -118,8 +118,8 @@ let
       ${nickel}/bin/nickel -f ${fileToCall} export > $out
     '';
 
-  # Import a nickel-nix file as a Nix value. flakeInputs are where the packages
-  # passed to the nickel-nix file are taken from. If the nickel-nix file
+  # Import a Nickel expression as a Nix value. flakeInputs are where the packages
+  # passed to the Nickel expression are taken from. If the Nickel expression 
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
   importNcl = { runCommand, nickel, system, lib, mkShell }@args: nickelFile: flakeInputs:
