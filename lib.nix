@@ -9,7 +9,7 @@ let
           builtins.mapAttrs (_: exportForNickel) value
         )
       else if (type == "list") then builtins.map exportForNickel value
-      else if (type == "list") then
+      else if (type == "lambda") then
         throw "Can’t export a function"
       else value;
 
