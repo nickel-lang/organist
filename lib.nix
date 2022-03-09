@@ -10,6 +10,20 @@
 
   isInStore = lib.hasPrefix builtins.storeDir;
 
+  valueWithContext = {
+    create = value: context: {inherit value context;};
+    emptyContext = value: valueWithContext.create value {};
+    mergeContexts = lib.recursiveUpdateUntil (p: _: _: lib.length p < 2);
+    setAttr = set: name: value: {
+      value = set.value // {${name} = value.value;};
+      context = valueWithContext.mergeContexts set.context value.context;
+    };
+    prependToList = value: list: {
+      value = [value.value] ++ list.value;
+      context = valueWithContext.mergeContexts value.context list.context;
+    };
+  };
+
   exportForNickel = value: let
     type = builtins.typeOf value;
   in
@@ -18,29 +32,47 @@
       (
         if (value.type or "" == "derivation")
         then
-          {
-            "${typeField}" = "nixDerivation";
-            inherit
-              (value)
-              drvPath
-              outputName
-              ;
-            outputPath = value.outPath;
+          valueWithContext.create (
+            {
+              "${typeField}" = "nixDerivation";
+              inherit
+                (value)
+                drvPath
+                outputName
+                ;
+              outputPath = value.outPath;
+            }
+            // (
+              if value ? version
+              then {inherit (value) version;}
+              else {}
+            )
+          ) {
+            ${builtins.unsafeDiscardStringContext value.drvPath}.${value.outputName} = value;
           }
-          // (
-            if value ? version
-            then {inherit (value) version;}
-            else {}
+        else
+          builtins.foldl'
+          (
+            acc: eltName:
+              valueWithContext.setAttr acc eltName (exportForNickel value.${eltName})
           )
-        else builtins.mapAttrs (_: exportForNickel) value
+          (valueWithContext.emptyContext {})
+          (builtins.attrNames value)
       )
     else if (type == "list")
-    then builtins.map exportForNickel value
+    then
+      builtins.foldl'
+      (
+        acc: elt:
+          valueWithContext.prependToList (exportForNickel elt) acc
+      )
+      (valueWithContext.emptyContext [])
+      value
     else if (type == "lambda")
     then throw "Can’t export a function"
     else if (type == "path" && isInStore value)
-    then builtins.toString value
-    else value;
+    then valueWithContext.emptyContext (builtins.toString value)
+    else valueWithContext.emptyContext value;
 
   # Take a symbolic derivation (a datastructure representing a derivation), as
   # produced by Nickel, and transform it into valid arguments to
@@ -58,10 +90,10 @@
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = system: baseDir: value: let
+  importFromNickel = context: system: baseDir: value: let
     type = builtins.typeOf value;
     isNickelDerivation = type: type == "nickelDerivation";
-    importFromNickel_ = importFromNickel system baseDir;
+    importFromNickel_ = importFromNickel context system baseDir;
   in
     if (type == "set")
     then
@@ -77,7 +109,7 @@
           in
             derivation prepared
           else if nixelType == "nixDerivation"
-          then (import value.drvPath).${value.outputName or "out"}
+          then context.${value.drvPath}.${value.outputName or "out"}
           else if nixelType == "nixString"
           then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if nixelType == "nixPath"
@@ -93,7 +125,7 @@
   computeNickelFile = {
     baseDir,
     nickelFile,
-    exportedPkgs,
+    exportedPkgsNcl,
   }: let
     sources = builtins.path {
       path = baseDir;
@@ -104,7 +136,7 @@
     exportedJSON =
       builtins.toFile
       "inputs.json"
-      (builtins.unsafeDiscardStringContext (builtins.toJSON (exportForNickel exportedPkgs)));
+      (builtins.unsafeDiscardStringContext (builtins.toJSON exportedPkgsNcl));
 
     nickelWithImports = builtins.toFile "eval.ncl" ''
       let params = {
@@ -178,12 +210,9 @@
             baseDir
             + "/${builtins.concatStringsSep "." declaredInputs.${inputId}.path}";
         in
-          acc
-          // {
-            "${inputId}" =
-              exportForNickel (runCommand (builtins.baseNameOf as_nix_path) {}
-                "cp -r ${as_nix_path} $out");
-          }
+          valueWithContext.setAttr acc inputId
+          (exportForNickel (runCommand (builtins.baseNameOf as_nix_path) {}
+              "cp -r ${as_nix_path} $out"))
       else if builtins.hasAttr inputTakeFrom flakeInputs
       then let
         input =
@@ -196,7 +225,7 @@
         pkgPath = declaredInputs.${inputId}.path or [inputId];
       in
         if lib.hasAttrByPath pkgPath input
-        then acc // {"${inputId}" = exportForNickel (lib.getAttrFromPath pkgPath input);}
+        then valueWithContext.setAttr acc inputId (exportForNickel (lib.getAttrFromPath pkgPath input))
         else
           builtins.throw ''
             Could not find package `${builtins.concatStringsSep "." pkgPath}`
@@ -211,7 +240,7 @@
           }
         '';
   in
-    lib.lists.foldr addPackage {} (builtins.attrNames declaredInputs);
+    lib.lists.foldr addPackage (valueWithContext.emptyContext {}) (builtins.attrNames declaredInputs);
 
   # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
@@ -226,11 +255,18 @@
     exportedPkgs =
       exportInputs
       {inherit declaredInputs flakeInputs baseDir;};
-    fileToCall = computeNickelFile {inherit baseDir nickelFile exportedPkgs;};
+    pkgsExportResult = exportForNickel exportedPkgs.value;
+    fileToCall = computeNickelFile {
+      inherit baseDir nickelFile;
+      exportedPkgsNcl = pkgsExportResult.value;
+    };
   in
-    runCommand "nickel-res.json" {} ''
-      ${nickel}/bin/nickel -f ${fileToCall} export > $out
-    '';
+    valueWithContext.create
+    (
+      runCommand "nickel-res.json" {} ''
+        ${nickel}/bin/nickel -f ${fileToCall} export > $out
+      ''
+    ) (valueWithContext.mergeContexts pkgsExportResult.context exportedPkgs.context);
 
   # Import a Nickel expression as a Nix value. flakeInputs are where the packages
   # passed to the Nickel expression are taken from. If the Nickel expression
@@ -247,7 +283,7 @@
       flakeInputs = flakeInputsWithInternals;
     };
   in
-    {rawNickel = nickelResult;}
-    // lib.traceVal (importFromNickel system baseDir (builtins.fromJSON
-        (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
+    {rawNickel = nickelResult.value;}
+    // lib.traceVal (importFromNickel nickelResult.context system baseDir (builtins.fromJSON
+        (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult.value))));
 in {inherit importNcl;}

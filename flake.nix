@@ -48,7 +48,7 @@
 
                 First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-                Then run `nix develop --impure` to enter the dev shell.
+                Then run `nix develop` to enter the dev shell.
               '';
             }
         )
@@ -217,7 +217,7 @@
                   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
                   nix flake lock --override-input nickel-nix path:${./.} --accept-flake-config
                   nix run .#regenerate-lockfile --accept-flake-config
-                  nix develop --impure --accept-flake-config --print-build-logs < /dev/null
+                  nix develop --accept-flake-config --print-build-logs < /dev/null
                   popd
                 '';
               }
@@ -232,7 +232,7 @@
                   cd ./${name}
                   nix flake lock --override-input nickel-nix path:${./.}
                   nix run .#regenerate-lockfile --accept-flake-config
-                  nix build --impure --accept-flake-config
+                  nix build --accept-flake-config
                 '';
               }
           );
