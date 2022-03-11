@@ -1,6 +1,7 @@
 {
   inputs = {
     hello = { input = "nixpkgs" }
+    , cowsay = { input = "nixpkgs" }
   }
 
   , output = fun { pkgs, nix, .. } =>
@@ -12,8 +13,8 @@
        ]
 
        , shellHook = nix.lib.nix_string_hack [
-          "echo 'Development shell'\n",
-          pkgs.hello, "/bin/hello",
+          pkgs.cowsay, "/bin/cowsay 'Welcowme to this nickel-powered shell!'",
        ]
-    } | nix.Shell,
+
+} | nix.Shell
 }
