@@ -108,7 +108,7 @@ let contracts = {
   Params | doc "The parameters provided to the Nickel expression"
     = {
     system | Str,
-    pkgs | {_: NixDerivation},
+    inputs | {_: NixDerivation},
     nix | {..},
   },
 
