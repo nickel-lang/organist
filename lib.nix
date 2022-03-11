@@ -47,7 +47,7 @@ let
 
       nickelWithImports = builtins.toFile "eval.ncl" ''
           let params = {
-            pkgs = import "${exportedJSON}",
+            inputs = import "${exportedJSON}",
             system = "${system}",
             nix = import "${./nix.ncl}",
           } in

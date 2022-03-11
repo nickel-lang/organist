@@ -2,16 +2,16 @@
 # This is for illustration purpose, and not really useful in this particular
 # example.
 {
-  inputs = {
+  inputs_spec = {
     hello = { input = "nixpkgs" }
   }
 
-  , output = fun { pkgs, nix, .. } =>
+  , output = fun { inputs, nix, .. } =>
     {
        name = "hello"
 
        , packages = [
-         pkgs.hello
+         inputs.hello
        ]
 
        , shellHook = m%"
