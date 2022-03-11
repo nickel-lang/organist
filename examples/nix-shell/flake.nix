@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel-nix.url = "github:nickel-lang/nickel-nix/nickel-shell";
+  inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   nixConfig = {
     extra-substituters = [ "https://nickel.cachix.org" ];
