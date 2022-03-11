@@ -120,7 +120,7 @@ let contracts = {
 
   NickelExpression | doc "A Nickel expression"
     = {
-    inputs | {_ : NickelInput},
+    inputs_spec | {_ : NickelInput},
     output | Params -> NickelDerivation,
   },
 } in
