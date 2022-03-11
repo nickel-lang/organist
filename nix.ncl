@@ -27,12 +27,19 @@ let contracts = {
   NixStringFragment | doc "A fragment of a Nix String"
     = contract.from_predicate predicate.is_string_fragment,
 
-  NixString | doc "A Nix string (from which a context will be deduced)"
+  NixStringWithContext | doc "A Nix string (from which a context will be deduced)"
     =
     {
       type = "nixString",
       fragments | Array NixStringFragment,
     },
+
+  NixString
+   = fun label value =>
+      if builtin.is_record value then
+        contract.apply NixStringWithContext label value
+      else
+        contract.apply Str label value,
 
   NickelDerivationType | doc m%"
       A string value to represent the type of a nickel derivation.
