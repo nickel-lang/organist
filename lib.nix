@@ -86,7 +86,7 @@ let
               if inputName == "nixpkgs" then
                 flakeInputs.${inputName}.legacyPackages.${system}
               else
-                flakeInputs.${inputName}.${system}.packages;
+                flakeInputs.${inputName}.packages.${system};
           in
           if builtins.hasAttr name input then
             acc // {"${name}" = exportForNickel input.${name};}
