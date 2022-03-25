@@ -84,8 +84,8 @@ let contracts = {
   },
 
   NickelShell = NickelDerivationBase & {
-    pakages | Array NixDerivation
-            | default = [],
+    packages | Array NixDerivation
+             | default = [],
 
     type = "nickelShell",
     ..
