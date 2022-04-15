@@ -1,14 +1,15 @@
-# nickel-nix
+Nickel-nix
+==========
 
 An experimental Nix toolkit to use [Nickel](https://github.com/tweag/nickel) as a
 language for writing nix packages, shells and more.
 
-**Caution**: nickel-nix is not a full-fledged Nix integration. It is currently
-missing several basic features. nickel-nix is intended to be a proof-of-concept
-for writing a Nix derivation using Nickel at the moment, without requiring new
-features either in Nix or in Nickel. The future of integration Nix and Nickel
-will most probably involve deeper modifications of the two projects, and
-hopefully lead to a more featureful and ergonomic solution.
+**Caution**: `nickel-nix` is not a full-fledged Nix integration. It is currently
+missing several basic features. `nickel-nix` is intended to be a
+proof-of-concept for writing a Nix derivation using Nickel at the moment,
+without requiring new features either in Nix or in Nickel. The future of the
+integration of Nix and Nickel will most probably involve deeper changes to the
+two projects, and hopefully lead to a more featureful and ergonomic solution.
 
 ## Content
 
@@ -47,12 +48,12 @@ More examples of varied Nix derivations are to come.
 
 ## Why using Nickel for Nix ?
 
-There are several resources on what is Nickel, and why it can make for better
-user experience for Nix[^1]. In particular, Nickel adds validations
-capabilities, thanks to so-called types and contracts. As a simple illustration,
-let us make a stupid error in our Nix version of the shell in Nix version of the
-shell, [`examples/nix-shell/shell.nix`](examples/nix-shell/shell.nix), by
-replacing the list of `packages` by a string:
+There are already resources on what is Nickel, and why it can make for better
+user experience for Nix[^1]. In particular, Nickel adds validations capabilities
+thanks to its type system and contract system. As a simple illustration, let's
+make a stupid error in our Nix version of the `hello` shell,
+[`examples/nix-shell/shell.nix`](examples/nix-shell/shell.nix), by replacing the
+list of `packages` by a string:
 
 ```nix
 -    packages = [ pkgs.hello ];
@@ -74,12 +75,12 @@ error: value is a string while a list was expected
            38|   propagatedBuildInputs = mergeInputs "propagatedBuildInputs";
 ```
 
-The error points to Nix internal code. Thanks to the variable being hopefully
-named `packages` as well, and the simple type error, we may be able to still
-diagnostic the issue here, as long as we aren't a beginner user. A slightly more
-involved example would probably quickly lets us at loss.
+The error points to Nix internal code. Thanks to the variable being luckily
+named `packages` as well, and the simple nature of the error, a seasoned Nix
+user might be able to diagnose the issue here. However, a slightly less
+forgiving example could quickly let us at loss.
 
-Let's do the same thing to `shell.ncl`:
+Let's do the same thing to the Nickel version in `shell.ncl`:
 
 ```nickel
 -    , packages = "[
@@ -90,7 +91,7 @@ Let's do the same thing to `shell.ncl`:
 +    "
 ```
 
-Here is the error we get:
+Now, we get:
 
 ```
 error: contract broken by a value
@@ -128,23 +129,29 @@ relevant error than Nix:
 2. It shows where the contract was enforced. This is inside the `nix.ncl` lib,
    but those are readable contract definitions, instead of an internal function
    building a derivation.
-3. It shows the actual value of the expression evaluated to. This is not very useful here,
-   because `packages` is already a string literal, but would be if packages
-   would be a more complex expression.
+3. It shows the actual value the expression evaluated to. This is not very useful here,
+   because `packages` is already a string literal, but would be if `packages`
+   was a compound expression.
 
-This report is made possible by contracts, a runtime validation feature. Here,
-the contract is slapped on top of our `shell.ncl` transparently by the `nix.ncl`
-library.
+This report is made possible by contracts, a runtime validation feature of
+Nickel. Here, a contract is slapped on top of our `shell.ncl` transparently by
+the `nix.ncl` library.
 
-No one would probably make this specific error in practice. However, while the
-current contracts of `nickel-nix` are rather minimal, this example shows the
-potential of encoding the domain knowledge and constraints of Nix inside Nickel
-to improve the troubleshooting experience. While one could also implement some
-validation capabilities in Nix, the native contracts of Nickel have specific
-interpreter support, helping to better track errors across data and functions
-calls, and providing good error reporting out of the box. Contracts can be
-written in a fairly lightweight and natural way, like data schemas: this
-hopefully lowers the barrier to have a more comprehensive validation story.
+While this precise error is a tad artificila, and the current contracts of
+`nickel-nix` are minimalists, the point is to demonstrate the _potential_ of
+encoding the domain knowledge and constraints of Nix inside Nickel, in order to
+improve the troubleshooting experience.
+
+While one could also implement validation capabilities in Nix (as is done in
+NixOS modules), the native contracts of Nickel have specific interpreter
+support, which helps to:
+- better track errors across data and functions calls
+- easily and succintly specify new contracts
+- provide good error reporting out of the box
+
+Contracts can be written in a fairly lightweight and natural way, like data
+schemas: this hopefully lowers the barrier to have a more comprehensive
+validation story.
 
 [^1]: You can read the
   [announcement of the first release](https://www.tweag.io/blog/2022-03-11-nickel-first-release/).
