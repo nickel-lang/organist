@@ -1,17 +1,17 @@
 # Constraints
 
-What needs to be in Nickel to be usabe for Nix.
+What needs to be in Nickel to be usable for Nix.
 
 - string context
 
-## Primitive / effet
+## Primitive / effect
 
 - derivation. JSON interchange. Loose of lazyness. Not a problem for the
   direction Nickel -> Nix because it morally takes JSON.
 - Nickel-specific
 - Module system OS
 
-Transpiling Nix vers Nickel. String context.
+Transpiling Nix to Nickel. String context.
 
 Simply add a way of nix builtins. Look at what other implementations of Nix lang
 do. `rnix`, `hnix` parser e.g. `rnix-lsp`.

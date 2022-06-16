@@ -15,6 +15,17 @@ let Drv = {
   ..
 } in
 
+{
+  name = "acpiligh",
+  version = "..",
+  src = ".",
+}
+|> Drv
+{
+  ..,
+  derivation = %derivation% name version src ...
+}
+
 let InputBinder = fun res => {
   inputs = res,
   build_inputs = res,
@@ -30,12 +41,27 @@ let InputBinder = fun res => {
   combine | {_: PackageDef} -> {_ : Drv} = fun pkgs =>
     # Problem: record.map doesn't allow further overriding
     let res = pkgs | {_ : Drv} in
+
+
+    # Fixpoint, but not sure
+    record.fixpoint (fun self =>
+      record.map (fun _k pkg => pkg & {inputs = self, build_inputs = self}) res)
+
+    # But when do we apply "overlays"/override?
+    # we can't really do it after the fact without additional machinery,
+    # because inputs and build_inputs wouldn't be bound.
+
+    (combine foo) & bar =~= (combine (foo & bar))
+
+    # (r | [foo, .., ])
     # res & { fixed = record.map (fun _k x => x & {inputs = res, build_inputs = res} }
     res | (fun lbl x -> x & …)
-    (foo | A | B) & (bar | C | D) ~ (foo | A | B | C | D) & (bar | C | D | A | B)
-    (foo & bar) | A | B | C | D
-    res & ...
-    something_else & ...
+
+    #record.fixpoint (fun self => { })
+    #(foo | A | B) & (bar | C | D) ~ (foo | A | B | C | D) & (bar | C | D | A | B)
+    #(foo & bar) | A | B | C | D
+    #res & ...
+    #something_else & ...
     
     n1 & n2 = n1 if n1 == n2 or _|_
     booleans
@@ -82,6 +108,13 @@ fun self => { bar = self.foo + 1 }
     # contract itself. Sounds like abusing contracts, but ok as long as
     # idempotent?
     # Then, all we need to do is to "tie the knot"
+}
+
+{
+  foo = "this",
+  bar = foo + 1,
+  baz = self."%{foo}",
+  inputs = self,
 }
 
 # nickelpkgs @ [let py = import "python.ncl" in py & { version = "3", name =
