@@ -21,6 +21,8 @@
           { withNix = import ./shell.nix { inherit pkgs; };
             withNickel = importNcl ./shell.ncl inputs;
             withNickelNixString = importNcl ./shell-nix-string.ncl inputs;
+            withNixTypeError = import ./shell-type-error.nix { inherit pkgs; };
+            withNickelTypeError = importNcl ./shell-type-error.ncl inputs;
           };
       });
 }
