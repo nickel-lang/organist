@@ -1,25 +1,44 @@
 let nix_builtins = import "nix_builtins.ncl" in
+let Drv in
 
+# let some_function = fun {args1, .., argsn} => (ret_value : Foo)
+# let x = {args1, .., argsn, ret_value = some_function {args1, .., argns}}
+# SomeFuncInterface = {args1, .., argsn}
+# SomeFunc = {args1, .., argsn, ret_value}
+# Drv == Foo
 {
-  BinShBuilder = Derivation & drv_builder & {
+  BinShBuilder = DerivationInterface & {
     build_script | Str,
     build_command = [
       "/bin/sh",
-      (nix_builtins.write_text "builder" build_script)
+      ((import "nix_builtins.ncl").write_text "builder" build_script).path,
     ],
   },
+
+  GenericCargoBuilder = BinShBuilder & {
+    cargo | Derivation,
+
+    build_script = "%{cargo}/bin/cargo build",
+  },
+
+  Cargo5Builder = GenericCargoBuilder & {
+    build_inputs = { cargo5 },
+    cargo = build_inputs.cargo5,
+  },
+
+  Drv = {out, drv_path}, 
 
   drv_builder = {
     name | Str,
     version | Str,
     system | Str,
-    build_command | Str,
+    build_command | Array Str,
     derivation | Drv = nix_builtins.derivation name version system build_command,
   },
 
   PackageDef = BinShBuilder & {
-    inputs | default = [],
-    build_inputs | default = [],
+    inputs | default = {},
+    build_inputs | default = {},
     install_phase | Str | default = "",
     build_phase | Str | default = "",
     build_script | Str = m%"
@@ -32,7 +51,9 @@ let nix_builtins = import "nix_builtins.ncl" in
   DerivationInterface = {
     name | Str,
     version | Str,
-    system | {..},
+    system | {arch | Str, os | Str} 
+           | default = {arch = "x86_64", os = "linux"},
+    build_command | Array Str,
     ..
   },
 
@@ -41,7 +62,7 @@ let nix_builtins = import "nix_builtins.ncl" in
     name | Str,
     version | Str,
     system | {..},
-    build_command | Str,
+    build_command | Array Str,
     derivation | {..},
   },
 
@@ -49,7 +70,6 @@ let nix_builtins = import "nix_builtins.ncl" in
    derivation | Drv,
   },
 
-  Unit = fun label => function.id,
-
-  Effect = fun x => x,
+  Unit = Dyn,
+  Effect = Dyn,
 }

@@ -1,4 +1,6 @@
-let {drv_builder, Effect, Unit, PackageDef, Derivation,..} = import "builders.ncl" in
+let builders = import "builders.ncl" in
+let {drv_builder, Effect, Unit, Derivation, ..} = builders in
+let PackageDef = builders.PackageDef in
 
 # Can't implement this function in a satisfying way (i.e. that preserves
 # recursive fields and all). Binding everything like a brute for now
@@ -10,8 +12,10 @@ let record = record & {
 } in
 
 {
-  get_all_defs | Effect Unit -> Array PackageDef,
-  defs_with_name | Array PackageDef -> {_ : PackageDef},
+  get_all_defs | Effect (Array PackageDef) = [import "pkgs/hello-world.ncl"],
+  defs_with_name | Array PackageDef -> {_ : PackageDef} = fun _pkgs => {
+    hello-world = import "pkgs/hello-world.ncl",
+  },
   combine | {_: PackageDef} -> {_ : Package} = fun pkgs =>
     # Bind the derivation field to the others. Using merging and not a contract
     # to avoid redoing the computation again and again
@@ -23,8 +27,8 @@ let record = record & {
         build_inputs = record.project pkg.build_inputs res,
       }) base in
     res,
-  make | Effect Unit -> {_ : Derivation} =
-    get_all_defs null
+  make | Effect {_ : Derivation} =
+    get_all_defs
     |> defs_with_name
     |> combine,
 }
