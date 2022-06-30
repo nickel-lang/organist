@@ -71,5 +71,5 @@ let Drv in
   },
 
   Unit = Dyn,
-  Effect = Dyn,
+  Effect = fun contract => Dyn,
 }
