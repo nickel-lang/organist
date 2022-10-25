@@ -16,8 +16,10 @@
   Derivation = Dyn,
 
   NickelPkg 
-    | doc "The basic, low-level interface for a symbolic derivation to be passed
-to the Nix side in order to be built."
+    | doc m%"
+        The basic, low-level interface for a symbolic derivation to be passed
+        to the Nix side in order to be built.
+      "%m
     = {
       name
         | doc "The name of the package."
@@ -42,7 +44,16 @@ to the Nix side in order to be built."
       env
         | doc "Set additional environment variables for the builder."
         | {_: Str},
-      type | force = `derivation,
+      # "derivation"
+      type | force = `nickelDerivation,
+  },
+
+  NickelShell = {
+    name | Name,
+    packages | Array Derivation
+             | default = [],
+    type | force = `nickelShell,
+    ..
   },
 }
 

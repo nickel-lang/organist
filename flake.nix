@@ -14,7 +14,7 @@
       {
         packages.importNcl = pkgs.callPackage self.lib.importNcl {
           inherit system;
-          nickel = nickel.defaultPackage.${system};
+          nickel = nickel.packages.${system}.default;
         };
       }
   );

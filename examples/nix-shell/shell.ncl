@@ -6,23 +6,23 @@
   }
 
   , output = fun { inputs, nix, .. } =>
-    let builders = import "../builders.ncl" in
     let hello = {
       name = "hello",
       version = "0.1",
       build_command = {
-        cmd = "%{inputs.bash}/bin/bash",
+        cmd = "%{inputs.bash.outputPath}/bin/bash",
         args = [ "-c", m%"
-          %{inputs.coreutils}/bin/mkdir -p $out/bin
-          %{inputs.coreutils}/bin/cat <<EOF > $out/bin/hello
-            #!%{inputs.bash}/bin/bash
-            echo "Hello world"
+          %{inputs.coreutils.outputPath}/bin/mkdir -p $out/bin
+          %{inputs.coreutils.outputPath}/bin/cat <<EOF > $out/bin/hello
+          #!%{inputs.bash.outputPath}/bin/bash
+          echo "Hello world"
           EOF
+          %{inputs.coreutils.outputPath}/bin/chmod +x $out/bin/hello
         "%m, ]
       },
       env = {},
       dependencies = [ inputs.bash, inputs.coreutils ],
-    } | builders.NickelPkg
+    } | nix.builders.NickelPkg
     in
     {
        name = "hello"
@@ -36,5 +36,5 @@
            hello
          "%m
 
-    } | nix.Shell,
+    } | nix.builders.NickelShell,
 }
