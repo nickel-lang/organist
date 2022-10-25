@@ -192,6 +192,7 @@ let constructors
   Derivation = contracts.NickelDerivation,
   NickelExpression = contracts.NickelExpression,
   lib = constructors,
+  builders = import "builders.ncl",
 } | doc m%"
     Nickel library for Nickel-Nix interoperability. Provide contracts used to
     serialize Nix inputs to Nickel, to define a Nickel expression, and helpers
