@@ -44,16 +44,16 @@ let contracts = {
     ..
   },
 
-  NickelDerivation | doc "A package or a shell natively specified in Nickel."
-    = fun label value =>
-    let value_checked = contract.apply
-      HasDerivationType
-      (contract.tag "missing or incorrect derivation type (field `type`)" label)
-      value in
-    if value_checked.type == "nickelPackage" then
-      contract.apply NickelPackage label value
-    else
-      contract.apply NickelShell label value,
+  # NickelDerivation | doc "A package or a shell natively specified in Nickel."
+  #   = fun label value =>
+  #   let value_checked = contract.apply
+  #     HasDerivationType
+  #     (contract.tag "missing or incorrect derivation type (field `type`)" label)
+  #     value in
+  #   if value_checked.type == "nickelPackage" then
+  #     contract.apply NickelPackage label value
+  #   else
+  #     contract.apply NickelShell label value,
 
   NickelDerivationBase = {
     name | doc "The package name."
@@ -108,7 +108,7 @@ let contracts = {
   Params | doc "The parameters provided to the Nickel expression"
     = {
     system | Str,
-    inputs | {_: NixDerivation},
+    inputs | {_: Dyn},
     nix | {..},
   },
 
@@ -118,15 +118,25 @@ let contracts = {
           | default = "nixpkgs",
   },
 
+  # TODO: have the actual contract for the result of an expression. It's pretty
+  # open (could be an integer, a derivation, a record of derivations, etc.) but
+  # still obey some rules: if the `type` field is set to a known predefined
+  # value, then the record must have a certain shape.
+  # The contract must be: what the Nix side of the code can "parse" without
+  # erroring out.
+  NickelExpressionResult = Dyn,
   NickelExpression | doc "A Nickel expression"
     = {
     inputs_spec | {_ : NickelInput},
-    output | Params -> NickelDerivation,
+    output | Params -> NickelExpressionResult,
   },
 } in
 
 let constructors
   = {
+  import_file
+    | Str -> contracts.NixPath
+    = fun filepath => { type = "nix_path", path = filepath, },
   nix_string_hack
     | Array contracts.NixStringFragment -> contracts.NixString
     | doc m%%"

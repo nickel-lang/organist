@@ -42,6 +42,8 @@ let
         (import value.drvPath).${value.outputName or "out"}
       else if valueType == "nixString" then
         builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
+      else if valueType == "nixPath" then
+        ./ + value.path
       else
         builtins.mapAttrs (_: importFromNickel_) value
       )
@@ -63,8 +65,7 @@ let
             system = "${system}",
             nix = import "${./.}/nix.ncl",
           } in
-          # let nickel_expr | params.nix.NickelExpression = import "${nickelFile}" in
-          let nickel_expr = import "${nickelFile}" in
+          let nickel_expr | params.nix.NickelExpression = import "${nickelFile}" in
           nickel_expr.output params
       '';
 
@@ -76,8 +77,7 @@ let
     let
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
         let nix = import "${./.}/nix.ncl" in
-        # let nickel_expr | nix.NickelExpression = import "${nickelFile}" in
-        let nickel_expr = import "${nickelFile}" in
+        let nickel_expr | nix.NickelExpression = import "${nickelFile}" in
         nickel_expr.inputs_spec
       '';
       result = runCommand "nickel-inputs.json" {} ''
@@ -133,7 +133,7 @@ let
     '';
 
   # Import a Nickel expression as a Nix value. flakeInputs are where the packages
-  # passed to the Nickel expression are taken from. If the Nickel expression 
+  # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
   importNcl = { runCommand, nickel, system, lib, mkShell }@args: nickelFile: flakeInputs:
