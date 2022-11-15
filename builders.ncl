@@ -8,6 +8,8 @@
   # later.
   Name = Str,
   Version = Str,
+  #TODO: better contract for strings that can have context
+  StringWithCtxt = Dyn,
   # For now, we use Str, but same thing: should we have enums tags for arch and
   # os instead?
   System = {arch | Str, os | Str},
@@ -33,17 +35,18 @@
         | Version,
       dependencies
         | doc "The dependencies of the package."
-        | Array Derivation,
+        | Array Derivation
+        | default = [],
       system
         | doc "The system to build the package on."
         | System
         | default = {arch = "x86_64", os = "linux"},
       build_command
         | doc "The build command to execute."
-        | {cmd | Str, args | Array Str},
+        | {cmd | StringWithCtxt, args | Array StringWithCtxt},
       env
         | doc "Set additional environment variables for the builder."
-        | {_: Str},
+        | {_: StringWithCtxt},
       # "derivation"
       type | force = `nickelDerivation,
   },

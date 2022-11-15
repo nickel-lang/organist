@@ -20,7 +20,7 @@ let predicate | doc "Various predicates used to define contracts"
       is_plain_string x
 
     , is_derivation_type = fun x =>
-      x == "nickelPackage" || x == "nickelShell"
+      x == `nickelPackage || x == `nickelShell
   } in
 
 let contracts = {
