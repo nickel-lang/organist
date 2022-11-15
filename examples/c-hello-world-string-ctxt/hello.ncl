@@ -13,17 +13,10 @@
       build_command = {
         cmd = nix.lib.nix_string_hack [inputs.bash, "/bin/bash"],
         args = [ "-c",
-          nix.lib.nix_string_hack [
-             inputs.gcc,
-             "/bin/gcc ",
-             inputs.hello,
-             " -o hello\n"]
-           @ [
-             inputs.coreutils,
-             "/bin/mkdir -p $out/bin\n"]
-           @ [
-             inputs.coreutils,
-             "/bin/cp hello $out/bin/hello"]
+          ([inputs.gcc, "/bin/gcc ", inputs.hello, " -o hello\n"]
+           @ [ inputs.coreutils, "/bin/mkdir -p $out/bin\n"]
+           @ [ inputs.coreutils, "/bin/cp hello $out/bin/hello"])
+           |> nix.lib.nix_string_hack
         ]
       },
       env = {},
