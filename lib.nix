@@ -43,7 +43,7 @@ let
       else if valueType == "nixString" then
         builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
       else if valueType == "nixPath" then
-        ./ + value.path
+        ./. + value.path
       else
         builtins.mapAttrs (_: importFromNickel_) value
       )
