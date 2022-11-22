@@ -4,7 +4,7 @@
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   # inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
-  inputs.nickel-nix.url = "path:ABSOLUTE_PATH_OF_../../";
+  inputs.nickel-nix.url = "path:../../";
 
   nixConfig = {
     extra-substituters = [ "https://nickel.cachix.org" ];
@@ -20,10 +20,8 @@
         devShell = devShells.withNickel;
         devShells =
           { withNix = import ./shell.nix { inherit pkgs; };
-            withNickel = importNcl ./shell.ncl inputs;
-            withNickelNixString = importNcl ./shell-nix-string.ncl inputs;
-            withNixTypeError = import ./shell-type-error.nix { inherit pkgs; };
-            withNickelTypeError = importNcl ./shell-type-error.ncl inputs;
+            withNickel = importNcl ./. ./shell.ncl inputs;
+            withNickelNixString = importNcl ./. ./shell-nix-string.ncl inputs;
           };
       });
 }

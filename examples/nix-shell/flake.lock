@@ -89,13 +89,13 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1666704254,
-        "narHash": "sha256-SEBzko8Y3bc/WlBQCKI35kWbqOWjWdyCWbfGLdt6P7o=",
-        "path": "/home/yago/Pro/Tweag/projects/nickel/nickel-nix",
+        "lastModified": 0,
+        "narHash": "sha256-9HUKnOd7pRESzuR8gWtGmY/nnZNIxSfwvrhvnFj/iWQ=",
+        "path": "../../",
         "type": "path"
       },
       "original": {
-        "path": "/home/yago/Pro/Tweag/projects/nickel/nickel-nix",
+        "path": "../../",
         "type": "path"
       }
     },

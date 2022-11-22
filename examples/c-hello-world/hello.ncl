@@ -3,7 +3,10 @@
     bash = { input = "nixpkgs" },
     coreutils = { input = "nixpkgs" },
     gcc = { input = "nixpkgs" },
-    hello = { input = "sources" },
+    hello = {
+      input = "sources",
+      path = "hello.c",
+    },
   }
 
   , output = fun { inputs, nix, .. } =>
