@@ -116,6 +116,8 @@ let contracts = {
   = {
     input | Str
           | default = "nixpkgs",
+    # TODO: precise contract. We want to allow a path if input == "sources"
+    ..
   },
 
   # TODO: have the actual contract for the result of an expression. It's pretty

@@ -89,12 +89,28 @@ let
   # Process the inputs declared in the Nickel expression, fetch the corresponding
   # Nix values, and export them to JSON to be directly usable by the nickel-nix
   # file
-  exportInputs = system: lib: { declaredInputs, flakeInputs }:
+  exportInputs = {system, lib, runCommand}: { declaredInputs, flakeInputs, baseDir }:
     let
       pkgNames = builtins.attrNames declaredInputs;
       addPackage = name: acc:
-        let inputName = declaredInputs."${name}".input; in
-        if builtins.hasAttr inputName flakeInputs then
+        let inputName = declaredInputs.${name}.input; in
+        # "sources" is a special type of input for files. They mimic Nix style
+        # paths. We don't take them from flake inputs (where they aren't,
+        # anyway), but create a simple derivation wrapper around them to pass
+        # them to the Nickel side.
+        if inputName == "sources" then
+          # TODO: could we use flakeInputs.self.outPath instead of passing
+          # baseDir explicitly? Maybe, but the issue is that this path is the
+          # path of the git directory, not the subdirectory of the flake.nix.
+          # may need some massaging
+          let as_nix_path = baseDir + "/${declaredInputs.${name}.path}";
+          in
+          acc // {
+            "${name}" =
+              exportForNickel (runCommand (builtins.baseNameOf as_nix_path) {}
+              "cp -r ${as_nix_path} $out");
+          }
+        else if builtins.hasAttr inputName flakeInputs then
           let
             input =
               if inputName == "nixpkgs" then
@@ -111,7 +127,7 @@ let
         else
           builtins.throw ''
             The Nickel expression requires an input `${inputName}` for package
-            `${name}`, but no such input was forwaded to importNcl on the nix
+            `${name}`, but no such input was forwarded to importNcl on the nix
             side. Forwarded inputs: ${
                  builtins.toString (builtins.attrNames flakeInputs)
               }
@@ -121,10 +137,12 @@ let
 
   # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
-  callNickel = { runCommand, nickel, system, lib, ... }@args: { nickelFile, flakeInputs }:
+  callNickel = { runCommand, nickel, system, lib, ... }@args: { nickelFile, flakeInputs, baseDir }:
     let
       declaredInputs = extractInputs { inherit runCommand nickel system; } nickelFile;
-      exportedPkgs = exportInputs system lib { inherit declaredInputs flakeInputs; };
+      exportedPkgs = exportInputs
+        {inherit system lib runCommand;}
+        {inherit declaredInputs flakeInputs baseDir; };
       fileToCall = computeNickelFile system { inherit nickelFile exportedPkgs; };
     in
 
@@ -136,8 +154,8 @@ let
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = { runCommand, nickel, system, lib, mkShell }@args: nickelFile: flakeInputs:
-    let nickelResult = callNickel args { inherit nickelFile flakeInputs; }; in
+  importNcl = { runCommand, nickel, system, lib, mkShell}@args: baseDir: nickelFile: flakeInputs:
+    let nickelResult = callNickel args { inherit nickelFile flakeInputs baseDir; }; in
     { rawNickel = nickelResult; }
     // (importFromNickel mkShell (builtins.fromJSON
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));

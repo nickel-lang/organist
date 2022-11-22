@@ -16,13 +16,11 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         importNcl = nickel-nix.packages.${system}.importNcl;
-      in rec {
+      in {
         # we want hello.c to be part of the source of the hello package, but we
         # don't have yet a way to easily import plain files into the Nickel
         # world. This is a temporary hack: we wrap hello.co as a stub package
         # and pass it as any other input to the Nickel part.
-        packages.default = importNcl ./hello.ncl (inputs // {
-          sources.packages.${system}.hello = pkgs.runCommand "hello.c" {} "cp ${./hello.c} $out";
-        });
+        packages.default = importNcl ./. ./hello.ncl inputs;
       });
 }
