@@ -161,4 +161,4 @@ let
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 
 in
-{ inherit importNcl; }
+{ inherit importNcl callNickel; }

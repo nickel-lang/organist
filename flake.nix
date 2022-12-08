@@ -16,6 +16,10 @@
           inherit system;
           nickel = nickel.packages.${system}.default;
         };
+        packages.callNickel = pkgs.callPackage self.lib.callNickel {
+          inherit system;
+          nickel = nickel.packages.${system}.default;
+        };
       }
   );
 }
