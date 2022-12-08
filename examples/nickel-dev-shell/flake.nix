@@ -18,24 +18,23 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      callNickel = nickel-nix.packages.${system}.callNickel;
-      nickelThing = callNickel {
-        baseDir = ./.;
-        nickelFile = ./nickel-dev-shell.ncl;
-        flakeInputs = inputs;
+      importNcl = nickel-nix.packages.${system}.importNcl;
+      dummyStdenv = pkgs.writeTextFile {
+          name = "stdenv";
+          destination = "/setup";
+          text = ''
+            # Fix for `nix develop`
+            : ''${outputs:=out}
+            runHook() {
+            eval "$shellHook"
+            unset runHook
+            }
+          '';
       };
-      nickelDerivation =
-        builtins.derivation
-        (
-          builtins.fromJSON
-          (
-            builtins.readFile
-            nickelThing
-          ) // {inherit system;}
-        );
+      nickelDerivation = importNcl ./. ./nickel-dev-shell.ncl (inputs // {
+          myInputs.packages.${system} = { inherit dummyStdenv; };});
     in rec {
-      packages = rec {
-        inherit nickelThing nickelDerivation;
+      packages = {
         default = nickelDerivation;
       };
       devShells = {

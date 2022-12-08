@@ -2,12 +2,20 @@
   inputs_spec = {
     bash = { input = "nixpkgs" },
     coreutils = { input = "nixpkgs" },
+    dummyStdenv = { input = "myInputs" },
   },
 
   output = fun { inputs, nix, .. } =>
   {
     name = "nickel-shell",
     version = "0.1",
-    builder = "%{inputs.bash.outputPath}/bin/bash",
-  }
+    build_command = {
+      cmd = "%{inputs.bash.outputPath}/bin/bash",
+      args = [],
+    },
+    dependencies = [ inputs.bash ],
+    env = {
+      stdenv = inputs.dummyStdenv,
+    },
+  } | nix.builders.NickelPkg
 }
