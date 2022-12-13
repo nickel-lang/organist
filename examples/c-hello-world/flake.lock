@@ -89,14 +89,14 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1668522687,
-        "narHash": "sha256-YxYMHYOu+/Ag4OwQZE+jvOpm2ar3gUyzhswDDkERHno=",
-        "type": "git",
-        "url": "file:///home/yago/Pro/Tweag/projects/nickel/nickel-nix"
+        "lastModified": 0,
+        "narHash": "sha256-upID2Mu3EA8lBqmCXyUyQqEZypLNU05WCoOMvK0QNhA=",
+        "path": "../../",
+        "type": "path"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/yago/Pro/Tweag/projects/nickel/nickel-nix"
+        "path": "../../",
+        "type": "path"
       }
     },
     "nixpkgs": {
