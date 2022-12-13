@@ -21,13 +21,7 @@
         target=$out/setup
         %{inputs.coreutils.outputPath}/bin/touch $target
         %{inputs.coreutils.outputPath}/bin/cp %{inputs.naked-stdenv.outputPath} $target
-        #%{inputs.coreutils.outputPath}/bin/echo -n "test" > $target
       "%m,
-      #"%{inputs.coreutils.outputPath}/bin/echo 'hi'"
-      #"echo $out",
-      #"target=$out/setup",
-      #"mkdir -p \"$(dirname \"$target\")\"",
-      #"echo -n \"test\" > \"$target\""
       ],
     },
     dependencies = [ inputs.bash, inputs.coreutils, inputs.naked-stdenv ],

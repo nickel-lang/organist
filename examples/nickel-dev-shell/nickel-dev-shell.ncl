@@ -5,9 +5,6 @@
     nakedStdenv = { input = "myInputs" },
   },
 
-  # On Nix side:
-  # inputs = { coreutils = inputs.nixpkgs.legacyPackages.x86_64-linux.coreutils.drvPath; }
-
   output = fun { inputs, nix, .. } =>
   {
     name = "nickel-shell",
