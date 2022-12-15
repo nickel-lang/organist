@@ -1,6 +1,11 @@
 let predicate | doc "Various predicates used to define contracts"
   = { is_plain_string = builtin.is_str
 
+    , is_nix_path
+        = fun x => builtin.is_record x &&
+                   record.has_field "type" x &&
+                   x.type == `nixPath
+
     , is_nix_derivation
         = fun x => builtin.is_record x &&
                    record.has_field "type" x &&
@@ -17,7 +22,8 @@ let predicate | doc "Various predicates used to define contracts"
 
     , is_string_fragment = fun x =>
       is_derivation x ||
-      is_plain_string x
+      is_plain_string x ||
+      is_nix_path x
 
     , is_derivation_type = fun x =>
       x == `nickelPackage || x == `nickelShell

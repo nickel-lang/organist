@@ -16,10 +16,10 @@ let {NixStringFragment, ..} = import "nix.ncl" in
   #TODO: better contract for strings that can have context
   StringWithCtxt = fun label value =>
     if builtin.is_str value then
-      nix_string_hack_unsafe [value]
+      nix_string_hack_unsafe [value] # Array Str
+                                     #       ___
     else
-      let result = contract.apply (Array NixStringFragment) label
-value in
+      let result = value | Array NixStringFragment in
       nix_string_hack_unsafe result,
   # For now, we use Str, but same thing: should we have enums tags for arch and
   # os instead?
