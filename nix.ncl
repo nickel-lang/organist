@@ -36,7 +36,7 @@ let contracts = {
 
   NickelDerivationType | doc m%"
       A string value to represent the type of a nickel derivation.
-    "%m
+    "%
     = contract.from_predicate predicate.is_derivation_type,
 
   HasDerivationType = {
@@ -62,7 +62,7 @@ let contracts = {
          | doc m%"
             The type of derivation. Should not be set directly, but rather set by
             contract annotations.
-          "%m,
+          "%,
   },
 
   NickelPackage = NickelDerivationBase & {
@@ -95,7 +95,7 @@ let contracts = {
       Apply this contract to a Nickel expression to indicate that it should be
       considered as defining a shell. Applying this contract is similar to
       calling `mkShell` in the Nix world.
-    "%m
+    "%
     = {type = "nickelShell", ..},
 
   NixDerivation | doc "A derivation coming from the Nix world"
@@ -132,13 +132,18 @@ let contracts = {
     inputs_spec | {_ : NickelInput},
     output | Params -> NickelExpressionResult,
   },
+
+  NixPath = {
+    type | force = `nixPath,
+    path | Str,
+  }
 } in
 
 let constructors
   = {
   import_file
     | Str -> contracts.NixPath
-    = fun filepath => { type = "nix_path", path = filepath, },
+    = fun filepath => {path = filepath},
   nix_string_hack
     | Array contracts.NixStringFragment -> contracts.NixString
     | doc m%%"
@@ -194,7 +199,7 @@ let constructors
 
         In the future, we will hopefully have a native mechanism similar or subsuming
         string contexts in Nickel.
-    "%%m
+    "%%
   = fun f =>
     { type = "nixString", fragments = f },
 } in
@@ -203,10 +208,13 @@ let constructors
   Shell = contracts.Shell,
   Derivation = contracts.NickelDerivation,
   NickelExpression = contracts.NickelExpression,
+  NixStringFragment = contracts.NixStringFragment,
+  ImportedFile = contracts.ImportedFile,
   lib = constructors,
   builders = import "builders.ncl",
-} | doc m%"
-    Nickel library for Nickel-Nix interoperability. Provide contracts used to
-    serialize Nix inputs to Nickel, to define a Nickel expression, and helpers
-    to build strings which preserves Nix string contexts.
-  "%m
+}
+# | doc m%"
+#     Nickel library for Nickel-Nix interoperability. Provide contracts used to
+#     serialize Nix inputs to Nickel, to define a Nickel expression, and helpers
+#     to build strings which preserves Nix string contexts.
+#   "%

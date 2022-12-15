@@ -2,7 +2,7 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel.url = "github:tweag/nickel";
+  inputs.nickel.url = "github:tweag/nickel/stable";
 
   nixConfig = {
     extra-substituters = [ "https://tweag-nickel.cachix.org" ];
