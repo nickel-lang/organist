@@ -186,8 +186,8 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1669127938,
-        "narHash": "sha256-n3DdCPj8wg7VSYztFcbOWT3EmIymjK6DgkEgEAcU75c=",
+        "lastModified": 1671124392,
+        "narHash": "sha256-dwT6gen/KD8VOeeYTBJNgAFsmmp5MmVKhgvfKgoYEas=",
         "type": "git",
         "url": "file:///home/yago/Pro/Tweag/projects/nickel/nickel-nix"
       },
