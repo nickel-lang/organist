@@ -4,7 +4,10 @@
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   # inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
-  inputs.nickel-nix.url = "/home/yago/Pro/Tweag/projects/nickel/nickel-nix";
+  inputs.nickel-nix = {
+    url = "/home/yago/Pro/Tweag/projects/nickel/nickel-nix";
+    inputs.nickel.url = "github:tweag/nickel/feature/symbolic-strings";
+  };
 
   nixConfig = {
     extra-substituters = [ "https://nickel.cachix.org" ];

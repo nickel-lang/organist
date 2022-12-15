@@ -3,13 +3,24 @@
 # SomeFuncInterface = {args1, .., argsn}
 # SomeFunc = {args1, .., argsn, ret_value}
 # Drv == Foo
+let {NixStringFragment, ..} = import "nix.ncl" in
 {
+  nix_string_hack_unsafe = fun fs =>
+    {
+      type = `nixString, fragments = fs,
+    },
   # Nix may require name, version, etc. to have a certain format, but we're not sure. TODO
   # later.
   Name = Str,
   Version = Str,
   #TODO: better contract for strings that can have context
-  StringWithCtxt = Dyn,
+  StringWithCtxt = fun label value =>
+    if builtin.is_str value then
+      nix_string_hack_unsafe [value]
+    else
+      let result = contract.apply (Array NixStringFragment) label
+value in
+      nix_string_hack_unsafe result,
   # For now, we use Str, but same thing: should we have enums tags for arch and
   # os instead?
   System = {arch | Str, os | Str},
@@ -21,7 +32,7 @@
     | doc m%"
         The basic, low-level interface for a symbolic derivation to be passed
         to the Nix side in order to be built.
-      "%m
+      "%
     = {
       name
         | doc "The name of the package."
