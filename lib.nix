@@ -24,11 +24,11 @@ let
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = mkShell: value:
+  importFromNickel = mkShell: baseDir: value:
     let
       type = builtins.typeOf value;
       isNickelDerivation = type: type == "nickelDerivation";
-      importFromNickel_ = importFromNickel mkShell;
+      importFromNickel_ = importFromNickel mkShell baseDir;
     in
     if (type == "set") then (
       let valueType = value.type or ""; in
@@ -43,7 +43,7 @@ let
       else if valueType == "nixString" then
         builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
       else if valueType == "nixPath" then
-        ./. + value.path
+        baseDir + "/${value.path}"
       else
         builtins.mapAttrs (_: importFromNickel_) value
       )
@@ -157,7 +157,7 @@ let
   importNcl = { runCommand, nickel, system, lib, mkShell}@args: baseDir: nickelFile: flakeInputs:
     let nickelResult = callNickel args { inherit nickelFile flakeInputs baseDir; }; in
     { rawNickel = nickelResult; }
-    // (importFromNickel mkShell (builtins.fromJSON
+    // (importFromNickel mkShell baseDir (builtins.fromJSON
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 
 in

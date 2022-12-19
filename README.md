@@ -7,8 +7,8 @@ packages, shells and more.
 
 This repo is composed of a Nix library, a Nickel library and a flake which
 provides the main entry point of `nickel-nix`, the Nix `importFromNcl` function.
-This function takes a Nickel file and inputs to forward and produces a
-derivation.
+This function takes the current directory, a Nickel file and inputs to forward
+and produces a derivation.
 
 The Nickel library contains in-code documentation that can be leveraged by the
 `nickel query` command. For example:
@@ -18,7 +18,8 @@ The Nickel library contains in-code documentation that can be leveraged by the
 - `nickel query -f nix.ncl lib.nix_string_hack` will show the documentation of a
     specific symbol, here `lib.nix_string_hack`.
 
-### Examples
+## Examples
 
 `example/nix-shell` shows how to use `nickel-nix` to write a simple `hello`
-shell. More examples of varied Nix derivations are to come.
+shell. `examples/c-hello-world` and its variations builds a simple hello world
+program in C. More examples of varied Nix derivations are to come.
