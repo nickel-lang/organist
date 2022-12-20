@@ -2,7 +2,7 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel.url = "github:tweag/nickel/stable";
+  inputs.nickel.url = "github:tweag/nickel/master";
 
   outputs = { self, nixpkgs, flake-utils, nickel } @ inputs:
   {

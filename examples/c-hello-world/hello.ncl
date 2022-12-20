@@ -19,7 +19,7 @@
           %{inputs.gcc.outputPath}/bin/gcc %{inputs.hello.outputPath} -o hello
           %{inputs.coreutils.outputPath}/bin/mkdir -p $out/bin
           %{inputs.coreutils.outputPath}/bin/cp hello $out/bin/hello
-        "%m, ]
+        "%, ]
       },
       env = {},
       dependencies = [ inputs.bash, inputs.coreutils, inputs.gcc, inputs.hello ],

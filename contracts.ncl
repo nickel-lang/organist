@@ -45,7 +45,7 @@ let mk_nix_string  = fun fs => {
 
   # TODO: more precise contract
   Derivation
-    | m%" 
+    | doc m%" 
         Contract representing either a Nix derivation (evaluated and imported
 from the Nix world) or a derivation defined in Nickel.
       "%
