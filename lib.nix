@@ -14,6 +14,9 @@ let
         throw "Can’t export a function"
       else value;
 
+  # Take a symbolic derivation (a datastructure representing a derivation), as
+  # produced by Nickel, and transform it into valid arguments to
+  # `derivation`
   prepareDerivation = value:
     (builtins.removeAttrs value ["build_command" "env"])
     // {
@@ -36,8 +39,6 @@ let
         let prepared = prepareDerivation (builtins.mapAttrs (_:
         importFromNickel_) value); in
         builtins.trace (builtins.toJSON prepared) (derivation prepared)
-      else if valueType == "nickelShell" then
-        mkShell (builtins.mapAttrs (_: importFromNickel_) value)
       else if valueType == "nixDerivation" then
         (import value.drvPath).${value.outputName or "out"}
       else if valueType == "nixString" then
@@ -98,6 +99,8 @@ let
         # paths. We don't take them from flake inputs (where they aren't,
         # anyway), but create a simple derivation wrapper around them to pass
         # them to the Nickel side.
+        # TODO: should we get rid of sources, now that we have `import_file` and
+        # symbolic strings?
         if inputName == "sources" then
           # TODO: could we use flakeInputs.self.outPath instead of passing
           # baseDir explicitly? Maybe, but the issue is that this path is the
