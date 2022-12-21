@@ -165,16 +165,16 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1671554472,
-        "narHash": "sha256-YjQW6H27zu157IQsJwCTbaPAZAcBkTGLb0Xqdmrd+h0=",
+        "lastModified": 1671207155,
+        "narHash": "sha256-NhBnd/rxe3AKwkvAzEk0oRmuFZVppfyAf3iIjvbDYnU=",
         "owner": "tweag",
         "repo": "nickel",
-        "rev": "d74d22919ac83200c62bc1991f44075108304ec2",
+        "rev": "c95ab86f3e7fb9f9929b7ee625beb1844e583ff1",
         "type": "github"
       },
       "original": {
         "owner": "tweag",
-        "ref": "fix/contract-error-reporting",
+        "ref": "master",
         "repo": "nickel",
         "type": "github"
       }
@@ -187,7 +187,7 @@
       },
       "locked": {
         "lastModified": 0,
-        "narHash": "sha256-RKRKM34QMDGmR9Oa/cxGthHUWoZv+mqym6dLDtjST6Y=",
+        "narHash": "sha256-RBYFaG3RUlzEWr2RfhptTXB2MbDaXjRx1o027DTKG9o=",
         "path": "../../",
         "type": "path"
       },
