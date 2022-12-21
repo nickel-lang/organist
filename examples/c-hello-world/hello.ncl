@@ -1,8 +1,8 @@
 {
   inputs_spec = {
-    bash = { input = "nixpkgs" },
-    coreutils = { input = "nixpkgs" },
-    gcc = { input = "nixpkgs" },
+    bash.input = "nixpkgs",
+    coreutils.input = "nixpkgs",
+    gcc.input = "nixpkgs",
     hello = {
       input = "sources",
       path = "hello.c",
