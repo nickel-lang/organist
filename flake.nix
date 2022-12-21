@@ -4,6 +4,11 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nickel.url = "github:tweag/nickel/master";
 
+  nixConfig = {
+    extra-substituters = [ "https://tweag-nickel.cachix.org" ];
+    extra-trusted-public-keys = [ "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA=" ];
+  };
+
   outputs = { self, nixpkgs, flake-utils, nickel } @ inputs:
   {
     lib = import ./lib.nix;
