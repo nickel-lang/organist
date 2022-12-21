@@ -1,10 +1,12 @@
 let
   # Export a Nix value to be consumed by Nickel
+  typeField = "$__nixel_type";
+
   exportForNickel = value:
       let type = builtins.typeOf value; in
       if (type == "set") then (
         if (value.type or "" == "derivation") then
-          { type = "nixDerivation"; drvPath = value.drvPath; outputName =
+          { "${typeField}" = "nixDerivation"; drvPath = value.drvPath; outputName =
             value.outputName; outputPath = value.outPath;}
         else
           builtins.mapAttrs (_: exportForNickel) value
@@ -34,16 +36,16 @@ let
       importFromNickel_ = importFromNickel mkShell baseDir;
     in
     if (type == "set") then (
-      let valueType = value.type or ""; in
-      if isNickelDerivation valueType then
+      let nixelType = value."${typeField}" or ""; in
+      if isNickelDerivation nixelType then
         let prepared = prepareDerivation (builtins.mapAttrs (_:
         importFromNickel_) value); in
         builtins.trace (builtins.toJSON prepared) (derivation prepared)
-      else if valueType == "nixDerivation" then
+      else if nixelType == "nixDerivation" then
         (import value.drvPath).${value.outputName or "out"}
-      else if valueType == "nixString" then
+      else if nixelType == "nixString" then
         builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
-      else if valueType == "nixPath" then
+      else if nixelType == "nixPath" then
         baseDir + "/${value.path}"
       else
         builtins.mapAttrs (_: importFromNickel_) value
