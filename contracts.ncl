@@ -1,21 +1,21 @@
+let type_field = "$__nixel_type" in
+
 let predicate | doc "Various predicates used to define contracts"
   = {
-    is_plain_string = builtin.is_str
-
-    , is_nix_path
+    is_nix_path
         = fun x => builtin.is_record x &&
-                   record.has_field "type" x &&
-                   x.type == `nixPath
+                   record.has_field type_field x &&
+                   x."%{type_field}" == "nixPath"
 
     , is_nix_derivation
         = fun x => builtin.is_record x &&
-                   record.has_field "type" x &&
-                   x.type == `nixDerivation
+                   record.has_field type_field x &&
+                   x."%{type_field}" == "nixDerivation"
 
     , is_nickel_derivation = fun x =>
       builtin.is_record x &&
-      record.has_field "type" x &&
-      is_derivation_type x.type
+      record.has_field type_field x &&
+      x."%{type_field}" == "nickelDerivation"
 
     , is_derivation = fun x =>
       is_nickel_derivation x ||
@@ -23,15 +23,13 @@ let predicate | doc "Various predicates used to define contracts"
 
     , is_string_fragment = fun x =>
       is_derivation x ||
-      is_plain_string x ||
+      builtin.is_str x ||
       is_nix_path x
-
-    , is_derivation_type = fun x =>
-      x == `nickelPackage || x == `nickelShell
   } in
 
-let mk_nix_string  = fun fs => {
-  type = `nixString, fragments = fs,
+let mk_nix_string = fun fs => {
+  "%{type_field}" = "nixString",
+  fragments = fs,
 } in
 
 {
@@ -135,14 +133,15 @@ from the Nix world) or a derivation defined in Nickel.
         #TODO: we should use contract.apply, otherwise the error reporting is
         # off, but doing so makes Nickel panic for now. Until the bug is
         # fixed, we have to resort to this contract application
-        (value | Array NixStringFragment)
+        let label = contract.tag (builtin.serialize `Json value) label in
+        contract.apply (Array NixString) label value
         |> mk_nix_string,
   
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
     drvPath | Str,
     outputName | Str,
-    type = `nixDerivation,
+    "%{type_field}" | force = "nixDerivation",
   },
 
   NickelDerivation
@@ -179,8 +178,7 @@ from the Nix world) or a derivation defined in Nickel.
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},
-      # "derivation"
-      type | force = `nickelDerivation,
+      "%{type_field}" | force = "nickelDerivation",
   },
 
 
@@ -214,7 +212,7 @@ from the Nix world) or a derivation defined in Nickel.
   },
 
   NixPath = {
-    type | force = `nixPath,
+    "%{type_field}" | force = "nixPath",
     path | Str,
   }
 }
