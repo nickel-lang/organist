@@ -2,10 +2,6 @@
   inputs_spec = {
     bash = { input = "nixpkgs" },
     coreutils = { input = "nixpkgs" },
-    naked-stdenv = {
-      input = "sources",
-      path = "naked-stdenv.sh",
-    },
   },
 
   output = fun { inputs, nix, .. } =>
@@ -20,7 +16,7 @@
         %{inputs.coreutils}/bin/mkdir -p $out
         target=$out/setup
         %{inputs.coreutils}/bin/touch $target
-        %{inputs.coreutils}/bin/cp %{inputs.naked-stdenv} $target
+        %{inputs.coreutils}/bin/cp %{nix.lib.import_file "naked-stdenv.sh"} $target
       "%,
       ],
     },

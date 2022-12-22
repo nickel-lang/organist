@@ -33,4 +33,29 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       ```
       "%%%
     = NickelDerivation,
+
+  BashShell = {
+    inputs_spec | {
+      # default or not?
+      bash.input | default = "nixpkgs",
+      nakedStdenv.input | default = "myInputs",
+      ..
+    },
+
+    inputs,
+    nix,
+
+    output = {
+      version | default = "0.1",
+
+      build_command = {
+        cmd = s%"%{inputs.bash}/bin/bash"%,
+        args = [],
+      },
+
+      env = {
+        stdenv = inputs.nakedStdenv,
+      },
+    }, 
+  },
 }

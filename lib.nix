@@ -29,18 +29,18 @@ let
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = mkShell: baseDir: value:
+  importFromNickel = baseDir: value:
     let
       type = builtins.typeOf value;
       isNickelDerivation = type: type == "nickelDerivation";
-      importFromNickel_ = importFromNickel mkShell baseDir;
+      importFromNickel_ = importFromNickel baseDir;
     in
     if (type == "set") then (
       let nixelType = value."${typeField}" or ""; in
       if isNickelDerivation nixelType then
         let prepared = prepareDerivation (builtins.mapAttrs (_:
         importFromNickel_) value); in
-        builtins.trace (builtins.toJSON prepared) (derivation prepared)
+        derivation prepared
       else if nixelType == "nixDerivation" then
         (import value.drvPath).${value.outputName or "out"}
       else if nixelType == "nixString" then
@@ -159,10 +159,10 @@ let
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = { runCommand, nickel, system, lib, mkShell}@args: baseDir: nickelFile: flakeInputs:
+  importNcl = { runCommand, nickel, system, lib}@args: baseDir: nickelFile: flakeInputs:
     let nickelResult = callNickel args { inherit nickelFile flakeInputs baseDir; }; in
     { rawNickel = nickelResult; }
-    // (importFromNickel mkShell baseDir (builtins.fromJSON
+    // lib.traceVal (importFromNickel baseDir (builtins.fromJSON
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 
 in
