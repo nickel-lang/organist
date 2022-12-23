@@ -1,6 +1,6 @@
 # C hello world
 
-This example builds a simple C hello wolrd program through nickel-nix.
+This example builds a simple C hello world program through nickel-nix.
 
 ## Usage
 
