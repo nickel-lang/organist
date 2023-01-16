@@ -1,7 +1,7 @@
 let {NickelDerivation, ..} = import "contracts.ncl" in
 
 {
-  NickelPkg 
+  NickelPkg
     # we should only need two '%%', but a current Nickel bug (#XXX) bug makes the example being
     # recognized as actual interpolation. For the time being, we thus use a
     # three '%' delimiter.
@@ -35,12 +35,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     = NickelDerivation,
 
   BashShell = {
-    inputs_spec | {
-      # default or not?
-      bash.input | default = "nixpkgs",
-      nakedStdenv.input | default = "myInputs",
-      ..
-    },
+    inputs_spec
+      | {
+        # default or not?
+        bash.input | priority -100 = "nixpkgs",
+        nakedStdenv.input | priority -100 = "myInputs",
+      }
+      | default = {},
 
     inputs,
     nix,
@@ -54,8 +55,9 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       },
 
       env = {
-        stdenv = inputs.nakedStdenv,
+        # TODO: handle naked derivations without having to interpolate
+        stdenv = s%"%{inputs.nakedStdenv}"%,
       },
-    }, 
+    } | NickelPkg,
   },
 }

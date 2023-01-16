@@ -14,7 +14,7 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       importNcl = nickel-nix.packages.${system}.importNcl;
-      nakedStdenv = importNcl ./. ./naked-stdenv.ncl inputs;
+      nakedStdenv = importNcl ./. "naked-stdenv.ncl" inputs;
       nickelDerivation =
         importNcl ./. "nickel-dev-shell.ncl"
         (

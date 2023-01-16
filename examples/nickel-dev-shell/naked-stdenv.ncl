@@ -4,7 +4,11 @@
     coreutils = { input = "nixpkgs" },
   },
 
-  output = fun { inputs, nix, .. } =>
+  # parameters
+  inputs,
+  nix,
+
+  output =
   {
     name = "naked-stdenv",
     version = "0.1",
