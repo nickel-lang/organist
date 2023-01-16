@@ -56,8 +56,14 @@ let
 
   # Generate a Nickel program that evaluates the nickel-nix output, passing
   # the given exported packages, and write it to outFile.
-  computeNickelFile = system: {nickelFile, exportedPkgs}:
+  computeNickelFile = system: {baseDir, nickelFile, exportedPkgs}:
     let
+      sources = builtins.path {
+        path = baseDir;
+        # TODO: filter .ncl files
+        # filter =
+      };
+
       exportedJSON = builtins.toFile
           "inputs.json"
           (builtins.unsafeDiscardStringContext (builtins.toJSON (exportForNickel exportedPkgs)));
@@ -67,20 +73,30 @@ let
             inputs = import "${exportedJSON}",
             system = "${system}",
             nix = import "${./.}/nix.ncl",
-          } in
-          let nickel_expr | params.nix.NickelExpression = import "${nickelFile}" in
-          nickel_expr.output params
+          }
+          in
+
+          let nickel_expr | params.nix.NickelExpression =
+            import "${sources}/${nickelFile}"
+          in
+
+          (nickel_expr & params).output
       '';
 
     in
     nickelWithImports;
 
   # Extract the inputs declared in the Nickel expression.
-  extractInputs = {runCommand, nickel, system}: nickelFile:
+  extractInputs = {runCommand, nickel, system}: {baseDir, nickelFile}:
     let
+      sources = builtins.path {
+        path = baseDir;
+        # TODO: filter .ncl files
+        # filter =
+      };
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
         let nix = import "${./.}/nix.ncl" in
-        let nickel_expr | nix.NickelExpression = import "${nickelFile}" in
+        let nickel_expr | nix.NickelExpression = import "${sources}/${nickelFile}" in
         nickel_expr.inputs_spec
       '';
       result = runCommand "nickel-inputs.json" {} ''
@@ -144,11 +160,13 @@ let
   # See importNcl for details about the flakeInputs parameter.
   callNickel = { runCommand, nickel, system, lib, ... }@args: { nickelFile, flakeInputs, baseDir }:
     let
-      declaredInputs = extractInputs { inherit runCommand nickel system; } nickelFile;
+      declaredInputs = extractInputs
+        { inherit runCommand nickel system; }
+        { inherit baseDir nickelFile; };
       exportedPkgs = exportInputs
         {inherit system lib runCommand;}
         {inherit declaredInputs flakeInputs baseDir; };
-      fileToCall = computeNickelFile system { inherit nickelFile exportedPkgs; };
+      fileToCall = computeNickelFile system { inherit baseDir nickelFile exportedPkgs; };
     in
 
     runCommand "nickel-res.json" {} ''
