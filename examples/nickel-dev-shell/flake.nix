@@ -16,7 +16,7 @@
       importNcl = nickel-nix.packages.${system}.importNcl;
       nakedStdenv = importNcl ./. ./naked-stdenv.ncl inputs;
       nickelDerivation =
-        importNcl ./. ./nickel-dev-shell.ncl
+        importNcl ./. "nickel-dev-shell.ncl"
         (
           inputs
           // {

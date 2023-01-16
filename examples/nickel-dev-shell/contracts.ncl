@@ -12,11 +12,6 @@ let predicate | doc "Various predicates used to define contracts"
                    record.has_field type_field x &&
                    x."%{type_field}" == "nixDerivation"
 
-    , is_nix_string
-      = fun value => builtin.is_record value &&
-        record.has_field type_field value &&
-        value."%{type_field}" == "nixString"
-
     , is_nickel_derivation = fun x =>
       builtin.is_record x &&
       record.has_field type_field x &&
@@ -38,7 +33,7 @@ let mk_nix_string = fun fs => {
 } in
 
 {
-  # Nix may require name, version, etc. to have a certain format, but we're not sure.
+  # Nix may require name, version, etc. to have a certain format, but we're not sure. 
   # TODO: refine those contracts
   Name = Str,
   Version = Str,
@@ -48,7 +43,7 @@ let mk_nix_string = fun fs => {
 
   # TODO: more precise contract
   Derivation
-    | doc m%"
+    | doc m%" 
         Contract representing either a Nix derivation (evaluated and imported
 from the Nix world) or a derivation defined in Nickel.
       "%
@@ -111,7 +106,7 @@ from the Nix world) or a derivation defined in Nickel.
 
       To do so, juste use the multiline string syntax, but with an `s` prefix
       instead (**Warning**: the `s` prefix is as of now temporary, and subject
-      to change in the future):
+      to change in the future): 
 
       ```nickel
       shellHook = s%"
@@ -132,8 +127,7 @@ from the Nix world) or a derivation defined in Nickel.
     = fun label value =>
       # We accept a single string fragment (a plain string, a derivation or a
       # Nix path). We normalize it by wrapping it as a one-element array
-      if predicate.is_nix_string value then value
-      else if predicate.is_string_fragment value then
+      if predicate.is_string_fragment value then
         mk_nix_string [contract.apply NixStringFragment label value]
       else
         #TODO: we should use contract.apply, otherwise the error reporting is
@@ -142,7 +136,7 @@ from the Nix world) or a derivation defined in Nickel.
         let label = contract.tag (builtin.serialize `Json value) label in
         contract.apply (Array NixString) label value
         |> mk_nix_string,
-
+  
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
     drvPath | Str,
@@ -214,8 +208,7 @@ from the Nix world) or a derivation defined in Nickel.
   NickelExpression | doc "A Nickel expression"
     = {
     inputs_spec | {_ : NickelInputSpec},
-    output | NickelExpressionResult,
-    ..
+    output | Params -> NickelExpressionResult,
   },
 
   NixPath = {
