@@ -20,7 +20,7 @@ let
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = value:
-    (builtins.removeAttrs value ["build_command" "env"])
+    (builtins.removeAttrs value ["build_command" "env" "structured_env"])
     // {
       system = "${value.system.arch}-${value.system.os}";
       builder = value.build_command.cmd;

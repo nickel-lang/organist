@@ -40,6 +40,7 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         # default or not?
         bash.input | priority -100 = "nixpkgs",
         nakedStdenv.input | priority -100 = "myInputs",
+        ..
       }
       | default = {},
 
@@ -59,5 +60,17 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         stdenv = s%"%{inputs.nakedStdenv}"%,
       },
     } | NickelPkg,
+  },
+
+  GccShell = BashShell & {
+    inputs_spec | {
+      gcc.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [s%"%{inputs.bash}/bin"%, s%"%{inputs.gcc}/bin"%],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 }
