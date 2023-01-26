@@ -147,6 +147,7 @@ from the Nix world) or a derivation defined in Nickel.
     = {
     drvPath | Str,
     outputName | Str,
+    name | Str,
     "%{type_field}" | force = "nixDerivation",
   },
 
@@ -183,7 +184,7 @@ from the Nix world) or a derivation defined in Nickel.
         },
       structured_env
         | doc "TODO"
-        | {_: Array NixString},
+        | Dyn,
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},

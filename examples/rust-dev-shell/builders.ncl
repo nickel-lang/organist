@@ -1,4 +1,4 @@
-let {NickelDerivation, ..} = import "contracts.ncl" in
+let {NickelDerivation, NixString, Derivation, ..} = import "contracts.ncl" in
 
 {
   NickelPkg
@@ -34,6 +34,61 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       "%%%
     = NickelDerivation,
 
+  env_lib = {
+    DagElement = fun Data => {
+      before : Array Str | default = [],
+      after : Array Str | default = [],
+      value : Data
+    },
+
+    Dag = fun Data => {
+          _: DagElement Data
+    },
+
+    topo_sort
+      | Dag Dyn -> Array Dyn
+      = fun dag => dag
+        |> record.values
+        |> array.map (fun elt => elt.value),
+
+    StructuredEnvVar = {sep : Str | default = ":", elems : Dag NixString},
+    StructuredEnv = { _ : StructuredEnvVar },
+    Env = { _ : NixString },
+
+    join_path | Str -> Array NixString -> NixString
+      = fun sep arr =>
+      if array.length arr == 0 then
+        ""
+      else
+        array.foldl
+          (fun acc path_elem => s%"%{acc}%{sep}%{path_elem}"%)
+          (array.head arr)
+          (array.tail arr),
+
+    destructure_env_elt
+      | Str -> StructuredEnvVar -> NixString
+      = 
+        fun name { sep, elems } =>
+        elems
+        |> topo_sort
+        |> join_path sep,
+
+    destructure_env
+      | StructuredEnv -> Env
+      = record.map destructure_env_elt,
+
+    from_drv_array
+      | Array Derivation -> StructuredEnvVar
+      = array.foldl (fun acc elt => acc & {elems."%{elt.name}".value = elt})
+        {elems = {}},
+
+    bins_from_drvs
+      | Array Derivation -> StructuredEnvVar
+      = array.foldl
+        (fun acc drv => acc & {elems."%{drv.name}".value = s%"%{drv}/bin"%})
+        {elems = {}},
+  }, 
+
   BashShell = {
     inputs_spec
       | {
@@ -55,10 +110,16 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         args = [],
       },
 
-      env = {
-        # TODO: handle naked derivations without having to interpolate
-        stdenv = s%"%{inputs.nakedStdenv}"%,
+      env | env_lib.Env = env_lib.destructure_env structured_env,
+
+      # Building the DAG in client code. This is so nice because it composes well,
+      # but it's also quite heavy to write
+      structured_env | env_lib.StructuredEnv = {
+        stdenv.elems = {
+          stdenv.value = s%"%{inputs.nakedStdenv}"%,
+        },
       },
+
     } | NickelPkg,
   },
 
@@ -71,15 +132,23 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       ..
     },
     inputs,
-    output.structured_env = {
-      PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.cargo}/bin"%,
-        s%"%{inputs.rustc}/bin"%,
-        s%"%{inputs.rustfmt}/bin"%,
-        s%"%{inputs.rust-analyzer}/bin"%
-      ],
-    },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+
+    output.structured_env.PATH = env_lib.bins_from_drvs [
+      inputs.bash,
+      inputs.cargo,
+      inputs.rustc,
+      inputs.rustfmt,
+      inputs.rust-analyzer
+    ],
+    # output.structured_env = {
+    #   PATH = env.from_drv_array [
+    #     s%"%{inputs.bash}/bin"%,
+    #     s%"%{inputs.cargo}/bin"%,
+    #     s%"%{inputs.rustc}/bin"%,
+    #     s%"%{inputs.rustfmt}/bin"%,
+    #     s%"%{inputs.rust-analyzer}/bin"%
+    #   ],
+    # },
+    # output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 }

@@ -7,7 +7,7 @@ let
       if (type == "set") then (
         if (value.type or "" == "derivation") then
           { "${typeField}" = "nixDerivation"; drvPath = value.drvPath; outputName =
-            value.outputName; outputPath = value.outPath;}
+            value.outputName; outputPath = value.outPath; name = value.name;}
         else
           builtins.mapAttrs (_: exportForNickel) value
         )
