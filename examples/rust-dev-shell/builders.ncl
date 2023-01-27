@@ -50,6 +50,8 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output = {
       version | default = "0.1",
 
+      # this is required otherwise nix develop
+      # will fail with a message that it only supports bash
       build_command = {
         cmd = s%"%{inputs.bash}/bin/bash"%,
         args = [],
