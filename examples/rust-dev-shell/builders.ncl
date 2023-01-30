@@ -221,4 +221,23 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  # broken: PyLTI-0.7.0 not supported for interpreter python3.10
+  # works with a regular nix shell though
+  Python310Shell = BashShell & {
+    inputs_spec | {
+      python310.input | priority -100 = "nixpkgs",
+      python310Packages.python-lsp-server.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.python310}/bin"%,
+        s%"%{inputs.python310Packages.python-lsp-server}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
