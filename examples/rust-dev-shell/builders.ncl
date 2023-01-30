@@ -204,4 +204,21 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  ScalaShell = BashShell & {
+    inputs_spec | {
+      scala.input | priority -100 = "nixpkgs",
+      metals.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.scala}/bin"%,
+        s%"%{inputs.metals}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
