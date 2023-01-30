@@ -154,4 +154,21 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  ZigShell = BashShell & {
+    inputs_spec | {
+      zig.input | priority -100 = "nixpkgs",
+      zls.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.zig}/bin"%,
+        s%"%{inputs.zls}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
