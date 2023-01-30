@@ -136,4 +136,22 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  # intelephense is currently broken in nixpkgs
+  PhpShell = BashShell & {
+    inputs_spec | {
+      php.input | priority -100 = "nixpkgs",
+      nodePackages.intelephense.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.php}/bin"%,
+        s%"%{inputs.nodePackages_latest.intelephense}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
