@@ -102,4 +102,21 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  ClojureShell = BashShell & {
+    inputs_spec | {
+      clojure.input | priority -100 = "nixpkgs",
+      clojure-lsp.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.clojure}/bin"%,
+        s%"%{inputs.clojure-lsp}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
