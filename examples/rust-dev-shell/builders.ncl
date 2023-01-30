@@ -171,4 +171,22 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
+  # nodePackages_latest.typescript-language-server is marked broken in nixpkgs
+  JavascriptShell = BashShell & {
+    inputs_spec | {
+      nodejs.input | priority -100 = "nixpkgs",
+      nodePackages_latest.typescript-language-server.input | priority -100 = "nixpkgs",
+      ..
+    },
+    inputs,
+    output.structured_env = {
+      PATH = [
+        s%"%{inputs.bash}/bin"%,
+        s%"%{inputs.nodejs}/bin"%,
+        s%"%{inputs.nodePackages_latest.typescript-language-server}/bin"%,
+      ],
+    },
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+  },
+
 }
