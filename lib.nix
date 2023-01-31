@@ -20,7 +20,7 @@ let
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = value:
-    (builtins.removeAttrs value ["build_command" "env"])
+    (builtins.removeAttrs value ["build_command" "env" "structured_env"])
     // {
       system = "${value.system.arch}-${value.system.os}";
       builder = value.build_command.cmd;
@@ -29,18 +29,18 @@ let
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = mkShell: baseDir: value:
+  importFromNickel = baseDir: value:
     let
       type = builtins.typeOf value;
       isNickelDerivation = type: type == "nickelDerivation";
-      importFromNickel_ = importFromNickel mkShell baseDir;
+      importFromNickel_ = importFromNickel baseDir;
     in
     if (type == "set") then (
       let nixelType = value."${typeField}" or ""; in
       if isNickelDerivation nixelType then
         let prepared = prepareDerivation (builtins.mapAttrs (_:
         importFromNickel_) value); in
-        builtins.trace (builtins.toJSON prepared) (derivation prepared)
+        derivation prepared
       else if nixelType == "nixDerivation" then
         (import value.drvPath).${value.outputName or "out"}
       else if nixelType == "nixString" then
@@ -56,8 +56,14 @@ let
 
   # Generate a Nickel program that evaluates the nickel-nix output, passing
   # the given exported packages, and write it to outFile.
-  computeNickelFile = system: {nickelFile, exportedPkgs}:
+  computeNickelFile = system: {baseDir, nickelFile, exportedPkgs}:
     let
+      sources = builtins.path {
+        path = baseDir;
+        # TODO: filter .ncl files
+        # filter =
+      };
+
       exportedJSON = builtins.toFile
           "inputs.json"
           (builtins.unsafeDiscardStringContext (builtins.toJSON (exportForNickel exportedPkgs)));
@@ -67,20 +73,30 @@ let
             inputs = import "${exportedJSON}",
             system = "${system}",
             nix = import "${./.}/nix.ncl",
-          } in
-          let nickel_expr | params.nix.NickelExpression = import "${nickelFile}" in
-          nickel_expr.output params
+          }
+          in
+
+          let nickel_expr | params.nix.NickelExpression =
+            import "${sources}/${nickelFile}"
+          in
+
+          (nickel_expr & params).output
       '';
 
     in
     nickelWithImports;
 
   # Extract the inputs declared in the Nickel expression.
-  extractInputs = {runCommand, nickel, system}: nickelFile:
+  extractInputs = {runCommand, nickel, system}: {baseDir, nickelFile}:
     let
+      sources = builtins.path {
+        path = baseDir;
+        # TODO: filter .ncl files
+        # filter =
+      };
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
         let nix = import "${./.}/nix.ncl" in
-        let nickel_expr | nix.NickelExpression = import "${nickelFile}" in
+        let nickel_expr | nix.NickelExpression = import "${sources}/${nickelFile}" in
         nickel_expr.inputs_spec
       '';
       result = runCommand "nickel-inputs.json" {} ''
@@ -144,11 +160,13 @@ let
   # See importNcl for details about the flakeInputs parameter.
   callNickel = { runCommand, nickel, system, lib, ... }@args: { nickelFile, flakeInputs, baseDir }:
     let
-      declaredInputs = extractInputs { inherit runCommand nickel system; } nickelFile;
+      declaredInputs = extractInputs
+        { inherit runCommand nickel system; }
+        { inherit baseDir nickelFile; };
       exportedPkgs = exportInputs
         {inherit system lib runCommand;}
         {inherit declaredInputs flakeInputs baseDir; };
-      fileToCall = computeNickelFile system { inherit nickelFile exportedPkgs; };
+      fileToCall = computeNickelFile system { inherit baseDir nickelFile exportedPkgs; };
     in
 
     runCommand "nickel-res.json" {} ''
@@ -159,10 +177,10 @@ let
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = { runCommand, nickel, system, lib, mkShell}@args: baseDir: nickelFile: flakeInputs:
+  importNcl = { runCommand, nickel, system, lib}@args: baseDir: nickelFile: flakeInputs:
     let nickelResult = callNickel args { inherit nickelFile flakeInputs baseDir; }; in
     { rawNickel = nickelResult; }
-    // (importFromNickel mkShell baseDir (builtins.fromJSON
+    // lib.traceVal (importFromNickel baseDir (builtins.fromJSON
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 
 in
