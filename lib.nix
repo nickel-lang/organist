@@ -96,7 +96,7 @@ let
       };
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
         let nix = import "${./.}/nix.ncl" in
-        let nickel_expr | nix.NickelExpression = import "${sources}/${nickelFile}" in
+        let nickel_expr = import "${sources}/${nickelFile}" in
         nickel_expr.inputs_spec
       '';
       result = runCommand "nickel-inputs.json" {} ''
