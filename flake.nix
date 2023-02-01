@@ -12,9 +12,14 @@
   outputs = { self, nixpkgs, flake-utils, nickel } @ inputs:
   {
     templates = {
-      rust = {
+      rust-devshell = {
         path = ./templates/rust-dev-shell;
         description = "A rust dev shell using nickel.";
+        welcomeText = ''
+          You have created a rust dev shell that is built using nickel!
+
+          Run `nix develop --impure` to enter the dev shell.
+        '';
       };
     };
   } // flake-utils.lib.eachDefaultSystem (system:
