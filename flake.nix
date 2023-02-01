@@ -5,29 +5,48 @@
   inputs.nickel.url = "github:tweag/nickel/master";
 
   nixConfig = {
-    extra-substituters = [ "https://tweag-nickel.cachix.org" ];
-    extra-trusted-public-keys = [ "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA=" ];
+    extra-substituters = ["https://tweag-nickel.cachix.org"];
+    extra-trusted-public-keys = ["tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="];
   };
 
-  outputs = { self, nixpkgs, flake-utils, nickel } @ inputs:
-  {
-    templates = {
-      rust-devshell = {
-        path = ./templates/rust-dev-shell;
-        description = "A rust dev shell using nickel.";
-        welcomeText = ''
-          You have created a rust dev shell that is built using nickel!
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    nickel,
+  } @ inputs:
+    {
+      templates =
+        (
+          let
+            inherit (nixpkgs) lib;
+          in
+            lib.mapAttrs'
+            (
+              name: value: let
+                language = lib.removePrefix "dev-" name;
+              in
+                lib.nameValuePair
+                (language + "-devshell")
+                {
+                  path = ./templates/${name};
+                  description = "A ${language} devshell using nickel.";
+                  welcomeText = ''
+                    You have created a ${language} devshell that is built using nickel!
 
-          Run `nix develop --impure` to enter the dev shell.
-        '';
-      };
-    };
-  } // flake-utils.lib.eachDefaultSystem (system:
-      let
+                    Run `nix develop --impure` to enter the dev shell.
+                  '';
+                }
+            )
+            (builtins.readDir ./templates/devshells)
+        )
+        // {};
+    }
+    // flake-utils.lib.eachDefaultSystem (
+      system: let
         lib = import ./lib.nix;
         pkgs = nixpkgs.legacyPackages.${system};
-      in
-      {
+      in {
         lib.importNcl = pkgs.callPackage lib.importNcl {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel;
@@ -39,5 +58,5 @@
           ];
         };
       }
-  );
+    );
 }
