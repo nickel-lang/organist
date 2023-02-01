@@ -3,7 +3,7 @@
 
 for devenv in $(awk '/= BashShell/ { print $1 }' builders.ncl)
 do
-  ENV_NAME="dev-$(echo $devenv | tr [A-Z] [a-z] | sed 's/shell$//')"
+  ENV_NAME="$(echo $devenv | tr [A-Z] [a-z] | sed 's/shell$//')"
   DEST="../$ENV_NAME"
   if ! [[ ./ -ef "$DEST" ]];
   then
