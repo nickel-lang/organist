@@ -23,16 +23,14 @@
           in
             lib.mapAttrs'
             (
-              name: value: let
-                language = lib.removePrefix "dev-" name;
-              in
+              name: value:
                 lib.nameValuePair
-                (language + "-devshell")
+                (name + "-devshell")
                 {
-                  path = ./templates/${name};
-                  description = "A ${language} devshell using nickel.";
+                  path = ./templates/devshells/${name};
+                  description = "A ${name} devshell using nickel.";
                   welcomeText = ''
-                    You have created a ${language} devshell that is built using nickel!
+                    You have created a ${name} devshell that is built using nickel!
 
                     Run `nix develop --impure` to enter the dev shell.
                   '';
