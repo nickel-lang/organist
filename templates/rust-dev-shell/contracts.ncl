@@ -181,6 +181,9 @@ from the Nix world) or a derivation defined in Nickel.
           cmd | NixString,
           args | Array NixString
         },
+      structured_env
+        | doc "TODO"
+        | {_: Array NixString},
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},
