@@ -3,8 +3,7 @@
 
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  # inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
-  inputs.nickel-nix.url = "path:../../";
+  inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   nixConfig = {
     extra-substituters = [ "https://tweag-nickel.cachix.org" ];
@@ -15,7 +14,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        importNcl = nickel-nix.packages.${system}.importNcl;
+        importNcl = nickel-nix.lib.${system}.importNcl;
       in {
         # we want hello.c to be part of the source of the hello package, but we
         # don't have yet a way to easily import plain files into the Nickel

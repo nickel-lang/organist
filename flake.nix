@@ -11,13 +11,24 @@
 
   outputs = { self, nixpkgs, flake-utils, nickel } @ inputs:
   {
-    lib = import ./lib.nix;
+    templates = {
+      rust-devshell = {
+        path = ./templates/rust-dev-shell;
+        description = "A rust dev shell using nickel.";
+        welcomeText = ''
+          You have created a rust dev shell that is built using nickel!
+
+          Run `nix develop --impure` to enter the dev shell.
+        '';
+      };
+    };
   } // flake-utils.lib.eachDefaultSystem (system:
       let
+        lib = import ./lib.nix;
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
-        packages.importNcl = pkgs.callPackage self.lib.importNcl {
+        lib.importNcl = pkgs.callPackage lib.importNcl {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel;
         };

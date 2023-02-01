@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel-nix.url = "path:../..";
+  inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   outputs = {
     self,
@@ -13,7 +13,7 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      importNcl = nickel-nix.packages.${system}.importNcl;
+      importNcl = nickel-nix.lib.${system}.importNcl;
       nakedStdenv = importNcl ./. "naked-stdenv.ncl" inputs;
       nickelDerivation =
         importNcl ./. "dev-shell.ncl"
