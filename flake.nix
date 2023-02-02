@@ -20,6 +20,12 @@
         (
           let
             inherit (nixpkgs) lib;
+            brokenShells = ["javascript" "php" "python310"];
+            filteredShells = (
+              lib.filterAttrs
+              (name: value: !(builtins.elem name brokenShells))
+              (builtins.readDir ./templates/devshells)
+            );
           in
             lib.mapAttrs'
             (
@@ -36,7 +42,7 @@
                   '';
                 }
             )
-            (builtins.readDir ./templates/devshells)
+            filteredShells
         )
         // {};
     }
