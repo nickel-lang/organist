@@ -19,9 +19,9 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         name = "hello",
         version = "0.1",
         build_command = {
-          cmd = s%"%{inputs.bash}/bin/bash"%,
+          cmd = nix-s%"%{inputs.bash}/bin/bash"%,
           args = [ "-c",
-            s%"
+            nix-s%"
               %{inputs.gcc}/bin/gcc %{nix.lib.import_file "hello.c"} -o hello
               %{inputs.coreutils}/bin/mkdir -p $out/bin
               %{inputs.coreutils}/bin/cp hello $out/bin/hello
@@ -53,13 +53,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       # this is required otherwise nix develop
       # will fail with a message that it only supports bash
       build_command = {
-        cmd = s%"%{inputs.bash}/bin/bash"%,
+        cmd = nix-s%"%{inputs.bash}/bin/bash"%,
         args = [],
       },
 
       env = {
         # TODO: handle naked derivations without having to interpolate
-        stdenv = s%"%{inputs.nakedStdenv}"%,
+        stdenv = nix-s%"%{inputs.nakedStdenv}"%,
       },
     } | NickelPkg,
   },
@@ -75,14 +75,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.cargo}/bin"%,
-        s%"%{inputs.rustc}/bin"%,
-        s%"%{inputs.rustfmt}/bin"%,
-        s%"%{inputs.rust-analyzer}/bin"%
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.cargo}/bin"%,
+        nix-s%"%{inputs.rustc}/bin"%,
+        nix-s%"%{inputs.rustfmt}/bin"%,
+        nix-s%"%{inputs.rust-analyzer}/bin"%
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   GoShell = BashShell & {
@@ -94,12 +94,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.go}/bin"%,
-        s%"%{inputs.gopls}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.go}/bin"%,
+        nix-s%"%{inputs.gopls}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   ClojureShell = BashShell & {
@@ -111,12 +111,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.clojure}/bin"%,
-        s%"%{inputs.clojure-lsp}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.clojure}/bin"%,
+        nix-s%"%{inputs.clojure-lsp}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   CShell = BashShell & {
@@ -128,12 +128,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.clang}/bin"%,
-        s%"%{inputs.clang-tools}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.clang}/bin"%,
+        nix-s%"%{inputs.clang-tools}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   # intelephense is currently broken in nixpkgs
@@ -146,12 +146,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.php}/bin"%,
-        s%"%{inputs.nodePackages_latest.intelephense}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.php}/bin"%,
+        nix-s%"%{inputs.nodePackages_latest.intelephense}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   ZigShell = BashShell & {
@@ -163,12 +163,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.zig}/bin"%,
-        s%"%{inputs.zls}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.zig}/bin"%,
+        nix-s%"%{inputs.zls}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   # nodePackages_latest.typescript-language-server is marked broken in nixpkgs
@@ -181,12 +181,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.nodejs}/bin"%,
-        s%"%{inputs.nodePackages_latest.typescript-language-server}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.nodejs}/bin"%,
+        nix-s%"%{inputs.nodePackages_latest.typescript-language-server}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   RacketShell = BashShell & {
@@ -197,11 +197,11 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.racket}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.racket}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   ScalaShell = BashShell & {
@@ -213,12 +213,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.scala}/bin"%,
-        s%"%{inputs.metals}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.scala}/bin"%,
+        nix-s%"%{inputs.metals}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   # broken: PyLTI-0.7.0 not supported for interpreter python3.10
@@ -232,12 +232,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.python310}/bin"%,
-        s%"%{inputs.python310Packages.python-lsp-server}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.python310}/bin"%,
+        nix-s%"%{inputs.python310Packages.python-lsp-server}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
   ErlangShell = BashShell & {
@@ -249,12 +249,12 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     inputs,
     output.structured_env = {
       PATH = [
-        s%"%{inputs.bash}/bin"%,
-        s%"%{inputs.erlang}/bin"%,
-        s%"%{inputs.erlang-ls}/bin"%,
+        nix-s%"%{inputs.bash}/bin"%,
+        nix-s%"%{inputs.erlang}/bin"%,
+        nix-s%"%{inputs.erlang-ls}/bin"%,
       ],
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" xs) output.structured_env,
+    output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" xs) output.structured_env,
   },
 
 }

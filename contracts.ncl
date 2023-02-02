@@ -114,14 +114,14 @@ from the Nix world) or a derivation defined in Nickel.
       to change in the future):
 
       ```nickel
-      shellHook = s%"
+      shellHook = nix-s%"
         echo "Development shell"
         %{pkgs.hello}/bin/hello
       "%
       ```
 
       Note that:
-        - we've used the symbolic string syntax `s%"`
+        - we've used the symbolic string syntax `nix-s%"`
         - instead of `hello.outputPath`, we've interpolated `hello` directly,
           which is a derivation, and not a string
 
@@ -140,8 +140,22 @@ from the Nix world) or a derivation defined in Nickel.
         # off, but doing so makes Nickel panic for now. Until the bug is
         # fixed, we have to resort to this contract application
         let label = contract.tag (builtin.serialize `Json value) label in
-        contract.apply (Array NixString) label value
-        |> mk_nix_string,
+        let value_part_checked = contract.apply {
+          tag | [| `SymbolicString |],
+          prefix | Str,
+          fragments | Array NixString,
+        } label value
+        |> builtin.trace (builtin.serialize `Json value)
+        in
+
+        if value_part_checked.prefix == "nix" then
+          value_part_checked.fragments
+          |> mk_nix_string
+        else
+          contract.blame_with m%"
+            unexpected prefix `%{value_part_checked.prefix}` for string. Only `nix-s` is supported.
+          "%
+            label,
 
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
@@ -181,6 +195,10 @@ from the Nix world) or a derivation defined in Nickel.
           cmd | NixString,
           args | Array NixString
         },
+      structured_env
+        | doc "TODO"
+        | {_: Array NixString}
+        | default = {},
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},

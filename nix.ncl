@@ -13,7 +13,7 @@ let contracts = import "contracts.ncl" in
           # Example
 
           ```nickel
-          cmd = s%"
+          cmd = nix-s%"
               %{inputs.gcc}/bin/gcc %{import_file "hello.c"} -o hello
               %{inputs.coreutils}/bin/mkdir -p $out/bin
               %{inputs.coreutils}/bin/cp hello $out/bin/hello
