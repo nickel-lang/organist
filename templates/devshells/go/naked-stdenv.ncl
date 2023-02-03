@@ -13,10 +13,10 @@
     name = "naked-stdenv",
     version = "0.1",
     build_command = {
-      cmd = s%"%{inputs.bash}/bin/bash"%,
+      cmd = nix-s%"%{inputs.bash}/bin/bash"%,
       args = [
       "-c",
-      s%"
+      nix-s%"
         %{inputs.coreutils}/bin/mkdir -p $out
         target=$out/setup
         %{inputs.coreutils}/bin/touch $target

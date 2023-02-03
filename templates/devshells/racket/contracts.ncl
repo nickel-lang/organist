@@ -114,14 +114,14 @@ from the Nix world) or a derivation defined in Nickel.
       to change in the future):
 
       ```nickel
-      shellHook = s%"
+      shellHook = nix-s%"
         echo "Development shell"
         %{pkgs.hello}/bin/hello
       "%
       ```
 
       Note that:
-        - we've used the symbolic string syntax `s%"`
+        - we've used the symbolic string syntax `nix-s%"`
         - instead of `hello.outputPath`, we've interpolated `hello` directly,
           which is a derivation, and not a string
 
@@ -183,7 +183,7 @@ from the Nix world) or a derivation defined in Nickel.
         },
       structured_env
         | doc "TODO"
-        | {_: Array NixString},
+        | {_: {_: NixString}},
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},
