@@ -1,7 +1,16 @@
 # Nickel-nix
 
-An experimental Nix toolkit to use Nickel as a language for writing Nix
+An experimental Nix toolkit to use
+[Nickel](https://github.com/tweag/nickel) as a language for writing nix
 packages, shells and more.
+
+**Caution**: `nickel-nix` is not a full-fledged Nix integration. It is
+currently missing several basic features. `nickel-nix` is intended to be a
+proof-of-concept for writing a Nix derivation using Nickel at the moment,
+without requiring new features either in Nix or in Nickel. The future
+of the integration of Nix and Nickel will most probably involve deeper
+changes to the two projects, and hopefully lead to a more featureful
+and ergonomic solution.
 
 ## Content
 
