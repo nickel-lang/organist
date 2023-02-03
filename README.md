@@ -12,6 +12,27 @@ of the integration of Nix and Nickel will most probably involve deeper
 changes to the two projects, and hopefully lead to a more featureful
 and ergonomic solution.
 
+# How to use
+
+We currently provide a few basics development environment for some languages.
+You need Nix with flakes enabled to use Nickel-nix:
+
+You can list available development shell templates by running:
+
+```shell
+nix flake show github:nickel-lang/nickel-nix
+```
+
+The following example copies the rust devshell and enters the development
+environment.
+
+```shell
+$ mkdir my_project
+$ cd my_project
+$ nix flake init -t github:nickel-lang/nickel-nix#rust-devshell
+$ nix develop --impure
+```
+
 ## Content
 
 This repo is composed of a Nix library, a Nickel library and a flake which
