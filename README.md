@@ -15,7 +15,7 @@ and ergonomic solution.
 # How to use
 
 We currently provide a few basics development environment for some languages.
-You need Nix with flakes enabled to use Nickel-nix:
+You need Nix with flakes enabled to use Nickel-nix.
 
 You can list available development shell templates by running:
 
