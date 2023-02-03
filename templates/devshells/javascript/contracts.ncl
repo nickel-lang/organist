@@ -183,7 +183,7 @@ from the Nix world) or a derivation defined in Nickel.
         },
       structured_env
         | doc "TODO"
-        | {_: Array NixString},
+        | {_: {_: NixString}},
       env
         | doc "Set additional environment variables for the builder."
         | {_: NixString},
