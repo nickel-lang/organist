@@ -140,8 +140,22 @@ from the Nix world) or a derivation defined in Nickel.
         # off, but doing so makes Nickel panic for now. Until the bug is
         # fixed, we have to resort to this contract application
         let label = contract.tag (builtin.serialize `Json value) label in
-        contract.apply (Array NixString) label value
-        |> mk_nix_string,
+        let value_part_checked = contract.apply {
+          tag | [| `SymbolicString |],
+          prefix | Str,
+          fragments | Array NixString,
+        } label value
+        |> builtin.trace (builtin.serialize `Json value)
+        in
+
+        if value_part_checked.prefix == "nix" then
+          value_part_checked.fragments
+          |> mk_nix_string
+        else
+          contract.blame_with m%"
+            unexpected prefix `%{value_part_checked.prefix}` for string. Only `nix-s` is supported.
+          "%
+            label,
 
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
