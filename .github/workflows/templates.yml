@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        template: ${{ fromJSON(needs.get-template-names.outputs.templates }}
+        template: ${{ fromJSON(needs.get-template-names.outputs.templates) }}
 
     steps:
     - uses: actions/checkout@v3
