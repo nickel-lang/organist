@@ -28,9 +28,9 @@ jobs:
     - name: List all templates
       id: templates
       env:
-      # Should only be needed until we use a `cachinx/install-nix` action that contains
-      # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
-      NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+        # Should only be needed until we use a `cachinx/install-nix` action that contains
+        # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
+        NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
       run: |
         templates=$(nix eval .#templates --apply builtins.attrNames --json)
         echo "templates=$templates" >> $GITHUB_OUTPUT
