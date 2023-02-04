@@ -60,7 +60,7 @@ jobs:
       run: |
         ls -FhoA $PWD
         ls -FhoA $PWD/repo
-        nix flake new --template path:$PWD/repo.#${{ matrix.template }} example
+        nix flake new --template path:$PWD/repo#${{ matrix.template }} example
 
     - name: Enter devshell ${{ matrix.template }}
       run: |
