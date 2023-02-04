@@ -31,9 +31,9 @@ jobs:
       # Should only be needed until we use a `cachinx/install-nix` action that contains
       # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
       NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
-    run: |
-      templates=$(nix eval .#templates --apply builtins.attrNames --json)
-      echo "templates=$templates" >> $GITHUB_OUTPUT
+      run: |
+        templates=$(nix eval .#templates --apply builtins.attrNames --json)
+        echo "templates=$templates" >> $GITHUB_OUTPUT
 
   enter-devshells:
     name: Test devshell ${{ matrix.template }}
