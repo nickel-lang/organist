@@ -60,10 +60,10 @@ jobs:
       run: |
         ls -FhoA $PWD
         ls -FhoA $PWD/repo
-        nix flake new --template path:$PWD/repo#${{ matrix.template }} example
+        nix flake new --template path:$PWD/repo#${{ matrix.template }} example --accept-flake-config
 
     - name: Enter devshell ${{ matrix.template }}
       run: |
           pushd ./example
-          nix develop --impure
+          nix develop --impure --accept-flake-config
           popd

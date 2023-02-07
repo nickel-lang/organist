@@ -5,6 +5,11 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
+  nixConfig = {
+    extra-substituters = ["https://tweag-nickel.cachix.org"];
+    extra-trusted-public-keys = ["tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="];
+  };
+
   outputs = {
     self,
     nixpkgs,
