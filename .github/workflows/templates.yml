@@ -1,0 +1,67 @@
+name: Templates
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  get-template-names:
+    name: Setup nix and nickel-nix
+    runs-on: ubuntu-latest
+
+    outputs:
+      templates: ${{ steps.templates.outputs.templates }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup
+      uses: ./.github/actions/common-setup
+      with:
+        SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List all templates
+      id: templates
+      env:
+        # Should only be needed until we use a `cachinx/install-nix` action that contains
+        # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
+        NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+      run: |
+        templates=$(nix eval .#templates --apply builtins.attrNames --json)
+        echo "templates=$templates" >> $GITHUB_OUTPUT
+
+  enter-devshells:
+    name: Test devshell ${{ matrix.template }}
+    needs: get-template-names
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.get-template-names.outputs.templates) }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        path: repo
+        fetch-depth: 0
+
+    - name: Setup
+      uses: ./repo/.github/actions/common-setup
+      with:
+        SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Initialize devshell ${{ matrix.template }}
+      run: |
+        nix flake new --template path:$PWD/repo#${{ matrix.template }} example --accept-flake-config
+
+    - name: Enter devshell ${{ matrix.template }}
+      run: |
+          pushd ./example
+          nix develop --impure --accept-flake-config
+          popd
