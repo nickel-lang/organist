@@ -20,7 +20,7 @@
         (
           let
             inherit (nixpkgs) lib;
-            brokenShells = ["javascript" "php" "python310"];
+            brokenShells = [];
             filteredShells = (
               lib.filterAttrs
               (name: value: !(builtins.elem name brokenShells))
