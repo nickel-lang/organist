@@ -58,8 +58,6 @@ jobs:
 
     - name: Initialize devshell ${{ matrix.template }}
       run: |
-        ls -FhoA $PWD
-        ls -FhoA $PWD/repo
         nix flake new --template path:$PWD/repo#${{ matrix.template }} example --accept-flake-config
 
     - name: Enter devshell ${{ matrix.template }}
