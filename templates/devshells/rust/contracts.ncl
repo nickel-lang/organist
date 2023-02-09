@@ -272,10 +272,21 @@ from the Nix world) or a derivation defined in Nickel.
     nix | {..},
   },
 
+  InputPath = fun label value =>
+    if builtin.is_str value then
+      string.split "." value
+    else
+      value
+      |> contract.apply (Array Str) label,
+
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
   = {
-    input | Str
-          | default = "nixpkgs",
+    input
+      | Str
+      | default = "nixpkgs",
+    path
+      | InputPath
+      | optional,
     # TODO: precise contract. We want to allow a path if input == "sources"
     ..
   },
