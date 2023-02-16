@@ -58,6 +58,17 @@ from the Nix world) or a derivation defined in Nickel.
     | doc "A fragment of a Nix string (or a string with context). See `NixString`"
     = contract.from_predicate predicate.is_string_fragment,
 
+  NixSymbolicString
+    | doc m%"
+      A symbolic string with the `` `nix `` prefix, as output by the Nickel
+      parser. Used as a subcontract for `NixString`.
+      "%
+    = {
+    prefix | [| `nix |],
+    tag | [| `SymbolicString |], 
+    fragments | Array NixString,
+  },
+
   NixString
    | doc m%%"
       Nix string with a
@@ -114,14 +125,14 @@ from the Nix world) or a derivation defined in Nickel.
       to change in the future):
 
       ```nickel
-      shellHook = s%"
+      shellHook = nix-s%"
         echo "Development shell"
         %{pkgs.hello}/bin/hello
       "%
       ```
 
       Note that:
-        - we've used the symbolic string syntax `s%"`
+        - we've used the symbolic string syntax `nix-s%"`
         - instead of `hello.outputPath`, we've interpolated `hello` directly,
           which is a derivation, and not a string
 
@@ -130,18 +141,19 @@ from the Nix world) or a derivation defined in Nickel.
       `lib.import_file`), pure Nickel strings, and maybe more in the future.
     "%%
     = fun label value =>
+      # A contract must always be idempotent (be a no-op if applied a second
+      # time), so we accept something that is already a NixString
+      if predicate.is_nix_string value then value
       # We accept a single string fragment (a plain string, a derivation or a
       # Nix path). We normalize it by wrapping it as a one-element array
-      if predicate.is_nix_string value then value
       else if predicate.is_string_fragment value then
         mk_nix_string [contract.apply NixStringFragment label value]
       else
-        #TODO: we should use contract.apply, otherwise the error reporting is
-        # off, but doing so makes Nickel panic for now. Until the bug is
-        # fixed, we have to resort to this contract application
+        # TODO: it's for debugging, but we should remove the serializing at some
+        # point.
         let label = contract.tag (builtin.serialize `Json value) label in
-        contract.apply (Array NixString) label value
-        |> mk_nix_string,
+        let {fragments, ..} = contract.apply NixSymbolicString label value in
+        mk_nix_string fragments,
 
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
