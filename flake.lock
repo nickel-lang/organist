@@ -132,11 +132,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1676039663,
-        "narHash": "sha256-fkIg8rJcnvT0kEdd4lqwp90rAe5RsxSOrWsmlXzD3Uo=",
+        "lastModified": 1676554700,
+        "narHash": "sha256-NvWsy9nNB7qImAljHjlcKLtmzAe2t4khp4hVpyL24Tw=",
         "owner": "tweag",
         "repo": "nickel",
-        "rev": "38ca87438918b84ebe7287a040729e4afd8c75b1",
+        "rev": "23c0566574db2bc6ccfe6af404cb40c00b4b3cd3",
         "type": "github"
       },
       "original": {

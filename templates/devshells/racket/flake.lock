@@ -186,11 +186,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1675258077,
-        "narHash": "sha256-gwWhwdyUbnxtySkZxlZ7Su7fuD3nLLWNsWxDNKHmVag=",
+        "lastModified": 1676544723,
+        "narHash": "sha256-VFK58A9WBfhUVeoyzscW1IAGXrekuRmpXaQ6wx2UDoE=",
         "owner": "nickel-lang",
         "repo": "nickel-nix",
-        "rev": "63d38f9bf21d59f288f3bcd75e402b4534a07f4f",
+        "rev": "3cc3e3e5ddf090431bb9a60f2d7aa04fd09adc4a",
         "type": "github"
       },
       "original": {
