@@ -63,5 +63,5 @@ jobs:
     - name: Enter devshell ${{ matrix.template }}
       run: |
           pushd ./example
-          nix develop --impure --accept-flake-config
+          nix develop --impure --accept-flake-config --print-build-logs
           popd
