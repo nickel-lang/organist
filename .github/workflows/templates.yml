@@ -66,5 +66,7 @@ jobs:
       # tested in a `./example` directory, so `nickel-nix` is the direct parent.
       run: |
           pushd ./example
+          echo "CURDIR $GITHUB_WORKSPACE"
+          ls $GITHUB_WORKSPACE
           nix develop --impure --override-input nickel-nix path:$GITHUB_WORKSPACE --accept-flake-config --print-build-logs
           popd
