@@ -35,17 +35,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
     = NickelDerivation,
 
   BashShell = {
-    inputs_spec
-      | {
-        # default or not?
-        bash.input | priority -100 = "nixpkgs",
-        nakedStdenv.input | priority -100 = "myInputs",
-        ..
-      }
-      | default = {},
+    inputs_spec = {
+      # default or not?
+      bash.input | default = "nixpkgs",
+      nakedStdenv.input | default = "myInputs",
+    },
 
     inputs,
-    nix,
 
     output = {
       version | default = "0.1",
@@ -60,22 +56,22 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       env = {
         # TODO: handle naked derivations without having to interpolate
         stdenv = nix-s%"%{inputs.nakedStdenv}"%,
+        bash = nix-s%"%{inputs.bash}/bin"%,
       },
     } | NickelPkg,
   },
 
   RustShell = BashShell & {
-    inputs_spec | {
-      cargo.input | priority -100 = "nixpkgs",
-      rustc.input | priority -100 = "nixpkgs",
-      rustfmt.input | priority -100 = "nixpkgs",
-      rust-analyzer.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      cargo.input | default = "nixpkgs",
+      rustc.input | default = "nixpkgs",
+      rustfmt.input | default = "nixpkgs",
+      rust-analyzer.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         cargo = nix-s%"%{inputs.cargo}/bin"%,
         rustc = nix-s%"%{inputs.rustc}/bin"%,
         rustfmt = nix-s%"%{inputs.rustfmt}/bin"%,
@@ -86,15 +82,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   GoShell = BashShell & {
-    inputs_spec | {
-      go.input | priority -100 = "nixpkgs",
-      gopls.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      go.input | default = "nixpkgs",
+      gopls.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         go = nix-s%"%{inputs.go}/bin"%,
         gopls = nix-s%"%{inputs.gopls}/bin"%,
       },
@@ -103,15 +98,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   ClojureShell = BashShell & {
-    inputs_spec | {
-      clojure.input | priority -100 = "nixpkgs",
-      clojure-lsp.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      clojure.input | default = "nixpkgs",
+      clojure-lsp.input | default = "nixpkgs",
     },
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         clojure = nix-s%"%{inputs.clojure}/bin"%,
         clojure-lsp = nix-s%"%{inputs.clojure-lsp}/bin"%,
       },
@@ -120,15 +113,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   CShell = BashShell & {
-    inputs_spec | {
-      clang.input | priority -100 = "nixpkgs",
-      clang-tools.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      clang.input | default = "nixpkgs",
+      clang-tools.input | default = "nixpkgs",
     },
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         clang = nix-s%"%{inputs.clang}/bin"%,
         clang-tools = nix-s%"%{inputs.clang-tools}/bin"%,
       },
@@ -138,15 +129,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
   # intelephense is currently broken in nixpkgs
   PhpShell = BashShell & {
-    inputs_spec | {
-      php.input | priority -100 = "nixpkgs",
-      nodePackages.intelephense.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      php.input | default = "nixpkgs",
+      nodePackages.intelephense.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         php = nix-s%"%{inputs.php}/bin"%,
         intelephense = nix-s%"%{inputs.nodePackages_latest.intelephense}/bin"%,
       },
@@ -155,15 +145,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   ZigShell = BashShell & {
-    inputs_spec | {
-      zig.input | priority -100 = "nixpkgs",
-      zls.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      zig.input | default = "nixpkgs",
+      zls.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         zig = nix-s%"%{inputs.zig}/bin"%,
         zls = nix-s%"%{inputs.zls}/bin"%,
       },
@@ -173,15 +162,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
   # nodePackages_latest.typescript-language-server is marked broken in nixpkgs
   JavascriptShell = BashShell & {
-    inputs_spec | {
-      nodejs.input | priority -100 = "nixpkgs",
-      nodePackages_latest.typescript-language-server.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      nodejs.input | default = "nixpkgs",
+      nodePackages_latest.typescript-language-server.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         nodejs = nix-s%"%{inputs.nodejs}/bin"%,
         ts-lsp = nix-s%"%{inputs.nodePackages_latest.typescript-language-server}/bin"%,
       },
@@ -190,14 +178,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   RacketShell = BashShell & {
-    inputs_spec | {
-      racket.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      racket.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         racket = nix-s%"%{inputs.racket}/bin"%,
       },
     },
@@ -205,15 +192,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   ScalaShell = BashShell & {
-    inputs_spec | {
-      scala.input | priority -100 = "nixpkgs",
-      metals.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      scala.input | default = "nixpkgs",
+      metals.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         scala = nix-s%"%{inputs.scala}/bin"%,
         metals = nix-s%"%{inputs.metals}/bin"%,
       },
@@ -224,15 +210,14 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   # broken: PyLTI-0.7.0 not supported for interpreter python3.10
   # works with a regular nix shell though
   Python310Shell = BashShell & {
-    inputs_spec | {
-      python310.input | priority -100 = "nixpkgs",
-      python310Packages.python-lsp-server.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      python310.input | default = "nixpkgs",
+      python310Packages.python-lsp-server.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         python = nix-s%"%{inputs.python310}/bin"%,
         python-lsp = nix-s%"%{inputs.python310Packages.python-lsp-server}/bin"%,
       },
@@ -241,20 +226,18 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   },
 
   ErlangShell = BashShell & {
-    inputs_spec | {
-      erlang.input | priority -100 = "nixpkgs",
-      erlang-ls.input | priority -100 = "nixpkgs",
-      ..
+    inputs_spec = {
+      erlang.input | default = "nixpkgs",
+      erlang-ls.input | default = "nixpkgs",
     },
+
     inputs,
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         erlang = nix-s%"%{inputs.erlang}/bin"%,
         erlang-lsp = nix-s%"%{inputs.erlang-ls}/bin"%,
       },
     },
     output.env = record.map (fun _n xs => array.foldl (fun acc x => nix-s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
-
 }
