@@ -61,7 +61,10 @@ jobs:
         nix flake new --template path:$PWD/repo#${{ matrix.template }} example --accept-flake-config
 
     - name: Enter devshell ${{ matrix.template }}
+      # For the CI, we test against the local version of `nickel-nix`, not the
+      # one in main (hence the --override-input). Note that each template is
+      # tested in a `./example` directory, so `nickel-nix` is the direct parent.
       run: |
           pushd ./example
-          nix develop --impure --accept-flake-config --print-build-logs
+          nix develop --impure --override-input nickel-nix path:$GITHUB_WORKSPACE --accept-flake-config --print-build-logs
           popd
