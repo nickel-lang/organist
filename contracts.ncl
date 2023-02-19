@@ -152,9 +152,9 @@ from the Nix world) or a derivation defined in Nickel.
 
   NickelDerivation
     | doc m%"
-        The basic, low-level interface for a symbolic derivation. A NickelPkg is
-        intenteded to be passed (exported) to the Nix side, which will take care
-        of actually building it.
+        The basic, low-level interface for a symbolic derivation. A
+        NickelDerivation is intenteded to be passed (exported) to the Nix side,
+        which will take care of actually building it.
       "%
     = {
       name
@@ -181,9 +181,86 @@ from the Nix world) or a derivation defined in Nickel.
           cmd | NixString,
           args | Array NixString
         },
+      structured_env
+        | doc m%%"
+            Set additional environment variables for the builder.
+
+            `structured_env` is usually preferred over `env`, as the former is
+            easier to merge and to override.
+
+
+            # Format
+
+            `structured_env` is a record whose fields are environment variables
+            (`PATH`, `CLASSPATH`, `LD_PRELOAD`, etc.). The values are records
+            themselves, which represents _named pieces_ that are joined together
+            to form the final value of the variable.
+
+            For example:
+
+            ```nickel
+            structured_env.PATH = {
+              bash = nix-s%"%{inputs.bash}/bin"%,
+              curl = nix-s%"%{inputs.curl}/bin"%,
+            }
+            ```
+
+            This structured environment corresponds to a variable `PATH` with
+            value `"%{inputs.bash}/bin:%{inputs.curl}/bin"`. Note that the order
+            isn't preserved. The `bash` and `curl` names don't appear in the
+            final value, but they are used for composability and overriding.
+
+            ## Combining
+
+            For example, imagine defining a shell in two different records, that
+            are merged together: `builder1 & builder2`. `builder1` defines the
+            structured environment given in the example above. Because
+            `structured_env.PATH` is a recod, you can simply write in
+            `builder2.ncl`:
+
+            ```nickel
+            structured_env.PATH.other-package = nix-s"%{inputs.other-package}/bin"%,
+            ```
+
+            The final result will be a path with all three subpaths separated by
+            `:`.
+
+            ## Overriding
+
+            Because pieces are named (`bash`, `curl`, `other-package`), you can
+            override them specifically using merging:
+
+            ```nickel
+            structured_env.PATH.bash | force = nix-s"%{inputs.special-bash}/bin"%,
+            ```
+
+            # Interaction with `env`
+
+            Usually, you should only work with `structured_env`. The default
+            value of `env` is built from `structured_env` automatically. If you
+            override `env` directly, be aware that **`structured_env` will then
+            be potentially completly ignored**.
+          "%%
+        | {_: {_: NixString}}
+        | default = {},
       env
-        | doc "Set additional environment variables for the builder."
-        | {_: NixString},
+        | doc m%"
+          Set additional environment variables for the builder.
+
+          By default, `env` is computed from `structured_env`, and
+          `structured_env` should be used preferably. Ultimately, `env` is the
+          actual source of truth being passed to Nix when building the
+          derivation. See the documentation of `structured_env` for more
+          details.
+          "%
+        | {_: NixString}
+        | default = record.map
+            (fun _n xs =>
+              record.values xs
+              # I guess we don't necessarily always want to use `:` as a
+              # separator?
+              |> array.foldl (fun acc x => s%"%{acc}:%{x}"%) "")
+            structured_env,
       "%{type_field}" | force = "nickelDerivation",
   },
 
@@ -205,8 +282,9 @@ from the Nix world) or a derivation defined in Nickel.
 
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
-  # still obey some rules: if the `type` field is set to a known predefined
+  # it still obeys some rules: if the `type` field is set to a known predefined
   # value, then the record must have a certain shape.
+  #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
   NickelExpressionResult = Dyn,

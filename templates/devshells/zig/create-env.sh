@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 for devenv in $(awk '/= BashShell/ { print $1 }' builders.ncl)
