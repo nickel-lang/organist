@@ -82,7 +82,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         rust-analyzer = s%"%{inputs.rust-analyzer}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   GoShell = BashShell & {
@@ -99,7 +98,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         gopls = s%"%{inputs.gopls}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   ClojureShell = BashShell & {
@@ -116,7 +114,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         clojure-lsp = s%"%{inputs.clojure-lsp}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   CShell = BashShell & {
@@ -133,7 +130,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         clang-tools = s%"%{inputs.clang-tools}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   # intelephense is currently broken in nixpkgs
@@ -151,7 +147,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         intelephense = s%"%{inputs.nodePackages_latest.intelephense}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   ZigShell = BashShell & {
@@ -168,7 +163,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         zls = s%"%{inputs.zls}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   # nodePackages_latest.typescript-language-server is marked broken in nixpkgs
@@ -186,7 +180,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         ts-lsp = s%"%{inputs.nodePackages_latest.typescript-language-server}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   RacketShell = BashShell & {
@@ -201,7 +194,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         racket = s%"%{inputs.racket}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   ScalaShell = BashShell & {
@@ -218,7 +210,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         metals = s%"%{inputs.metals}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   # broken: PyLTI-0.7.0 not supported for interpreter python3.10
@@ -237,7 +228,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         python-lsp = s%"%{inputs.python310Packages.python-lsp-server}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
   ErlangShell = BashShell & {
@@ -254,7 +244,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         erlang-lsp = s%"%{inputs.erlang-ls}/bin"%,
       },
     },
-    output.env = record.map (fun _n xs => array.foldl (fun acc x => s%"%{acc}:%{x}"%) "" (record.values xs)) output.structured_env,
   },
 
 }
