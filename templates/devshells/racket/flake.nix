@@ -25,7 +25,7 @@
         (
           inputs
           // {
-            myInputs.packages.${system} = {inherit nakedStdenv;};
+            nixel-internals.packages.${system} = {naked_std_env = nakedStdenv;};
           }
         );
     in rec {
