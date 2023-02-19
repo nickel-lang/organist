@@ -182,7 +182,7 @@ from the Nix world) or a derivation defined in Nickel.
           args | Array NixString
         },
       structured_env
-        | doc m%%"
+        | doc m%%%"
             Set additional environment variables for the builder.
 
             `structured_env` is usually preferred over `env`, as the former is
@@ -240,7 +240,7 @@ from the Nix world) or a derivation defined in Nickel.
             value of `env` is built from `structured_env` automatically. If you
             override `env` directly, be aware that **`structured_env` will then
             be potentially completly ignored**.
-          "%%
+          "%%%
         | {_: {_: NixString}}
         | default = {},
       env
