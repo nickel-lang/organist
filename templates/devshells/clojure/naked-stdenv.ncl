@@ -24,6 +24,5 @@
       "%,
       ],
     },
-    env = {},
   } | nix.builders.NickelPkg
 }
