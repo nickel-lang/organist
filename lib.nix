@@ -95,9 +95,9 @@ let
         # filter =
       };
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
-        let nix = import "${./.}/nix.ncl" in
+        let contracts = import "${./.}/contracts.ncl" in
         let nickel_expr = import "${sources}/${nickelFile}" in
-        nickel_expr.inputs_spec
+        nickel_expr.inputs_spec | {_: contracts.NickelInputSpec}
       '';
       result = runCommand "nickel-inputs.json" {} ''
         ${nickel}/bin/nickel -f ${fileToCall} export > $out
@@ -110,45 +110,54 @@ let
   # file
   exportInputs = {system, lib, runCommand}: { declaredInputs, flakeInputs, baseDir }:
     let
-      pkgNames = builtins.attrNames declaredInputs;
-      addPackage = name: acc:
-        let inputName = declaredInputs.${name}.input; in
+      # inputId is the arbitrary name given by the Nickel expression to the
+      # input.
+      # For example,in
+      # `input_specs = {foo = {input = "nixpkgs", path = ["gcc"]}}`
+      # inputId is "foo". The package we want to get from nixpkgs is gcc.
+      #
+      # However, if no `path` is specified, `path` is taken to be `inputId`.
+      addPackage = inputId: acc:
+        let inputTakeFrom = declaredInputs.${inputId}.input; in
         # "sources" is a special type of input for files. They mimic Nix style
         # paths. We don't take them from flake inputs (where they aren't,
         # anyway), but create a simple derivation wrapper around them to pass
         # them to the Nickel side.
         # TODO: should we get rid of sources, now that we have `import_file` and
         # symbolic strings?
-        if inputName == "sources" then
+        if inputTakeFrom == "sources" then
           # TODO: could we use flakeInputs.self.outPath instead of passing
           # baseDir explicitly? Maybe, but the issue is that this path is the
           # path of the git directory, not the subdirectory of the flake.nix.
           # may need some massaging
-          let as_nix_path = baseDir + "/${declaredInputs.${name}.path}";
+          let as_nix_path = baseDir + "/${declaredInputs.${inputId}.path}";
           in
           acc // {
-            "${name}" =
+            "${inputId}" =
               exportForNickel (runCommand (builtins.baseNameOf as_nix_path) {}
               "cp -r ${as_nix_path} $out");
           }
-        else if builtins.hasAttr inputName flakeInputs then
+        else if builtins.hasAttr inputTakeFrom flakeInputs then
           let
             input =
-              if inputName == "nixpkgs" then
-                flakeInputs.${inputName}.legacyPackages.${system}
+              if inputTakeFrom == "nixpkgs" then
+                flakeInputs.${inputTakeFrom}.legacyPackages.${system}
               else
-                flakeInputs.${inputName}.packages.${system};
+                flakeInputs.${inputTakeFrom}.packages.${system};
+
+            pkgPath = declaredInputs.${inputId}.path or [inputId];
           in
-          if builtins.hasAttr name input then
-            acc // {"${name}" = exportForNickel input.${name};}
+          if lib.hasAttrByPath pkgPath input then
+            acc // {"${inputId}" = exportForNickel (lib.getAttrFromPath pkgPath input);}
           else
             builtins.throw ''
-              Could not find package `${name}` in input `${inputName}`
+              Could not find package `${builtins.concatStringsSep "." pkgPath}`
+              in input `${inputTakeFrom}`
             ''
         else
           builtins.throw ''
-            The Nickel expression requires an input `${inputName}` for package
-            `${name}`, but no such input was forwarded to importNcl on the nix
+            The Nickel expression requires an input `${inputTakeFrom}` for input
+            `${inputId}`, but no such input was forwarded to `importNcl` on the nix
             side. Forwarded inputs: ${
                  builtins.toString (builtins.attrNames flakeInputs)
               }

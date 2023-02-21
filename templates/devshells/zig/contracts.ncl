@@ -272,10 +272,43 @@ from the Nix world) or a derivation defined in Nickel.
     nix | {..},
   },
 
+  InputPath
+    | doc m%"
+        The path of a package in an input (usually nixpkgs). Can be either a
+        single attribute, represented as a string, or an array of string,
+        representing a composed path.
+
+        If a single attribute is provided (a `Str`), this contract normalizes the
+        result by splitting it around dots to obtain an array:
+
+        # Examples
+
+        ```nickel
+        "gcc" | InputPath
+          => ["gcc"]
+          => Pass the contract
+        "nodePackages.markdownlint-cli" | InputPath
+          => ["nodePackages", "markdownlint-cli"]
+          => Pass the contract
+        ["nodePackages", "markdownlint-cli"] | InputPath
+          => Pass the contract
+        ```
+    "%
+    = fun label value =>
+    if builtin.is_str value then
+      string.split "." value
+    else
+      value
+      |> contract.apply (Array Str) label,
+
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
   = {
-    input | Str
-          | default = "nixpkgs",
+    input
+      | Str
+      | default = "nixpkgs",
+    path
+      | InputPath
+      | optional,
     # TODO: precise contract. We want to allow a path if input == "sources"
     ..
   },
