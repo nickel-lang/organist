@@ -39,7 +39,7 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       | {
         # default or not?
         bash.input | priority -100 = "nixpkgs",
-        nakedStdenv.input | priority -100 = "myInputs",
+        naked_std_env.input | priority -100 = "nixel-internals",
         ..
       }
       | default = {},
@@ -57,10 +57,23 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         args = [],
       },
 
-      env = {
-        # TODO: handle naked derivations without having to interpolate
-        stdenv = s%"%{inputs.nakedStdenv}"%,
+      structured_env.stdenv = {
+        naked_std_env = s%"%{inputs.naked_std_env}"%,
       },
+      
+      # Compute `env` from `structured_env`. Note that thanks to recursive
+      # overriding, if stuff is added to `structured_env` through merging,
+      # `env` will be automatically up-to-date
+      env =
+        structured_env
+        |> record.map (fun _n xs =>
+          # Intersperse ':' between environment variable fragments
+          let values = record.values xs in
+          let first = array.head values in
+          values
+          |> array.tail
+          |> array.foldl (fun acc value => s%"%{acc}:%{value}"%) first
+        ),
     } | NickelPkg,
   },
 

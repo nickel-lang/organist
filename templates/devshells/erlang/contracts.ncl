@@ -247,23 +247,22 @@ from the Nix world) or a derivation defined in Nickel.
         | doc m%"
           Set additional environment variables for the builder.
 
-          By default, `env` is computed from `structured_env`, and
-          `structured_env` should be used preferably. Ultimately, `env` is the
-          actual source of truth being passed to Nix when building the
-          derivation. See the documentation of `structured_env` for more
-          details.
+          By default, `env` should computed from `structured_env`, and
+          `structured_env` should be used preferably. Ultimately, `env` is the actual
+          source of truth being passed to Nix when building the derivation. See the
+          documentation of `structured_env` for more details.
           "%
         | {_: NixString}
-        | default = record.map
-            (fun _n xs =>
-              record.values xs
-              # I guess we don't necessarily always want to use `:` as a
-              # separator?
-              |> array.foldl (fun acc x => s%"%{acc}:%{x}"%) "")
-            structured_env,
+        # TODO: should we compute `env` from `structured_env` directly here? Or
+        # let each builder do that by itself?
+        #
+        # Some parameters, like the separator, may vary. For now we have no
+        # choice anyway, because of merging not being idempotent on complex
+        # values, and because the `NickelDerivation` contract is applied several
+        # times, we have to move the computing logic to builders.
+        | default = {},
       "%{type_field}" | force = "nickelDerivation",
   },
-
 
   Params | doc "The parameters provided to the Nickel expression"
     = {
