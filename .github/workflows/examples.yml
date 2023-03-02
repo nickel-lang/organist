@@ -60,7 +60,7 @@ jobs:
       run: |
         ls -FhoA nickel-nix-repo
         cd nickel-nix-repo/examples/${{ matrix.example }}
-        nix build --override-input nickel-nix path:../../
+        nix build --impure --override-input nickel-nix path:../../
 
 #    - name: Initialize devshell ${{ matrix.example }}
 #      run: |
