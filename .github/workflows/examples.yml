@@ -32,7 +32,7 @@ jobs:
         # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
         NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
       run: |
-        examples=$(python3 -c "import json, os, sys; json.dump(os.listdir('examples'), sys.stdout, indent=2)")
+        examples=$(python3 -c "import json, os, sys; json.dump(os.listdir('examples'), sys.stdout)")
         echo "examples=$examples" >> $GITHUB_OUTPUT
 
   test-examples:
