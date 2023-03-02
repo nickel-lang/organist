@@ -58,6 +58,7 @@ jobs:
 
     - name: Build
       run: |
+        ls -FhoA
         cd examples/${{ matrix.example }}
         nix build --override-input nickel-nix path:../../
 
