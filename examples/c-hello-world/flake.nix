@@ -20,6 +20,6 @@
         # don't have yet a way to easily import plain files into the Nickel
         # world. This is a temporary hack: we wrap hello.co as a stub package
         # and pass it as any other input to the Nickel part.
-        packages.default = importNcl ./. ./hello.ncl inputs;
+        packages.default = importNcl ./. "hello.ncl" inputs;
       });
 }
