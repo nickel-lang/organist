@@ -77,7 +77,7 @@ let
           in
 
           let nickel_expr | params.nix.NickelExpression =
-            import "${nickelFile}"
+            import "${sources}/${nickelFile}"
           in
 
           (nickel_expr & params).output
@@ -96,7 +96,7 @@ let
       };
       fileToCall = builtins.toFile "extract-inputs.ncl" ''
         let contracts = import "${./.}/contracts.ncl" in
-        let nickel_expr = import "${nickelFile}" in
+        let nickel_expr = import "${sources}/${nickelFile}" in
         nickel_expr.inputs_spec | {_: contracts.NickelInputSpec}
       '';
       result = runCommand "nickel-inputs.json" {} ''
@@ -130,7 +130,9 @@ let
           # baseDir explicitly? Maybe, but the issue is that this path is the
           # path of the git directory, not the subdirectory of the flake.nix.
           # may need some massaging
-          let as_nix_path = baseDir + "/${builtins.concatStringsSep "." declaredInputs.${inputId}.path}";
+          let as_nix_path =
+            baseDir
+            + "/${builtins.concatStringsSep "." declaredInputs.${inputId}.path}";
           in
           acc // {
             "${inputId}" =
