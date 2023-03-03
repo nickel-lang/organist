@@ -1,0 +1,62 @@
+name: Examples
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+
+  get-example-names:
+    name: Setup nix and nickel-nix
+    runs-on: ubuntu-latest
+
+    outputs:
+      examples: ${{ steps.examples.outputs.examples }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup
+      uses: ./.github/actions/common-setup
+      with:
+        SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: List all examples
+      id: examples
+      env:
+        # Should only be needed until we use a `cachinx/install-nix` action that contains
+        # https://github.com/cachix/install-nix-action/pull/152 (should be in `v19`)
+        NIX_CONFIG: "extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}"
+      run: |
+        examples=$(python3 -c "import json, os, sys; json.dump(os.listdir('examples'), sys.stdout)")
+        echo "examples=$examples" >> $GITHUB_OUTPUT
+
+  test-examples:
+    name: Test example ${{ matrix.example }}
+    needs: get-example-names
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJSON(needs.get-example-names.outputs.examples) }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        path: nickel-nix-repo
+        fetch-depth: 0
+
+    - name: Setup
+      uses: ./nickel-nix-repo/.github/actions/common-setup
+      with:
+        SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build
+      run: |
+        cd nickel-nix-repo/examples/${{ matrix.example }}
+        nix build --impure --override-input nickel-nix path:../../

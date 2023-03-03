@@ -130,7 +130,9 @@ let
           # baseDir explicitly? Maybe, but the issue is that this path is the
           # path of the git directory, not the subdirectory of the flake.nix.
           # may need some massaging
-          let as_nix_path = baseDir + "/${declaredInputs.${inputId}.path}";
+          let as_nix_path =
+            baseDir
+            + "/${builtins.concatStringsSep "." declaredInputs.${inputId}.path}";
           in
           acc // {
             "${inputId}" =
