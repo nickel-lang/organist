@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for devenv in $(awk '/= BashShell/ { print $1 }' builders.ncl)
+for devenv in $(awk '/= BashShell/ { print $1 }' ./nixel/builders.ncl)
 do
   ENV_NAME="$(echo $devenv | tr [A-Z] [a-z] | sed 's/shell$//')"
   DEST="../$ENV_NAME"
@@ -10,10 +10,10 @@ do
 
     rm -fr "$DEST"
     mkdir -p "$DEST"
-    cp builders.ncl contracts.ncl flake.*  naked-stdenv.ncl naked-stdenv.sh create-env.sh "$DEST"
+    cp -r nixel flake.* "$DEST"
 
     cat <<EOF > "${DEST}/dev-shell.ncl"
-let builders = import "builders.ncl" in
+let builders = import "nixel/builders.ncl" in
 
 {
   output = {
