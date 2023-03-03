@@ -37,7 +37,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
   BashShell = {
     inputs_spec = {
       bash.input | default = "nixpkgs",
-      naked_std_env.input | default = "nixel-internals",
+      # Setting the following as a default value conflicts with InputsSpec's
+      # contract default value (`"nixpkgs"`). Maybe InputsSpec shouldn't set a
+      # default value at all?
+      # That being said, `naked_std_env` is an internal compatibility value:
+      # there doesn't seem to be a good reason to make it a default value. It
+      # can still be overridden using `force` if really needed
+      naked_std_env.input = "nixel-internals",
     },
     inputs,
 
