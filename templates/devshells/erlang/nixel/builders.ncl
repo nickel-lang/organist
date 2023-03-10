@@ -57,10 +57,10 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
         args = [],
       },
 
-      structured_env.stdenv = {
+      structured_env = {
         # TODO: handle naked derivations without having to interpolate
-        naked_std_env = nix-s%"%{inputs.naked_std_env}"%,
-        bash = nix-s%"%{inputs.bash}/bin"%,
+        stdenv.naked_std_env = nix-s%"%{inputs.naked_std_env}"%,
+        PATH.bash = nix-s%"%{inputs.bash}/bin"%,
       },
 
       # Compute `env` from `structured_env`. Note that thanks to recursive
