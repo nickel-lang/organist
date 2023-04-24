@@ -68,13 +68,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       # `env` will be automatically up-to-date
       env =
         structured_env
-        |> record.map (fun _n xs =>
+        |> std.record.map (fun _n xs =>
           # Intersperse ':' between environment variable fragments
-          let values = record.values xs in
-          let first = array.head values in
+          let values = std.record.values xs in
+          let first = std.array.first values in
           values
-          |> array.tail
-          |> array.foldl (fun acc value => nix-s%"%{acc}:%{value}"%) first
+          |> std.array.drop_first
+          |> std.array.fold_left (fun acc value => nix-s%"%{acc}:%{value}"%) first
         ),
     } | NickelPkg,
   },

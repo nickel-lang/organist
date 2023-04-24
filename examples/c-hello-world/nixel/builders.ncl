@@ -68,13 +68,13 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       # `env` will be automatically up-to-date
       env =
         structured_env
-        |> record.map (fun _n xs =>
+        |> std.record.map (fun _n xs =>
           # Intersperse ':' between environment variable fragments
-          let values = record.values xs in
-          let first = array.head values in
+          let values = std.record.values xs in
+          let first = std.array.first values in
           values
-          |> array.tail
-          |> array.foldl (fun acc value => nix-s%"%{acc}:%{value}"%) first
+          |> std.array.drop_first
+          |> std.array.fold_left (fun acc value => nix-s%"%{acc}:%{value}"%) first
         ),
     } | NickelPkg,
   },
@@ -90,7 +90,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         cargo = nix-s%"%{inputs.cargo}/bin"%,
         rustc = nix-s%"%{inputs.rustc}/bin"%,
         rustfmt = nix-s%"%{inputs.rustfmt}/bin"%,
@@ -108,7 +107,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         go = nix-s%"%{inputs.go}/bin"%,
         gopls = nix-s%"%{inputs.gopls}/bin"%,
       },
@@ -124,7 +122,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         clojure = nix-s%"%{inputs.clojure}/bin"%,
         clojure-lsp = nix-s%"%{inputs.clojure-lsp}/bin"%,
       },
@@ -140,7 +137,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         clang = nix-s%"%{inputs.clang}/bin"%,
         clang-tools = nix-s%"%{inputs.clang-tools}/bin"%,
       },
@@ -160,7 +156,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         php = nix-s%"%{inputs.php}/bin"%,
         intelephense = nix-s%"%{inputs.intelephense}/bin"%,
       },
@@ -176,7 +171,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         zig = nix-s%"%{inputs.zig}/bin"%,
         zls = nix-s%"%{inputs.zls}/bin"%,
       },
@@ -196,7 +190,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         nodejs = nix-s%"%{inputs.nodejs}/bin"%,
         ts-lsp = nix-s%"%{inputs.typescript-language-server}/bin"%,
       },
@@ -211,7 +204,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         racket = nix-s%"%{inputs.racket}/bin"%,
       },
     },
@@ -226,7 +218,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         scala = nix-s%"%{inputs.scala}/bin"%,
         metals = nix-s%"%{inputs.metals}/bin"%,
       },
@@ -247,7 +238,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         python = nix-s%"%{inputs.python310}/bin"%,
         python-lsp = nix-s%"%{inputs.python-lsp-server}/bin"%,
       },
@@ -263,7 +253,6 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
 
     output.structured_env = {
       PATH = {
-        bash = nix-s%"%{inputs.bash}/bin"%,
         erlang = nix-s%"%{inputs.erlang}/bin"%,
         erlang-lsp = nix-s%"%{inputs.erlang-ls}/bin"%,
       },

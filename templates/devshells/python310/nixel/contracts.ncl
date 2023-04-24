@@ -3,23 +3,23 @@ let type_field = "$__nixel_type" in
 let predicate | doc "Various predicates used to define contracts"
   = {
     is_nix_path
-        = fun x => builtin.is_record x &&
-                   record.has_field type_field x &&
+        = fun x => std.is_record x &&
+                   std.record.has_field type_field x &&
                    x."%{type_field}" == "nixPath"
 
     , is_nix_derivation
-        = fun x => builtin.is_record x &&
-                   record.has_field type_field x &&
+        = fun x => std.is_record x &&
+                   std.record.has_field type_field x &&
                    x."%{type_field}" == "nixDerivation"
 
     , is_nix_string
-      = fun value => builtin.is_record value &&
-        record.has_field type_field value &&
+      = fun value => std.is_record value &&
+        std.record.has_field type_field value &&
         value."%{type_field}" == "nixString"
 
     , is_nickel_derivation = fun x =>
-      builtin.is_record x &&
-      record.has_field type_field x &&
+      std.is_record x &&
+      std.record.has_field type_field x &&
       x."%{type_field}" == "nickelDerivation"
 
     , is_derivation = fun x =>
@@ -28,7 +28,7 @@ let predicate | doc "Various predicates used to define contracts"
 
     , is_string_fragment = fun x =>
       is_derivation x ||
-      builtin.is_str x ||
+      std.is_string x ||
       is_nix_path x
   } in
 
@@ -40,11 +40,11 @@ let mk_nix_string = fun fs => {
 {
   # Nix may require name, version, etc. to have a certain format, but we're not sure.
   # TODO: refine those contracts
-  Name = Str,
-  Version = Str,
-  # TODO: For now, we use Str, but should we have enums tags for arch and os
+  Name = String,
+  Version = String,
+  # TODO: For now, we use String, but should we have enums tags for arch and os
   # instead?
-  System = {arch | Str, os | Str},
+  System = {arch | String, os | String},
 
   # TODO: more precise contract
   Derivation
@@ -56,7 +56,7 @@ from the Nix world) or a derivation defined in Nickel.
 
   NixStringFragment
     | doc "A fragment of a Nix string (or a string with context). See `NixString`"
-    = contract.from_predicate predicate.is_string_fragment,
+    = std.contract.from_predicate predicate.is_string_fragment,
 
   NixSymbolicString
     | doc m%"
@@ -147,18 +147,18 @@ from the Nix world) or a derivation defined in Nickel.
       # We accept a single string fragment (a plain string, a derivation or a
       # Nix path). We normalize it by wrapping it as a one-element array
       else if predicate.is_string_fragment value then
-        mk_nix_string [contract.apply NixStringFragment label value]
+        mk_nix_string [std.contract.apply NixStringFragment label value]
       else
         # TODO: it's for debugging, but we should remove the serializing at some
         # point.
-        let label = contract.tag (builtin.serialize `Json value) label in
-        let {fragments, ..} = contract.apply NixSymbolicString label value in
+        let label = std.contract.label.append_note (std.serialize `Json value) label in
+        let {fragments, ..} = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
 
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
-    drvPath | Str,
-    outputName | Str,
+    drvPath | String,
+    outputName | String,
     "%{type_field}" | force = "nixDerivation",
   },
 
@@ -289,7 +289,7 @@ from the Nix world) or a derivation defined in Nickel.
         single attribute, represented as a string, or an array of string,
         representing a composed path.
 
-        If a single attribute is provided (a `Str`), this contract normalizes the
+        If a single attribute is provided (a `String`), this contract normalizes the
         result by splitting it around dots to obtain an array:
 
         # Examples
@@ -306,16 +306,16 @@ from the Nix world) or a derivation defined in Nickel.
         ```
     "%
     = fun label value =>
-    if builtin.is_str value then
-      string.split "." value
+    if std.is_string value then
+      std.string.split "." value
     else
       value
-      |> contract.apply (Array Str) label,
+      |> std.contract.apply (Array String) label,
 
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
   = {
     input
-      | Str
+      | String
       | default = "nixpkgs",
     path
       | InputPath
@@ -342,6 +342,6 @@ from the Nix world) or a derivation defined in Nickel.
 
   NixPath = {
     "%{type_field}" | force = "nixPath",
-    path | Str,
+    path | String,
   }
 }
