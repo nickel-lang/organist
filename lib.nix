@@ -19,26 +19,26 @@ let
   # Take a symbolic derivation (a datastructure representing a derivation), as
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
-  prepareDerivation = value:
+  prepareDerivation = system: value:
     (builtins.removeAttrs value ["build_command" "env" "structured_env"])
     // {
-      system = "${value.system.arch}-${value.system.os}";
+      system = if value ? system then "${value.system.arch}-${value.system.os}" else system;
       builder = value.build_command.cmd;
       args = value.build_command.args;
     }
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = baseDir: value:
+  importFromNickel = system: baseDir: value:
     let
       type = builtins.typeOf value;
       isNickelDerivation = type: type == "nickelDerivation";
-      importFromNickel_ = importFromNickel baseDir;
+      importFromNickel_ = importFromNickel system baseDir;
     in
     if (type == "set") then (
       let nixelType = value."${typeField}" or ""; in
       if isNickelDerivation nixelType then
-        let prepared = prepareDerivation (builtins.mapAttrs (_:
+        let prepared = prepareDerivation system (builtins.mapAttrs (_:
         importFromNickel_) value); in
         derivation prepared
       else if nixelType == "nixDerivation" then
@@ -191,7 +191,7 @@ let
   importNcl = { runCommand, nickel, system, lib}@args: baseDir: nickelFile: flakeInputs:
     let nickelResult = callNickel args { inherit nickelFile flakeInputs baseDir; }; in
     { rawNickel = nickelResult; }
-    // lib.traceVal (importFromNickel baseDir (builtins.fromJSON
+    // lib.traceVal (importFromNickel system baseDir (builtins.fromJSON
     (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 
 in

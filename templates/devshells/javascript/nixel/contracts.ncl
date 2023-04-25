@@ -186,7 +186,7 @@ from the Nix world) or a derivation defined in Nickel.
       system
         | doc "The system to build the package on."
         | System
-        | default = {arch = "x86_64", os = "linux"},
+        | optional,
       build_command
         | doc "The build command to execute."
         | {
