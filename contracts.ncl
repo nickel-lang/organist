@@ -184,9 +184,9 @@ from the Nix world) or a derivation defined in Nickel.
         | Array Derivation
         | default = [],
       system
-        | doc "The system to build the package on."
+        | doc "The system to build the package on. Defaults to the system used by importNcl."
         | System
-        | default = {arch = "x86_64", os = "linux"},
+        | optional,
       build_command
         | doc "The build command to execute."
         | {
