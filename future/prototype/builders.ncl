@@ -1,5 +1,5 @@
 let nix_builtins = import "nix_builtins.ncl" in
-let Drv in
+let Drv = Dyn in
 
 # let some_function = fun {args1, .., argsn} => (ret_value : Foo)
 # let x = {args1, .., argsn, ret_value = some_function {args1, .., argns}}
@@ -8,7 +8,7 @@ let Drv in
 # Drv == Foo
 {
   BinShBuilder = DerivationInterface & {
-    build_script | Str,
+    build_script | String,
     build_command = [
       "/bin/sh",
       ((import "nix_builtins.ncl").write_text "builder" build_script).path,
@@ -29,40 +29,40 @@ let Drv in
   Drv = {out, drv_path}, 
 
   drv_builder = {
-    name | Str,
-    version | Str,
-    system | Str,
-    build_command | Array Str,
+    name | String,
+    version | String,
+    system | String,
+    build_command | Array String,
     derivation | Drv = nix_builtins.derivation name version system build_command,
   },
 
   PackageDef = BinShBuilder & {
     inputs | default = {},
     build_inputs | default = {},
-    install_phase | Str | default = "",
-    build_phase | Str | default = "",
-    build_script | Str = m%"
+    install_phase | String | default = "",
+    build_phase | String | default = "",
+    build_script | String = m%"
       %{build_phase}
       %{install_phase}
-    "%m,
+    "%,
     ..
   },
 
   DerivationInterface = {
-    name | Str,
-    version | Str,
-    system | {arch | Str, os | Str} 
+    name | String,
+    version | String,
+    system | {arch | String, os | String} 
            | default = {arch = "x86_64", os = "linux"},
-    build_command | Array Str,
+    build_command | Array String,
     ..
   },
 
   # Do we want a syntax like ..DerivationInterface?
   Derivation = {
-    name | Str,
-    version | Str,
+    name | String,
+    version | String,
     system | {..},
-    build_command | Array Str,
+    build_command | Array String,
     derivation | {..},
   },
 

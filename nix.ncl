@@ -5,7 +5,7 @@ let contracts = import "contracts.ncl" in
   NickelExpression = contracts.NickelExpression,
   lib = {
     import_file
-      | Str -> contracts.NixPath
+      | String -> contracts.NixPath
       | doc m%%"
           Take a path as a string and produce a Nix path, which will be
           interpreted as a path on the Nix side and added to the store.

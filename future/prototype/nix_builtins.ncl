@@ -1,5 +1,5 @@
 {
-  derivation | Str -> Str -> {..} -> Str -> {..} =
+  derivation | String -> String -> {..} -> String -> {..} =
     fun name_ version_ system_ build_command_ => {
       name = name_,
       version = version_,
@@ -9,7 +9,7 @@
     },
   # we should return a derivation, but let's avoid circular imports for now, and
   # restructure contracts/functions later.
-  write_text | Str -> Str -> {..} = fun name_ text => {
+  write_text | String -> String -> {..} = fun name_ text => {
     name = name_,
     version = "1.0",
     system = {arch = "x86_64", os = "linux"},
