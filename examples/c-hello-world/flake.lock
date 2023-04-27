@@ -170,11 +170,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1677773446,
-        "narHash": "sha256-NVx4ziPJb1eJ8PvgHBkGqaeNLY5PGMfqa9q8Pe2TaU4=",
+        "lastModified": 1682353538,
+        "narHash": "sha256-0N9b3zj7Gbk5pq7eVp71ejSuGToNj+gPfWwa4OZtsfQ=",
         "owner": "nickel-lang",
         "repo": "nickel-nix",
-        "rev": "c57e55d966d392b90eb3884a9c85019fb37b2c4f",
+        "rev": "9c2b41a37a36fae5ae8b956cc17fb7540ceeae15",
         "type": "github"
       },
       "original": {
