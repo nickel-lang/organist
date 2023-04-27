@@ -60,12 +60,12 @@ from the Nix world) or a derivation defined in Nickel.
 
   NixSymbolicString
     | doc m%"
-      A symbolic string with the `` `nix `` prefix, as output by the Nickel
+      A symbolic string with the `` 'nix `` prefix, as output by the Nickel
       parser. Used as a subcontract for `NixString`.
       "%
     = {
-    prefix | [| `nix |],
-    tag | [| `SymbolicString |],
+    prefix | [| 'nix |],
+    tag | [| 'SymbolicString |],
     fragments | Array NixString,
   },
 
@@ -151,7 +151,7 @@ from the Nix world) or a derivation defined in Nickel.
       else
         # TODO: it's for debugging, but we should remove the serializing at some
         # point.
-        let label = std.contract.label.append_note (std.serialize `Json value) label in
+        let label = std.contract.label.append_note (std.serialize 'Json value) label in
         let {fragments, ..} = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
 
@@ -253,7 +253,7 @@ from the Nix world) or a derivation defined in Nickel.
             override `env` directly, be aware that **`structured_env` will then
             be potentially completly ignored**.
           "%%%
-        | {_: {_: NixString}}
+        | {_ | {_ | NixString}}
         | default = {},
       env
         | doc m%"
@@ -264,7 +264,7 @@ from the Nix world) or a derivation defined in Nickel.
           source of truth being passed to Nix when building the derivation. See the
           documentation of `structured_env` for more details.
           "%
-        | {_: NixString}
+        | {_ | NixString}
         # TODO: should we compute `env` from `structured_env` directly here? Or
         # let each builder do that by itself?
         #
@@ -279,7 +279,7 @@ from the Nix world) or a derivation defined in Nickel.
   Params | doc "The parameters provided to the Nickel expression"
     = {
     system | System,
-    inputs | {_: Derivation},
+    inputs | {_ | Derivation},
     nix | {..},
   },
 
@@ -335,7 +335,7 @@ from the Nix world) or a derivation defined in Nickel.
 
   NickelExpression | doc "A Nickel expression"
     = {
-    inputs_spec | {_ : NickelInputSpec},
+    inputs_spec | {_ | NickelInputSpec},
     output | NickelExpressionResult,
     ..
   },

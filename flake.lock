@@ -235,11 +235,11 @@
         "topiary": "topiary"
       },
       "locked": {
-        "lastModified": 1682335909,
-        "narHash": "sha256-E4+08BmxFg2G3QXzzEDh0DvVHUOhz0Q8q3WBGqF6NeI=",
+        "lastModified": 1682514100,
+        "narHash": "sha256-bNv3NlOJqK7L7J7KO0kKFOgLcT4eEu6E7/dwM/JdQiQ=",
         "owner": "tweag",
         "repo": "nickel",
-        "rev": "a5f20ca89f1ae8583e9742e8e8b57b79632929ad",
+        "rev": "913a7c1e12a1811b2c86d1ecae66958ef77520d0",
         "type": "github"
       },
       "original": {
@@ -474,11 +474,11 @@
         "rust-overlay": "rust-overlay_4"
       },
       "locked": {
-        "lastModified": 1680178226,
-        "narHash": "sha256-EZtmLYPQII8Ma9yH0udqlNjSXiYUg134j+0Srzb4rbM=",
+        "lastModified": 1682503900,
+        "narHash": "sha256-3Kb9D8S0lkGcPAcpJJGInVyFN79K6gn6TN0ZHWFA19s=",
         "owner": "tweag",
         "repo": "topiary",
-        "rev": "1af03d77abf6aef3ea36f878554c16619207252b",
+        "rev": "773159aa4c819b46c6d51ca9275e7366087eb3a0",
         "type": "github"
       },
       "original": {
