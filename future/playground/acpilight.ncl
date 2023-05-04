@@ -47,7 +47,7 @@ let Builder = {
      url = "https://gitlab.com/wavexx/acpilight.git",
      rev = "v%{version}",
      sha256 = "1r0r3nx6x6vkpal6vci0zaa1n9dfacypldf6k8fxg7919vzxdn1w",
-     fetchType = `Git,
+     fetchType = 'Git,
   },
 
   vars = {
