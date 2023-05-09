@@ -18,14 +18,13 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      importNcl = nickel-nix.lib.${system}.importNcl;
-      nakedStdenv = importNcl ./nixel "naked-stdenv.ncl" inputs;
+      inherit (nickel-nix.lib.${system}) importNcl nakedStdenv;
       nickelDerivation =
         importNcl ./. "dev-shell.ncl"
         (
           inputs
           // {
-            nixel-internals.packages.${system} = {naked_std_env = nakedStdenv;};
+            nixel-internals.packages.${system} = {naked_std_env = nakedStdenv nixpkgs;};
           }
         );
     in rec {

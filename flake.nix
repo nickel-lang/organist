@@ -56,6 +56,8 @@
           nickel = inputs.nickel.packages."${system}".nickel;
         };
 
+        lib.nakedStdenv = nixpkgs: self.lib.${system}.importNcl ./. "naked-stdenv.ncl" {inherit nixpkgs;};
+
         devShells.default = pkgs.mkShell {
           packages = [
             inputs.nickel.packages."${system}".nickel
