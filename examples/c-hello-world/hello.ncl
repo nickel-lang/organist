@@ -1,4 +1,4 @@
-let builders = import "nixel/builders.ncl" in
+let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
 
 {
   inputs_spec = {
