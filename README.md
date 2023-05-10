@@ -30,6 +30,7 @@ environment.
 $ mkdir my_project
 $ cd my_project
 $ nix flake init -t github:nickel-lang/nickel-nix#rust-devshell
+$ nix run .#regenerate-lockfile
 $ nix develop --impure
 ```
 
