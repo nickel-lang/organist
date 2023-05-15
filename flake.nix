@@ -64,9 +64,13 @@
         lib.importNcl = pkgs.callPackage lib.importNcl {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel;
+          inherit (self.lib.${system}) nickel-nix-internals;
         };
 
-        lib.nakedStdenv = nixpkgs: self.lib.${system}.importNcl ./. "naked-stdenv.ncl" {inherit nixpkgs;};
+        # Internal nickel-nix library. Each value is a function that accepts inputs from user flake.
+        lib.nickel-nix-internals = {
+          naked_std_env = self.lib.${system}.importNcl ./. "naked-stdenv.ncl";
+        };
 
         # Helper function that generates ugly contents for "nickel.lock.ncl", see buildLockFile.
         lib.buildLockFileContents = contents: let

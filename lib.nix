@@ -177,7 +177,9 @@ let
       else if builtins.hasAttr inputTakeFrom flakeInputs
       then let
         input =
-          if inputTakeFrom == "nixpkgs"
+          if inputTakeFrom == "nickel-nix-internals"
+          then flakeInputs.${inputTakeFrom}
+          else if inputTakeFrom == "nixpkgs"
           then flakeInputs.${inputTakeFrom}.legacyPackages.${system}
           else flakeInputs.${inputTakeFrom}.packages.${system};
 
@@ -237,8 +239,17 @@ let
     nickel,
     system,
     lib,
+    nickel-nix-internals,
   } @ args: baseDir: nickelFile: flakeInputs: let
-    nickelResult = callNickel args {inherit nickelFile flakeInputs baseDir;};
+    flakeInputsWithInternals =
+      flakeInputs
+      // {
+        nickel-nix-internals = builtins.mapAttrs (_: f: f flakeInputs) nickel-nix-internals;
+      };
+    nickelResult = callNickel args {
+      inherit nickelFile baseDir;
+      flakeInputs = flakeInputsWithInternals;
+    };
   in
     {rawNickel = nickelResult;}
     // lib.traceVal (importFromNickel system baseDir (builtins.fromJSON

@@ -24,22 +24,12 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (nickel-nix.lib.${system}) importNcl nakedStdenv regenerateLockFileApp;
-      nickelDerivation =
-        importNcl ./. "dev-shell.ncl"
-        (
-          inputs
-          // {
-            nixel-internals.packages.${system} = {naked_std_env = nakedStdenv nixpkgs;};
-          }
-        );
+      inherit (nickel-nix.lib.${system}) importNcl regenerateLockFileApp;
+      nickelDerivation = importNcl ./. "dev-shell.ncl" inputs;
       lockFileContents = {
         nickel-nix = nickel-nix.lib.${system}.lockFileContents;
       };
     in rec {
-      packages = {
-        default = nakedStdenv;
-      };
       devShells = {
         default = nickelDerivation;
       };
