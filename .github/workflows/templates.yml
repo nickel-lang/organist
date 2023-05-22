@@ -66,5 +66,7 @@ jobs:
       # tested in a `./example` directory, so `nickel-nix` is the direct parent.
       run: |
           pushd ./example
-          nix develop --impure --override-input nickel-nix path:$GITHUB_WORKSPACE/nickel-nix-repo --accept-flake-config --print-build-logs
+          nix flake lock --override-input nickel-nix path:$GITHUB_WORKSPACE/nickel-nix-repo --accept-flake-config
+          nix run .#regenerate-lockfile --accept-flake-config
+          nix develop --impure --accept-flake-config --print-build-logs
           popd

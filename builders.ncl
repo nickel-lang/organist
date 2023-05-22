@@ -43,7 +43,7 @@ let {NickelDerivation, ..} = import "contracts.ncl" in
       # That being said, `naked_std_env` is an internal compatibility value:
       # there doesn't seem to be a good reason to make it a default value. It
       # can still be overridden using `force` if really needed
-      naked_std_env.input = "nixel-internals",
+      naked_std_env.input = "nickel-nix-internals",
     },
     inputs,
 

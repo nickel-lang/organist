@@ -358,7 +358,11 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nickel": "nickel",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_3",
+        "topiary": [
+          "nickel",
+          "topiary"
+        ]
       }
     },
     "rust-overlay": {

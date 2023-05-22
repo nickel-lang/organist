@@ -6,8 +6,14 @@
   inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   nixConfig = {
-    extra-substituters = ["https://tweag-nickel.cachix.org"];
-    extra-trusted-public-keys = ["tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="];
+    extra-substituters = [
+      "https://tweag-nickel.cachix.org"
+      "https://tweag-topiary.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="
+      "tweag-topiary.cachix.org-1:8TKqya43LAfj4qNHnljLpuBnxAY/YwEBfzo3kzXxNY0="
+    ];
   };
 
   outputs = {
@@ -18,22 +24,17 @@
   } @ inputs:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      importNcl = nickel-nix.lib.${system}.importNcl;
-      nakedStdenv = importNcl ./nixel "naked-stdenv.ncl" inputs;
-      nickelDerivation =
-        importNcl ./. "dev-shell.ncl"
-        (
-          inputs
-          // {
-            nixel-internals.packages.${system} = {naked_std_env = nakedStdenv;};
-          }
-        );
-    in rec {
-      packages = {
-        default = nakedStdenv;
+      inherit (nickel-nix.lib.${system}) importNcl regenerateLockFileApp;
+      nickelDerivation = importNcl ./. "dev-shell.ncl" inputs;
+      lockFileContents = {
+        nickel-nix = nickel-nix.lib.${system}.lockFileContents;
       };
+    in rec {
       devShells = {
         default = nickelDerivation;
+      };
+      apps = {
+        regenerate-lockfile = regenerateLockFileApp lockFileContents;
       };
     });
 }
