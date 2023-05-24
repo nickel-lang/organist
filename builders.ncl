@@ -287,12 +287,17 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
   HaskellStackShell =
     BashShell
     & {
+      ghcVersion, # User-defined. To keep in sync with the one used by stack
       inputs_spec = {
         stack.input | default = "nixpkgs",
         ormolu.input | default = "nixpkgs",
         nix.input | default = "nixpkgs",
         git.input | default = "nixpkgs",
         coreutils.input | default = "nixpkgs",
+        haskell-language-server = {
+          input = "nixpkgs",
+          path = "haskell.packages.ghc%{ghcVersion}.haskell-language-server",
+        },
         # This will point to a copy of nixpkgs in nix store
         path.input | default = "nixpkgs",
       },
@@ -333,6 +338,7 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
             ormolu = nix-s%"%{inputs.ormolu}/bin"%,
             nix = nix-s%"%{inputs.nix}/bin"%,
             git = nix-s%"%{inputs.git}/bin"%,
+            haskell-language-server = nix-s%"%{inputs.haskell-language-server}/bin"%,
           },
         },
     },
