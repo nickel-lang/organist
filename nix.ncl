@@ -20,7 +20,7 @@ let contracts = import "contracts.ncl" in
              "%,
           ```
         "%%
-      = fun filepath => {path = filepath},
+      = fun filepath => { path = filepath },
   },
   builders = import "builders.ncl",
 }
