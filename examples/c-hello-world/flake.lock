@@ -271,14 +271,19 @@
       "inputs": {
         "flake-utils": "flake-utils_2",
         "nickel": "nickel",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_3",
+        "topiary": [
+          "nickel-nix",
+          "nickel",
+          "topiary"
+        ]
       },
       "locked": {
-        "lastModified": 1683200838,
-        "narHash": "sha256-wW6IMFMiDczDA1nx3ciTOudkL3qZ4da8Xia1KQmF84E=",
+        "lastModified": 1684745113,
+        "narHash": "sha256-6SSWFvoUHiUWj+HJUOEblAh9cxV3SgRyEBnGkU6Ajw0=",
         "owner": "nickel-lang",
         "repo": "nickel-nix",
-        "rev": "11f7ecf7701b99d5f9f704e6294336f3f8e251d8",
+        "rev": "36fd86f75858c84e078a00a5fbd9ff128d3b07c7",
         "type": "github"
       },
       "original": {

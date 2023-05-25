@@ -6,20 +6,39 @@
   inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   nixConfig = {
-    extra-substituters = [ "https://tweag-nickel.cachix.org" ];
-    extra-trusted-public-keys = [ "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA=" ];
+    extra-substituters = [
+      "https://tweag-nickel.cachix.org"
+      "https://tweag-topiary.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="
+      "tweag-topiary.cachix.org-1:8TKqya43LAfj4qNHnljLpuBnxAY/YwEBfzo3kzXxNY0="
+    ];
   };
 
-  outputs = { self, nixpkgs, flake-utils, nickel-nix } @ inputs:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-        importNcl = nickel-nix.lib.${system}.importNcl;
-      in {
-        # we want hello.c to be part of the source of the hello package, but we
-        # don't have yet a way to easily import plain files into the Nickel
-        # world. This is a temporary hack: we wrap hello.co as a stub package
-        # and pass it as any other input to the Nickel part.
-        packages.default = importNcl ./. "hello.ncl" inputs;
-      });
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+    nickel-nix,
+  } @ inputs:
+    flake-utils.lib.eachDefaultSystem (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      importNcl = nickel-nix.lib.${system}.importNcl;
+    in {
+      # we want hello.c to be part of the source of the hello package, but we
+      # don't have yet a way to easily import plain files into the Nickel
+      # world. This is a temporary hack: we wrap hello.co as a stub package
+      # and pass it as any other input to the Nickel part.
+      packages.default = importNcl ./. "hello.ncl" inputs;
+
+      apps = {
+        regenerate-lockfile = {
+          type = "app";
+          program = pkgs.lib.getExe (nickel-nix.lib.${system}.buildLockFile {
+            nickel-nix = nickel-nix.lib.${system}.lockFileContents;
+          });
+        };
+      };
+    });
 }

@@ -59,4 +59,6 @@ jobs:
     - name: Build
       run: |
         cd nickel-nix-repo/examples/${{ matrix.example }}
-        nix build --impure --override-input nickel-nix path:../../
+        nix flake lock --override-input nickel-nix path:../../
+        nix run .#regenerate-lockfile --accept-flake-config
+        nix build --impure --accept-flake-config
