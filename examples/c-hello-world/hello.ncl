@@ -19,7 +19,8 @@ let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
       version = "0.1",
       build_command = {
         cmd = nix-s%"%{inputs.bash.outputPath}/bin/bash"%,
-        args = [ "-c",
+        args = [
+          "-c",
           nix-s%"
             %{inputs.gcc.outputPath}/bin/gcc %{inputs.hello.outputPath} -o hello
             %{inputs.coreutils.outputPath}/bin/mkdir -p $out/bin
@@ -28,6 +29,6 @@ let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
         ]
       },
       env = {},
-      dependencies = [ inputs.bash, inputs.coreutils, inputs.gcc, inputs.hello ],
+      dependencies = [inputs.bash, inputs.coreutils, inputs.gcc, inputs.hello],
     } | builders.NickelPkg
 }

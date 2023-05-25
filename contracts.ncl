@@ -2,40 +2,38 @@ let type_field = "$__nixel_type" in
 
 let predicate | doc "Various predicates used to define contracts"
   = {
-    is_nix_path
-        = fun x => std.is_record x &&
-                   std.record.has_field type_field x &&
-                   x."%{type_field}" == "nixPath"
+    is_nix_path = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nixPath",
+    is_nix_derivation = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nixDerivation",
+    is_nix_string = fun value =>
+      std.is_record value
+      && std.record.has_field type_field value
+      && value."%{type_field}" == "nixString",
+    is_nickel_derivation = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nickelDerivation",
+    is_derivation = fun x =>
+      is_nickel_derivation x
+      || is_nix_derivation x,
+    is_string_fragment = fun x =>
+      is_derivation x
+      || std.is_string x
+      || is_nix_path x
+  }
+  in
 
-    , is_nix_derivation
-        = fun x => std.is_record x &&
-                   std.record.has_field type_field x &&
-                   x."%{type_field}" == "nixDerivation"
-
-    , is_nix_string
-      = fun value => std.is_record value &&
-        std.record.has_field type_field value &&
-        value."%{type_field}" == "nixString"
-
-    , is_nickel_derivation = fun x =>
-      std.is_record x &&
-      std.record.has_field type_field x &&
-      x."%{type_field}" == "nickelDerivation"
-
-    , is_derivation = fun x =>
-      is_nickel_derivation x ||
-      is_nix_derivation x
-
-    , is_string_fragment = fun x =>
-      is_derivation x ||
-      std.is_string x ||
-      is_nix_path x
-  } in
-
-let mk_nix_string = fun fs => {
-  "%{type_field}" = "nixString",
-  fragments = fs,
-} in
+let mk_nix_string = fun fs =>
+  {
+    "%{type_field}" = "nixString",
+    fragments = fs,
+  }
+in
 
 {
   # Nix may require name, version, etc. to have a certain format, but we're not sure.
@@ -44,7 +42,7 @@ let mk_nix_string = fun fs => {
   Version = String,
   # TODO: For now, we use String, but should we have enums tags for arch and os
   # instead?
-  System = {arch | String, os | String},
+  System = { arch | String, os | String },
 
   # TODO: more precise contract
   Derivation
@@ -54,8 +52,7 @@ from the Nix world) or a derivation defined in Nickel.
       "%
     = Dyn,
 
-  NixStringFragment
-    | doc "A fragment of a Nix string (or a string with context). See `NixString`"
+  NixStringFragment | doc "A fragment of a Nix string (or a string with context). See `NixString`"
     = std.contract.from_predicate predicate.is_string_fragment,
 
   NixSymbolicString
@@ -64,13 +61,13 @@ from the Nix world) or a derivation defined in Nickel.
       parser. Used as a subcontract for `NixString`.
       "%
     = {
-    prefix | [| 'nix |],
-    tag | [| 'SymbolicString |],
-    fragments | Array NixString,
-  },
+      prefix | [| 'nix |],
+      tag | [| 'SymbolicString |],
+      fragments | Array NixString,
+    },
 
   NixString
-   | doc m%%"
+    | doc m%%"
       Nix string with a
       [context](https://shealevy.com/blog/2018/08/05/understanding-nixs-string-context/)
       tracking the dependencies that need to be built before the string can make
@@ -143,24 +140,25 @@ from the Nix world) or a derivation defined in Nickel.
     = fun label value =>
       # A contract must always be idempotent (be a no-op if applied a second
       # time), so we accept something that is already a NixString
-      if predicate.is_nix_string value then value
-      # We accept a single string fragment (a plain string, a derivation or a
-      # Nix path). We normalize it by wrapping it as a one-element array
+      if predicate.is_nix_string value then
+        value
+        # We accept a single string fragment (a plain string, a derivation or a
+        # Nix path). We normalize it by wrapping it as a one-element array
       else if predicate.is_string_fragment value then
         mk_nix_string [std.contract.apply NixStringFragment label value]
       else
         # TODO: it's for debugging, but we should remove the serializing at some
         # point.
         let label = std.contract.label.append_note (std.serialize 'Json value) label in
-        let {fragments, ..} = std.contract.apply NixSymbolicString label value in
+        let { fragments, .. } = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
 
   NixDerivation | doc "A derivation coming from the Nix world"
     = {
-    drvPath | String,
-    outputName | String,
-    "%{type_field}" | force = "nixDerivation",
-  },
+      drvPath | String,
+      outputName | String,
+      "%{type_field}" | force = "nixDerivation",
+    },
 
   NickelDerivation
     | doc m%"
@@ -182,7 +180,8 @@ from the Nix world) or a derivation defined in Nickel.
       dependencies
         | doc "The dependencies of the package."
         | Array Derivation
-        | default = [],
+        | default
+        = [],
       system
         | doc "The system to build the package on. Defaults to the system used by importNcl."
         | System
@@ -253,8 +252,9 @@ from the Nix world) or a derivation defined in Nickel.
             override `env` directly, be aware that **`structured_env` will then
             be potentially completly ignored**.
           "%%%
-        | {_ | {_ | NixString}}
-        | default = {},
+        | { _ | { _ | NixString } }
+        | default
+        = {},
       env
         | doc m%"
           Set additional environment variables for the builder.
@@ -264,7 +264,7 @@ from the Nix world) or a derivation defined in Nickel.
           source of truth being passed to Nix when building the derivation. See the
           documentation of `structured_env` for more details.
           "%
-        | {_ | NixString}
+        | { _ | NixString }
         # TODO: should we compute `env` from `structured_env` directly here? Or
         # let each builder do that by itself?
         #
@@ -272,16 +272,17 @@ from the Nix world) or a derivation defined in Nickel.
         # choice anyway, because of merging not being idempotent on complex
         # values, and because the `NickelDerivation` contract is applied several
         # times, we have to move the computing logic to builders.
-        | default = {},
+        | default
+        = {},
       "%{type_field}" | force = "nickelDerivation",
-  },
+    },
 
   Params | doc "The parameters provided to the Nickel expression"
     = {
-    system | System,
-    inputs | {_ | Derivation},
-    nix | {..},
-  },
+      system | System,
+      inputs | { _ | Derivation },
+      nix | { .. },
+    },
 
   InputPath
     | doc m%"
@@ -306,23 +307,24 @@ from the Nix world) or a derivation defined in Nickel.
         ```
     "%
     = fun label value =>
-    if std.is_string value then
-      std.string.split "." value
-    else
-      value
-      |> std.contract.apply (Array String) label,
+      if std.is_string value then
+        std.string.split "." value
+      else
+        value
+        |> std.contract.apply (Array String) label,
 
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
-  = {
-    input
-      | String
-      | default = "nixpkgs",
-    path
-      | InputPath
-      | optional,
-    # TODO: precise contract. We want to allow a path if input == "sources"
-    ..
-  },
+    = {
+      input
+        | String
+        | default
+        = "nixpkgs",
+      path
+        | InputPath
+        | optional,
+      # TODO: precise contract. We want to allow a path if input == "sources"
+      ..
+    },
 
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
@@ -335,10 +337,10 @@ from the Nix world) or a derivation defined in Nickel.
 
   NickelExpression | doc "A Nickel expression"
     = {
-    inputs_spec | {_ | NickelInputSpec},
-    output | NickelExpressionResult,
-    ..
-  },
+      inputs_spec | { _ | NickelInputSpec },
+      output | NickelExpressionResult,
+      ..
+    },
 
   NixPath = {
     "%{type_field}" | force = "nixPath",

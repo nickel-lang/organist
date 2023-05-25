@@ -7,26 +7,32 @@ let Drv = Dyn in
 # SomeFunc = {args1, .., argsn, ret_value}
 # Drv == Foo
 {
-  BinShBuilder = DerivationInterface & {
-    build_script | String,
-    build_command = [
-      "/bin/sh",
-      ((import "nix_builtins.ncl").write_text "builder" build_script).path,
-    ],
-  },
+  BinShBuilder =
+    DerivationInterface
+    & {
+      build_script | String,
+      build_command = [
+        "/bin/sh",
+        ((import "nix_builtins.ncl").write_text "builder" build_script).path,
+      ],
+    },
 
-  GenericCargoBuilder = BinShBuilder & {
-    cargo | Derivation,
+  GenericCargoBuilder =
+    BinShBuilder
+    & {
+      cargo | Derivation,
 
-    build_script = "%{cargo}/bin/cargo build",
-  },
+      build_script = "%{cargo}/bin/cargo build",
+    },
 
-  Cargo5Builder = GenericCargoBuilder & {
-    build_inputs = { cargo5 },
-    cargo = build_inputs.cargo5,
-  },
+  Cargo5Builder =
+    GenericCargoBuilder
+    & {
+      build_inputs = { cargo5 },
+      cargo = build_inputs.cargo5,
+    },
 
-  Drv = {out, drv_path}, 
+  Drv = { out, drv_path },
 
   drv_builder = {
     name | String,
@@ -36,23 +42,27 @@ let Drv = Dyn in
     derivation | Drv = nix_builtins.derivation name version system build_command,
   },
 
-  PackageDef = BinShBuilder & {
-    inputs | default = {},
-    build_inputs | default = {},
-    install_phase | String | default = "",
-    build_phase | String | default = "",
-    build_script | String = m%"
+  PackageDef =
+    BinShBuilder
+    & {
+      inputs | default = {},
+      build_inputs | default = {},
+      install_phase | String | default = "",
+      build_phase | String | default = "",
+      build_script | String = m%"
       %{build_phase}
       %{install_phase}
     "%,
-    ..
-  },
+      ..
+    },
 
   DerivationInterface = {
     name | String,
     version | String,
-    system | {arch | String, os | String} 
-           | default = {arch = "x86_64", os = "linux"},
+    system
+      | { arch | String, os | String }
+      | default
+      = { arch = "x86_64", os = "linux" },
     build_command | Array String,
     ..
   },
@@ -61,14 +71,16 @@ let Drv = Dyn in
   Derivation = {
     name | String,
     version | String,
-    system | {..},
+    system | { .. },
     build_command | Array String,
-    derivation | {..},
+    derivation | { .. },
   },
 
-  Package = PackageDef & {
-   derivation | Drv,
-  },
+  Package =
+    PackageDef
+    & {
+      derivation | Drv,
+    },
 
   Unit = Dyn,
   Effect = fun contract => Dyn,
