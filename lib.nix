@@ -2,6 +2,9 @@ let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__nixel_type";
 
+  isInStore = path: let sd = builtins.storeDir; in
+    builtins.substring 0 (builtins.stringLength sd) path == sd;
+
   exportForNickel = value: let
     type = builtins.typeOf value;
   in
@@ -30,7 +33,7 @@ let
     then builtins.map exportForNickel value
     else if (type == "lambda")
     then throw "Can’t export a function"
-    else if (type == "path")
+    else if (type == "path" && isInStore value)
     then builtins.toString value
     else value;
 
