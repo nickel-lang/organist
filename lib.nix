@@ -2,6 +2,9 @@ let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__nixel_type";
 
+  isInStore = path: let sd = builtins.storeDir; in
+    builtins.substring 0 (builtins.stringLength sd) path == sd;
+
   exportForNickel = value: let
     type = builtins.typeOf value;
   in
@@ -9,19 +12,29 @@ let
     then
       (
         if (value.type or "" == "derivation")
-        then {
-          "${typeField}" = "nixDerivation";
-          drvPath = value.drvPath;
-          outputName =
-            value.outputName;
-          outputPath = value.outPath;
-        }
+        then
+          {
+            "${typeField}" = "nixDerivation";
+            inherit
+              (value)
+              drvPath
+              outputName
+              ;
+            outputPath = value.outPath;
+          }
+          // (
+            if value ? version
+            then {inherit (value) version;}
+            else {}
+          )
         else builtins.mapAttrs (_: exportForNickel) value
       )
     else if (type == "list")
     then builtins.map exportForNickel value
     else if (type == "lambda")
     then throw "Can’t export a function"
+    else if (type == "path" && isInStore value)
+    then builtins.toString value
     else value;
 
   # Take a symbolic derivation (a datastructure representing a derivation), as

@@ -283,4 +283,63 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
         },
       },
     },
+
+  HaskellStackShell =
+    BashShell
+    & {
+      ghcVersion, # User-defined. To keep in sync with the one used by stack
+      inputs_spec = {
+        stack.input | default = "nixpkgs",
+        ormolu.input | default = "nixpkgs",
+        nix.input | default = "nixpkgs",
+        git.input | default = "nixpkgs",
+        coreutils.input | default = "nixpkgs",
+        haskell-language-server = {
+          input = "nixpkgs",
+          path = "haskell.packages.ghc%{ghcVersion}.haskell-language-server",
+        },
+        # This will point to a copy of nixpkgs in nix store
+        path.input | default = "nixpkgs",
+      },
+      inputs,
+
+      output.structured_env =
+        let stack-wrapped =
+          {
+            name = "stack-wrapped",
+            version = inputs.stack.version,
+            build_command = {
+              cmd = nix-s%"%{inputs.bash}/bin/bash"%,
+              args = [
+                "-c",
+                # Sorry about Topiary formatting of the following lines
+                nix-s%"
+            export PATH="%{inputs.coreutils}/bin:$PATH"
+            mkdir -p $out/bin
+            echo "$0" > $out/bin/stack
+            chmod a+x $out/bin/*
+          "%,
+                nix-s%"
+            #!%{inputs.bash}/bin/bash
+            %{inputs.stack}/bin/stack \
+              --nix \
+              --no-nix-pure \
+              --nix-path="nixpkgs=%{inputs.path}" \
+              "$@"
+          "%,
+              ],
+            },
+          } | NickelPkg
+        in
+        {
+          PATH = {
+            stack = nix-s%"%{stack-wrapped}/bin"%,
+            stack' = nix-s%"%{inputs.stack}/bin"%,
+            ormolu = nix-s%"%{inputs.ormolu}/bin"%,
+            nix = nix-s%"%{inputs.nix}/bin"%,
+            git = nix-s%"%{inputs.git}/bin"%,
+            haskell-language-server = nix-s%"%{inputs.haskell-language-server}/bin"%,
+          },
+        },
+    },
 }
