@@ -45,18 +45,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        path: nickel-nix-repo
         fetch-depth: 0
 
     - name: Setup
-      uses: ./nickel-nix-repo/.github/actions/common-setup
+      uses: ./.github/actions/common-setup
       with:
         SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
 
     - name: Build
       run: |
-        cd nickel-nix-repo/examples/${{ matrix.example }}
-        nix flake lock --override-input nickel-nix path:../../
-        nix run .#regenerate-lockfile --accept-flake-config
-        nix build --impure --accept-flake-config
+        nix run .#tests.examples.${{ matrix.example }}

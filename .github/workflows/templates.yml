@@ -45,26 +45,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        path: nickel-nix-repo
         fetch-depth: 0
 
     - name: Setup
-      uses: ./nickel-nix-repo/.github/actions/common-setup
+      uses: ./.github/actions/common-setup
       with:
         SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
 
-    - name: Initialize devshell ${{ matrix.template }}
+    - name: Test devshell ${{ matrix.template }}
       run: |
-        nix flake new --template path:$PWD/nickel-nix-repo#${{ matrix.template }} example --accept-flake-config
-
-    - name: Enter devshell ${{ matrix.template }}
-      # For the CI, we test against the local version of `nickel-nix`, not the
-      # one in main (hence the --override-input). Note that each template is
-      # tested in a `./example` directory, so `nickel-nix` is the direct parent.
-      run: |
-          pushd ./example
-          nix flake lock --override-input nickel-nix path:$GITHUB_WORKSPACE/nickel-nix-repo --accept-flake-config
-          nix run .#regenerate-lockfile --accept-flake-config
-          nix develop --impure --accept-flake-config --print-build-logs
-          popd
+        nix run .#tests.templates.${{ matrix.template }}
