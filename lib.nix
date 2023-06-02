@@ -189,9 +189,9 @@
         input =
           if inputTakeFrom == "nickel-nix-internals"
           then flakeInputs.${inputTakeFrom}
-          else if inputTakeFrom == "nixpkgs"
-          then flakeInputs.${inputTakeFrom}.legacyPackages.${system}
-          else flakeInputs.${inputTakeFrom}.packages.${system};
+          else
+            flakeInputs.${inputTakeFrom}.legacyPackages.${system}
+            or flakeInputs.${inputTakeFrom}.packages.${system};
 
         pkgPath = declaredInputs.${inputId}.path or [inputId];
       in
