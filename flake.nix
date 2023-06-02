@@ -60,14 +60,14 @@
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
-        lib = import ./lib.nix;
-        pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        lib.importNcl = pkgs.callPackage lib.importNcl {
+        lib = pkgs.callPackage ./lib.nix {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel;
           inherit (self.lib.${system}) nickel-nix-internals;
         };
+        pkgs = nixpkgs.legacyPackages.${system};
+      in {
+        lib.importNcl = lib.importNcl;
 
         # Internal nickel-nix library. Each value is a function that accepts inputs from user flake.
         lib.nickel-nix-internals = {

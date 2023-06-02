@@ -1,8 +1,16 @@
-let
+{
+  runCommand,
+  nickel,
+  system,
+  lib,
+  nickel-nix-internals,
+}: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__nixel_type";
 
-  isInStore = path: let sd = builtins.storeDir; in
+  isInStore = path: let
+    sd = builtins.storeDir;
+  in
     builtins.substring 0 (builtins.stringLength sd) path == sd;
 
   exportForNickel = value: let
@@ -85,7 +93,7 @@ let
 
   # Generate a Nickel program that evaluates the nickel-nix output, passing
   # the given exported packages, and write it to outFile.
-  computeNickelFile = system: {
+  computeNickelFile = {
     baseDir,
     nickelFile,
     exportedPkgs,
@@ -120,10 +128,6 @@ let
 
   # Extract the inputs declared in the Nickel expression.
   extractInputs = {
-    runCommand,
-    nickel,
-    system,
-  }: {
     baseDir,
     nickelFile,
   }: let
@@ -146,10 +150,6 @@ let
   # Nix values, and export them to JSON to be directly usable by the nickel-nix
   # file
   exportInputs = {
-    system,
-    lib,
-    runCommand,
-  }: {
     declaredInputs,
     flakeInputs,
     baseDir,
@@ -219,25 +219,17 @@ let
   # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
   callNickel = {
-    runCommand,
-    nickel,
-    system,
-    lib,
-    ...
-  } @ args: {
     nickelFile,
     flakeInputs,
     baseDir,
   }: let
     declaredInputs =
       extractInputs
-      {inherit runCommand nickel system;}
       {inherit baseDir nickelFile;};
     exportedPkgs =
       exportInputs
-      {inherit system lib runCommand;}
       {inherit declaredInputs flakeInputs baseDir;};
-    fileToCall = computeNickelFile system {inherit baseDir nickelFile exportedPkgs;};
+    fileToCall = computeNickelFile {inherit baseDir nickelFile exportedPkgs;};
   in
     runCommand "nickel-res.json" {} ''
       ${nickel}/bin/nickel -f ${fileToCall} export > $out
@@ -247,19 +239,13 @@ let
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = {
-    runCommand,
-    nickel,
-    system,
-    lib,
-    nickel-nix-internals,
-  } @ args: baseDir: nickelFile: flakeInputs: let
+  importNcl = baseDir: nickelFile: flakeInputs: let
     flakeInputsWithInternals =
       flakeInputs
       // {
         nickel-nix-internals = builtins.mapAttrs (_: f: f flakeInputs) nickel-nix-internals;
       };
-    nickelResult = callNickel args {
+    nickelResult = callNickel {
       inherit nickelFile baseDir;
       flakeInputs = flakeInputsWithInternals;
     };
