@@ -149,6 +149,62 @@
           pkgs.lib.listToAttrs
         ];
 
+        apps.tests = let
+          mkTest = {
+            name,
+            script,
+          }: let
+            test = pkgs.writeShellApplication {
+              inherit name;
+              text = ''
+                set -xeuo pipefail
+                WORKDIR=$(mktemp -d)
+                function clean() {
+                  rm -rf "''${WORKDIR}"
+                }
+                trap clean EXIT
+                cd "''${WORKDIR}"
+
+                ${script}
+              '';
+            };
+          in {
+            type = "app";
+            program = "${pkgs.lib.getExe test}";
+          };
+        in {
+          templates = pkgs.lib.flip pkgs.lib.mapAttrs self.templates (
+            name: _:
+              mkTest {
+                name = "test devshell ${name}";
+                script = ''
+                  nix flake new --template path:${./.}#${name} example --accept-flake-config
+
+                  pushd ./example
+                  # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
+                  nix flake lock --override-input nickel-nix path:${./.} --accept-flake-config
+                  nix run .#regenerate-lockfile --accept-flake-config
+                  nix develop --impure --accept-flake-config --print-build-logs < /dev/null
+                  popd
+                '';
+              }
+          );
+          examples = pkgs.lib.flip pkgs.lib.mapAttrs (builtins.readDir ./examples) (
+            name: _:
+              mkTest {
+                name = "test ${name}";
+                script = ''
+                  cp -r ${./.}/examples/${name} ./${name}
+                  chmod -R u+w ./${name}
+                  cd ./${name}
+                  nix flake lock --override-input nickel-nix path:${./.}
+                  nix run .#regenerate-lockfile --accept-flake-config
+                  nix build --impure --accept-flake-config
+                '';
+              }
+          );
+        };
+
         devShells.default = pkgs.mkShell {
           packages = [
             inputs.nickel.packages."${system}".nickel
