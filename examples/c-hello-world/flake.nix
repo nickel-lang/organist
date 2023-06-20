@@ -6,14 +6,8 @@
   inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 
   nixConfig = {
-    extra-substituters = [
-      "https://tweag-nickel.cachix.org"
-      "https://tweag-topiary.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="
-      "tweag-topiary.cachix.org-1:8TKqya43LAfj4qNHnljLpuBnxAY/YwEBfzo3kzXxNY0="
-    ];
+    extra-substituters = ["https://nickel-nix.cachix.org"];
+    extra-trusted-public-keys = ["nickel-nix.cachix.org-1:/Ziozgt3g0CfGwGS795wyjRa9ArE89s3tbz31S6xxFM="];
   };
 
   outputs = {
