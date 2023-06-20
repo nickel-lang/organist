@@ -26,37 +26,33 @@
     topiary,
   } @ inputs:
     {
-      templates =
+      templates = let
+        inherit (nixpkgs) lib;
+        brokenShells = ["javascript" "php" "python310"];
+        filteredShells = (
+          lib.filterAttrs
+          (name: value: !(builtins.elem name brokenShells))
+          (builtins.readDir ./templates/devshells)
+        );
+      in
+        lib.mapAttrs'
         (
-          let
-            inherit (nixpkgs) lib;
-            brokenShells = ["javascript" "php" "python310"];
-            filteredShells = (
-              lib.filterAttrs
-              (name: value: !(builtins.elem name brokenShells))
-              (builtins.readDir ./templates/devshells)
-            );
-          in
-            lib.mapAttrs'
-            (
-              name: value:
-                lib.nameValuePair
-                (name + "-devshell")
-                {
-                  path = ./templates/devshells/${name};
-                  description = "A ${name} devshell using nickel.";
-                  welcomeText = ''
-                    You have created a ${name} devshell that is built using nickel!
+          name: value:
+            lib.nameValuePair
+            (name + "-devshell")
+            {
+              path = ./templates/devshells/${name};
+              description = "A ${name} devshell using nickel.";
+              welcomeText = ''
+                You have created a ${name} devshell that is built using nickel!
 
-                    First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
+                First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-                    Then run `nix develop --impure` to enter the dev shell.
-                  '';
-                }
-            )
-            filteredShells
+                Then run `nix develop --impure` to enter the dev shell.
+              '';
+            }
         )
-        // {};
+        filteredShells;
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
