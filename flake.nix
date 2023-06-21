@@ -26,37 +26,70 @@
     topiary,
   } @ inputs:
     {
-      templates =
+      templates = let
+        inherit (nixpkgs) lib;
+        brokenShells = ["javascript" "php" "python310"];
+        filteredShells = (
+          lib.filterAttrs
+          (name: value: !(builtins.elem name brokenShells))
+          (builtins.readDir ./templates/devshells)
+        );
+      in
+        lib.mapAttrs'
         (
-          let
-            inherit (nixpkgs) lib;
-            brokenShells = ["javascript" "php" "python310"];
-            filteredShells = (
-              lib.filterAttrs
-              (name: value: !(builtins.elem name brokenShells))
-              (builtins.readDir ./templates/devshells)
-            );
-          in
-            lib.mapAttrs'
-            (
-              name: value:
-                lib.nameValuePair
-                (name + "-devshell")
-                {
-                  path = ./templates/devshells/${name};
-                  description = "A ${name} devshell using nickel.";
-                  welcomeText = ''
-                    You have created a ${name} devshell that is built using nickel!
+          name: value:
+            lib.nameValuePair
+            (name + "-devshell")
+            {
+              path = ./templates/devshells/${name};
+              description = "A ${name} devshell using nickel.";
+              welcomeText = ''
+                You have created a ${name} devshell that is built using nickel!
 
-                    First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
+                First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-                    Then run `nix develop --impure` to enter the dev shell.
-                  '';
-                }
-            )
-            filteredShells
+                Then run `nix develop --impure` to enter the dev shell.
+              '';
+            }
         )
-        // {};
+        filteredShells;
+
+      # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
+      #
+      # apps.${system}.regenerate-lockfile generated from optional lockFileContents argument,
+      #   defaulting to `nickel-nix` pointing to this flake
+      # devShells.${system}.default generated from dev-shell.ncl
+      # packages.${system}.default generated from package.ncl
+      #
+      # (to be extended with more features later)
+      flake.outputsFromNickel = path: inputs: {
+        systems ? flake-utils.lib.defaultSystems,
+        lockFileContents ? {
+          nickel-nix = self.lib.x86_64-linux.lockFileContents;
+        },
+      }:
+        flake-utils.lib.eachSystem systems (system: let
+          lib = self.lib.${system};
+        in
+          {
+            apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
+          }
+          // nixpkgs.lib.pipe path [
+            builtins.readDir
+            (nixpkgs.lib.mapAttrsToList (name: value:
+              {
+                "dev-shell.ncl" = nixpkgs.lib.nameValuePair "devShells" {
+                  default = lib.importNcl path name inputs;
+                };
+                "package.ncl" = nixpkgs.lib.nameValuePair "packages" {
+                  default = lib.importNcl path name inputs;
+                };
+              }
+              .${name}
+              or []))
+            nixpkgs.lib.flatten
+            nixpkgs.lib.listToAttrs
+          ]);
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
