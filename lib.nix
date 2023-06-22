@@ -10,6 +10,25 @@
 
   isInStore = lib.hasPrefix builtins.storeDir;
 
+  # We use this structure to keep track of all derivations that are visited in exportForNickel:
+  #   {
+  #     value :: Any;  # the value that can be serialised to JSON to pass to Nickel
+  #     context :: {   # accumulates all derivations that are met during conversion
+  #       ... :: {     # key is drvPath of the derivation (any unique identifier would suffice)
+  #         ... ::     # subkey is outputName of the derivation to keep different outputs separate
+  #           Derivation;  # derivation as a opaque Nix object
+  #       };
+  #     };
+  #   }
+  # After we collect this data, we pass `value` to Nickel via JSON and keep `context`.
+  # When we convert Nickel values back to Nix, we substitute all attrsets with
+  # $__nixel_type == "nixDerivation" with values from the context, preserving
+  # original derivations without having to resort to impure methods like importing drvPath directly.
+  #
+  # NOTE: This `context` is neither Nix string context nor Nickel string context
+  # it has nothing to do with strings and everything to do with keeping references
+  # to the derivation objects on Nix side
+
   valueWithContext = {
     create = value: context: {inherit value context;};
     emptyContext = value: valueWithContext.create value {};
