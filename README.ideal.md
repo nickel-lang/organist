@@ -122,6 +122,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
             # Source the build env, and run `build` (the
             # script defined above)
             CI.steps.runInEnv "build",
+            CI.steps.runInEnv "make check" // { name = "test"; }
           ],
         },
       },
