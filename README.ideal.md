@@ -72,7 +72,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
   nix_inputs.spec = {
     pandoc = {},
     make = {},
-    prettier = {},
+    prettier = { attribute_path = "nodePackages.prettier"; },
     redis = {},
   },
   shells = Nixel.shells.Rust,
