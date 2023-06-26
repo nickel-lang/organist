@@ -5,7 +5,6 @@ Ni-Mh (called “nickel-nix” or “Nixel” at the moment, but I really like N
 
 1. A unified configuration framework for all of these
 2. A powerful and ergonomic language to allow you to easily abstract over these configurations, with discoverability and early error reporting
-3. A way to get these tools to communicate with each others, so that your custom scripts can easily leverage your package manager to get the dependencies they need, your CI setup can understand your build system and parallelise efficiently, and so on.
 
 ## Getting started
 
