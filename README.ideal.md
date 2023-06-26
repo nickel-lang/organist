@@ -104,15 +104,12 @@ let Nixel = import ".nickel-nix/lock.ncl" in
         "%,
   },
   ci =
-    let CI = Nixel.CI.Gha in
-    {
-      type = "gha",
-      jobs.build = {
-        systems = [
-          { os : "ubuntu-latest" },
-          { os : "macos-latest" }
-        ],
-        matrix = {
+    let CI = Nixel.CI.GithubActions in
+    CI.make {
+      jobs.build = CI.matrix {
+        system = [ { os : "ubuntu-latest" }, { os : "macos-latest" } ],
+        configVariant = [ "FOO=1", "FOO=2" ],
+        config = [{
           system | { os : Str },
           steps = [
             CI.steps.checkout,
@@ -121,10 +118,10 @@ let Nixel = import ".nickel-nix/lock.ncl" in
             CI.steps.check_generated_file,
             # Source the build env, and run `build` (the
             # script defined above)
-            CI.steps.runInEnv "build",
+            CI.steps.runInEnv "%{configVariant} build",
             CI.steps.runInEnv "make check" // { name = "test"; }
           ],
-        },
+        }}.config,
       },
     },
 }
