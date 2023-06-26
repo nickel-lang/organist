@@ -76,6 +76,9 @@ let Nixel = import ".nickel-nix/lock.ncl" in
     prettier = {},
     redis = {},
   },
+  shells = Nixel.shells.Rust,
+  shells = Nixel.shells.Nickel,
+  
   shells.build =
     {
       packages = [nix_inputs.pandoc],
@@ -86,12 +89,10 @@ let Nixel = import ".nickel-nix/lock.ncl" in
                 %{nix_inputs.make}/bin/make -j$(nproc) -l$(nproc)
             "%,
       },
-    }
-    & Nixel.shells.Rust
-    & Nixel.shells.Nickel,
+    },
+    
   shells.dev =
-    shells.build
-    & {
+    {
       env = {
         DEV_ENDPOINT = "http://localhost:1234",
       },
