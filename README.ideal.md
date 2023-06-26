@@ -25,7 +25,7 @@ $ nix flake init -t github:nickel-lang/nickel-nix
 # Edit the project file to fit your needs
 $ $EDITOR project.ncl
 # Enter the environment
-$ . .nickel-nix/activate
+$ nix develop
 ```
 
 ## Managing your environment with Nixel
