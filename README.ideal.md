@@ -102,6 +102,8 @@ let Nixel = import ".nickel-nix/lock.ncl" in
     redis.start = nix-s%"
             %{nix_inputs.redis}/bin/redis
         "%,
+    # Optional, will do the right things by default
+    # redis.stop = "kill $PID",
   },
   ci =
     let CI = Nixel.CI.GithubActions in
