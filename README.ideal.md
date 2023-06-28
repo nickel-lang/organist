@@ -73,25 +73,23 @@ let from_nixpkgs = Nixel.nix.from_nixpkgs in
   shells = Nixel.shells.Rust,
   shells = Nixel.shells.Nickel,
 
-  shells.build =
-    {
-      packages = [from_nixpkgs "pandoc"],
-      scripts = {
-        build = nix-s%"
+  shells.build = {
+    packages = [from_nixpkgs "pandoc"],
+    scripts = {
+      build = nix-s%"
                 #!/usr/bin/env bash
 
                 %{from_nixpkgs "gnumake"}/bin/make -j$(nproc) -l$(nproc)
             "%,
-      },
     },
+  },
 
-  shells.dev =
-    {
-      env = {
-        DEV_ENDPOINT = "http://localhost:1234",
-      },
-      packages = [from_nixpkgs "nodePackages.prettier"],
+  shells.dev = {
+    env = {
+      DEV_ENDPOINT = "http://localhost:1234",
     },
+    packages = [from_nixpkgs "nodePackages.prettier"],
+  },
   services = {
     postgresql = Nixel.services.postgresql,
     redis.start = nix-s%"
@@ -102,25 +100,34 @@ let from_nixpkgs = Nixel.nix.from_nixpkgs in
   },
   ci =
     let CI = Nixel.CI.GithubActions in
-    CI.make {
-      jobs.build = CI.matrix {
-        system = [ { os : "ubuntu-latest" }, { os : "macos-latest" } ],
-        configVariant = [ "FOO=1", "FOO=2" ],
-        config = [{
-          system | { os : Str },
-          steps =
-            # The steps that you'll want in nearly any case: Checkout the repo,
-            # check that the Nixel configuration is up-to-date, etc..
-            CI.standardSteps ++ [
-            (CI.steps.runInEnv m%"
+    CI.make
+      {
+        jobs.build =
+          CI.matrix
+            {
+              system = [{ os : "ubuntu-latest" }, { os : "macos-latest" }],
+              configVariant = ["FOO=1", "FOO=2"],
+              config = [
+                {
+                  system | { os : String },
+                  steps =
+                    # The steps that you'll want in nearly any case: Checkout the repo,
+                    # check that the Nixel configuration is up-to-date, etc..
+                    CI.standardSteps
+                    + [
+                      (
+                        CI.steps.runInEnv
+                          m%"
                 %{configVariant} build
                 make check
-                "%)
-                & { name = "test"; }
-          ],
-        }.config,
+                "%
+                      )
+                      & { name = "test" }
+                    ],
+                }
+              ],
+            }.config,
       },
-    },
 }
 ```
 
