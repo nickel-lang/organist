@@ -77,7 +77,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
   },
   shells = Nixel.shells.Rust,
   shells = Nixel.shells.Nickel,
-  
+
   shells.build =
     {
       packages = [nix_inputs.pandoc],
