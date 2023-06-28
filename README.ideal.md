@@ -89,7 +89,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
             "%,
       },
     },
-    
+
   shells.dev =
     {
       env = {
