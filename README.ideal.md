@@ -108,15 +108,15 @@ let from_nixpkgs = Nixel.nix.from_nixpkgs in
         configVariant = [ "FOO=1", "FOO=2" ],
         config = [{
           system | { os : Str },
-          steps = [
-            CI.steps.checkout,
-            # Make sure that the generated files (like
-            # the gha workflow files) are up-to-date
-            CI.steps.check_generated_file,
-            # Source the build env, and run `build` (the
-            # script defined above)
-            CI.steps.runInEnv "%{configVariant} build",
-            CI.steps.runInEnv "make check" & { name = "test"; }
+          steps =
+            # The steps that you'll want in nearly any case: Checkout the repo,
+            # check that the Nixel configuration is up-to-date, etc..
+            CI.standardSteps ++ [
+            (CI.steps.runInEnv m%"
+                %{configVariant} build
+                make check
+                "%)
+                & { name = "test"; }
           ],
         }.config,
       },
