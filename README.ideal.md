@@ -123,7 +123,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
             CI.steps.runInEnv "%{configVariant} build",
             CI.steps.runInEnv "make check" & { name = "test"; }
           ],
-        }}.config,
+        }.config,
       },
     },
 }
