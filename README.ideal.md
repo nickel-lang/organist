@@ -68,24 +68,19 @@ It describes the packages that should be included in your development environmen
 
 ```nickel
 let Nixel = import ".nickel-nix/lock.ncl" in
+let from_nixpkgs = Nixel.nix.from_nixpkgs in
 {
-  nix_inputs.spec = {
-    pandoc = {},
-    make = {},
-    prettier = { attribute_path = "nodePackages.prettier"; },
-    redis = {},
-  },
   shells = Nixel.shells.Rust,
   shells = Nixel.shells.Nickel,
 
   shells.build =
     {
-      packages = [nix_inputs.pandoc],
+      packages = [from_nixpkgs "pandoc"],
       scripts = {
         build = nix-s%"
                 #!/usr/bin/env bash
 
-                %{nix_inputs.make}/bin/make -j$(nproc) -l$(nproc)
+                %{from_nixpkgs "gnumake"}/bin/make -j$(nproc) -l$(nproc)
             "%,
       },
     },
@@ -95,12 +90,12 @@ let Nixel = import ".nickel-nix/lock.ncl" in
       env = {
         DEV_ENDPOINT = "http://localhost:1234",
       },
-      packages = [nix_inputs.prettier],
+      packages = [from_nixpkgs "nodePackages.prettier"],
     },
   services = {
     postgresql = Nixel.services.postgresql,
     redis.start = nix-s%"
-            %{nix_inputs.redis}/bin/redis
+            %{from_nixpkgs "redis"}/bin/redis
         "%,
     # Optional, will do the right things by default
     # redis.stop = "kill $PID",
