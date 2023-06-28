@@ -124,3 +124,15 @@ let from_nixpkgs = Nixel.nix.from_nixpkgs in
 }
 ```
 
+## Local overrides
+
+If a file `project.local.ncl` is present, then it will be merged with `project.ncl`. This allows locally overriding some parts of the development environment.
+
+For instance, a `project.local.ncl` like the below will add [hyperfine] to the development shell:
+
+```nickel
+let Nixel = import ".nickel-nix/lock.ncl" in
+{
+  shells.dev.packages = [ Nixel.nix.from_nixpkgs "hyperfine" ],
+}
+```
