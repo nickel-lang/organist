@@ -97,7 +97,7 @@
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = system: value:
-    (builtins.removeAttrs value ["build_command" "env" "structured_env"])
+    (builtins.removeAttrs value ["build_command" "env" "structured_env" "packages"])
     // {
       system =
         if value ? system
