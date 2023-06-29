@@ -36,7 +36,7 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
 
   BashShell = {
     inputs_spec = {
-      bash.input | default = "nixpkgs",
+      bash = {},
       # Setting the following as a default value conflicts with InputsSpec's
       # contract default value (`"nixpkgs"`). Maybe InputsSpec shouldn't set a
       # default value at all?
@@ -86,10 +86,10 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        cargo.input | default = "nixpkgs",
-        rustc.input | default = "nixpkgs",
-        rustfmt.input | default = "nixpkgs",
-        rust-analyzer.input | default = "nixpkgs",
+        cargo = {},
+        rustc = {},
+        rustfmt = {},
+        rust-analyzer = {},
       },
       inputs,
 
@@ -107,8 +107,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        go.input | default = "nixpkgs",
-        gopls.input | default = "nixpkgs",
+        go = {},
+        gopls = {},
       },
       inputs,
 
@@ -124,8 +124,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        clojure.input | default = "nixpkgs",
-        clojure-lsp.input | default = "nixpkgs",
+        clojure = {},
+        clojure-lsp = {},
       },
       inputs,
 
@@ -141,8 +141,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        clang.input | default = "nixpkgs",
-        clang-tools.input | default = "nixpkgs",
+        clang = {},
+        clang-tools = {},
       },
       inputs,
 
@@ -159,10 +159,9 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        php.input | default = "nixpkgs",
+        php = {},
         intelephense = {
           path = "nodePackages"."intelephense",
-          input | default = "nixpkgs",
         },
       },
       inputs,
@@ -179,8 +178,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        zig.input | default = "nixpkgs",
-        zls.input | default = "nixpkgs",
+        zig = {},
+        zls = {},
       },
       inputs,
 
@@ -197,10 +196,9 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        nodejs.input | default = "nixpkgs",
+        nodejs = {},
         typescript-language-server = {
           path = "nodePackages_latest.typescript-language-server",
-          input | default = "nixpkgs",
         }
       },
       inputs,
@@ -217,7 +215,7 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        racket.input | default = "nixpkgs",
+        racket = {},
       },
       inputs,
 
@@ -232,8 +230,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        scala.input | default = "nixpkgs",
-        metals.input | default = "nixpkgs",
+        scala = {},
+        metals = {},
       },
       inputs,
 
@@ -251,10 +249,9 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        python310.input | default = "nixpkgs",
+        python310 = {},
         python-lsp-server = {
           path = "python310Packages.python-lsp-server",
-          input | default = "nixpkgs",
         }
       },
       inputs,
@@ -271,8 +268,8 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     BashShell
     & {
       inputs_spec = {
-        erlang.input | default = "nixpkgs",
-        erlang-ls.input | default = "nixpkgs",
+        erlang = {},
+        erlang-ls = {},
       },
       inputs,
 
@@ -289,17 +286,16 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
     & {
       ghcVersion, # User-defined. To keep in sync with the one used by stack
       inputs_spec = {
-        stack.input | default = "nixpkgs",
-        ormolu.input | default = "nixpkgs",
-        nix.input | default = "nixpkgs",
-        git.input | default = "nixpkgs",
-        coreutils.input | default = "nixpkgs",
+        stack = {},
+        ormolu = {},
+        nix = {},
+        git = {},
+        coreutils = {},
         haskell-language-server = {
-          input = "nixpkgs",
           path = "haskell.packages.ghc%{ghcVersion}.haskell-language-server",
         },
         # This will point to a copy of nixpkgs in nix store
-        path.input | default = "nixpkgs",
+        path = {},
       },
       inputs,
 
