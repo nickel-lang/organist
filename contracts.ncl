@@ -275,7 +275,6 @@ from the Nix world) or a derivation defined in Nickel.
         | default
         = {},
       "%{type_field}" | force = "nickelDerivation",
-      ..
     },
 
   Params | doc "The parameters provided to the Nickel expression"

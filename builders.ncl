@@ -1,4 +1,4 @@
-let { NickelDerivation, .. } = import "contracts.ncl" in
+let { NickelDerivation, Derivation, .. } = import "contracts.ncl" in
 
 {
   NickelPkg
@@ -88,7 +88,7 @@ let { NickelDerivation, .. } = import "contracts.ncl" in
                 |> std.array.drop_first
                 |> std.array.fold_left (fun acc value => nix-s%"%{acc}:%{value}"%) first
             ),
-      } | NickelPkg,
+      } | (NickelPkg & { packages | { _ : Derivation } }),
   },
 
   RustShell =
