@@ -1,6 +1,6 @@
 _Ni-Mh — batteries included environments with Nickel inside_.
 
-Managing a project's development environment involves configuring a lot of tools and occasionnally getting to communicate with each other: One (or several) package manager, a CI system, a service manager (to run that local postgresql database without which you can't test anything), custom utility scripts that end up spawning everywhere, etc.
+Managing a project's development environment involves configuring a lot of tools and occasionally getting to communicate with each other: one (or several) package managers, a CI system, a service manager (to run that local postgresql database without which you can't test anything), custom utility scripts that end up spawning everywhere, etc.
 Ni-Mh (called “nickel-nix” or “Nixel” at the moment, but I really like Ni-Mh) aims at being your main entrypoint for managaing all these different tools, so that you can get:
 
 1. A unified configuration framework for all of these
