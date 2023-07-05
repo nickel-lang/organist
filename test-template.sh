@@ -15,7 +15,7 @@ test_one () {
   nix flake new --template "path:$PROJECT_ROOT" example --accept-flake-config
 
   pushd ./example
-  sed -i "s/Nickel/$target/" dev-shell.ncl
+  sed -i "s/BashShell/$target/" dev-shell.ncl
   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
   nix flake lock --override-input nickel-nix path:$PROJECT_ROOT --accept-flake-config
   nix run .#regenerate-lockfile --accept-flake-config
