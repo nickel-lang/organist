@@ -133,7 +133,7 @@ let Nixel = import ".nickel-nix/lock.ncl" in
 
 If a file `project.local.ncl` is present, then it will be merged with `project.ncl`. This allows locally overriding some parts of the development environment.
 
-For instance, a `project.local.ncl` like the below will add [hyperfine] to the development shell:
+For instance, a `project.local.ncl` like the below will add [hyperfine](https://github.com/sharkdp/hyperfine) to the development shell:
 
 ```nickel
 let Nixel = import ".nickel-nix/lock.ncl" in
