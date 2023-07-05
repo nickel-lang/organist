@@ -28,7 +28,7 @@ test_one () {
 if [[ -n ${1+x} ]]; then
   test_one "$1"
 else
-  all_targets=$(nickel export <<<'std.record.fields (import "builders.ncl") |> std.string.join " "')
+  all_targets=$(nickel export --format raw <<<'std.record.fields (import "builders.ncl") |> std.string.join " "')
   for target in $all_targets; do
     test_one $target
   done
