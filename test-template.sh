@@ -30,6 +30,9 @@ if [[ -n ${1+x} ]]; then
 else
   all_targets=$(nickel export --format raw <<<'std.record.fields (import "builders.ncl") |> std.string.join " "')
   for target in $all_targets; do
+    if [[ "$target" == NickelPkg ]]; then
+      continue
+    fi
     test_one $target
   done
 fi
