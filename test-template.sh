@@ -36,6 +36,3 @@ else
     test_one $target
   done
 fi
-
-
-target=${1:-Nickel}
