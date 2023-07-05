@@ -99,9 +99,8 @@ let Nixel = import ".nickel-nix/lock.ncl" in
     # Optional, will do the right things by default
     # redis.stop = "kill $PID",
   },
-  ci =
+  ci.github_actions =
     let CI = Nixel.CI.GithubActions in
-    CI.make
       {
         jobs.build =
           CI.matrix
