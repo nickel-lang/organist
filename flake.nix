@@ -142,6 +142,21 @@
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
 
+        apps.test.templates =
+          let testScript = pkgs.writeShellApplication {
+            name = "test-templates";
+            runtimeInputs = [ inputs.nickel.packages."${system}".nickel ];
+            text = ''
+              set -euo pipefail
+              cd ${./.}
+              exec ${pkgs.runtimeShell} ./test-template.sh "$@"
+            '';
+          }; in
+        {
+          type = "app";
+          program = pkgs.lib.getExe testScript;
+        };
+
         devShells.default = pkgs.mkShell {
           packages = [
             inputs.nickel.packages."${system}".default
