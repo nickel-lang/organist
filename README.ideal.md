@@ -42,8 +42,6 @@ These can then be instantiated using [Nix](https://nixos.org/nix).
 You can use Nixel to generate a CI configuration.
 This is extremely handy if you want to test some non-trivial matrix of platforms/configuration.
 
-Only Github actions is supported at the moment, but we plan to add more options soon.
-
 > TODO: Document
 
 ### Development services
