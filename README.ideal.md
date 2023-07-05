@@ -68,18 +68,19 @@ It describes the packages that should be included in your development environmen
 
 ```nickel
 let Nixel = import ".nickel-nix/lock.ncl" in
-let from_nixpkgs = Nixel.nix.from_nixpkgs in
 {
+  inputs, # Provideed by Nixel from the declared Nix inputs
+
   shells = Nixel.shells.Rust,
   shells = Nixel.shells.Nickel,
 
   shells.build = {
-    packages = [from_nixpkgs "pandoc"],
+    packages = [inputs.nixpkgs.pandoc],
     scripts = {
       build = nix-s%"
                 #!/usr/bin/env bash
 
-                %{from_nixpkgs "gnumake"}/bin/make -j$(nproc) -l$(nproc)
+                %{inputs.nixpkgs.gnumake}/bin/make -j$(nproc) -l$(nproc)
             "%,
     },
   },
@@ -88,12 +89,12 @@ let from_nixpkgs = Nixel.nix.from_nixpkgs in
     env = {
       DEV_ENDPOINT = "http://localhost:1234",
     },
-    packages = [from_nixpkgs "nodePackages.prettier"],
+    packages = [inputs.nixpkgs.nodePackages.prettier],
   },
   services = {
     postgresql = Nixel.services.postgresql,
     redis.start = nix-s%"
-            %{from_nixpkgs "redis"}/bin/redis
+            %{inputs.nixpkgs.redis}/bin/redis
         "%,
     # Optional, will do the right things by default
     # redis.stop = "kill $PID",
@@ -140,6 +141,6 @@ For instance, a `project.local.ncl` like the below will add [hyperfine] to the d
 ```nickel
 let Nixel = import ".nickel-nix/lock.ncl" in
 {
-  shells.dev.packages = [ Nixel.nix.from_nixpkgs "hyperfine" ],
+  shells.dev.packages = [ Nixel.nix.inputs.nixpkgs.hyperfine ],
 }
 ```
