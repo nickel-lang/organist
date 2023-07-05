@@ -1,6 +1,4 @@
 {
-  description = "A basic flake with a shell";
-
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
 

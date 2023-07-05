@@ -8,39 +8,9 @@ on:
 
 jobs:
 
-  get-template-names:
-    name: Setup nix and nickel-nix
-    runs-on: ubuntu-latest
-
-    outputs:
-      templates: ${{ steps.templates.outputs.templates }}
-
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Setup
-      uses: ./.github/actions/common-setup
-      with:
-        SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
-
-    - name: List all templates
-      id: templates
-      run: |
-        templates=$(nix eval .#templates --apply builtins.attrNames --json)
-        echo "templates=$templates" >> $GITHUB_OUTPUT
-
   enter-devshells:
-    name: Test devshell ${{ matrix.template }}
-    needs: get-template-names
+    name: Test devshells
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        template: ${{ fromJSON(needs.get-template-names.outputs.templates) }}
 
     steps:
     - uses: actions/checkout@v3
@@ -53,6 +23,6 @@ jobs:
         SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
 
-    - name: Test devshell ${{ matrix.template }}
+    - name: Test devshells
       run: |
-        nix run .#tests.templates.${{ matrix.template }}
+        nix develop --accept-flake-config --command bash test-template.sh

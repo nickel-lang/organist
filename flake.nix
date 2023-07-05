@@ -26,33 +26,17 @@
     topiary,
   } @ inputs:
     {
-      templates = let
-        inherit (nixpkgs) lib;
-        brokenShells = ["javascript" "php" "python310"];
-        filteredShells = (
-          lib.filterAttrs
-          (name: value: !(builtins.elem name brokenShells))
-          (builtins.readDir ./templates/devshells)
-        );
-      in
-        lib.mapAttrs'
-        (
-          name: value:
-            lib.nameValuePair
-            (name + "-devshell")
-            {
-              path = ./templates/devshells/${name};
-              description = "A ${name} devshell using nickel.";
-              welcomeText = ''
-                You have created a ${name} devshell that is built using nickel!
+      templates.default = {
+        path = ./templates/default;
+          description = "A devshell using nickel.";
+          welcomeText = ''
+            You have created a devshell that is built using nickel!
 
-                First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
+            First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-                Then run `nix develop` to enter the dev shell.
-              '';
-            }
-        )
-        filteredShells;
+            Then run `nix develop` to enter the dev shell.
+          '';
+      };
 
       # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
       #
@@ -156,62 +140,6 @@
         lib.regenerateLockFileApp = contents: {
           type = "app";
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
-        };
-
-        apps.tests = let
-          mkTest = {
-            name,
-            script,
-          }: let
-            test = pkgs.writeShellApplication {
-              inherit name;
-              text = ''
-                set -xeuo pipefail
-                WORKDIR=$(mktemp -d)
-                function clean() {
-                  rm -rf "''${WORKDIR}"
-                }
-                trap clean EXIT
-                cd "''${WORKDIR}"
-
-                ${script}
-              '';
-            };
-          in {
-            type = "app";
-            program = "${pkgs.lib.getExe test}";
-          };
-        in {
-          templates = pkgs.lib.flip pkgs.lib.mapAttrs self.templates (
-            name: _:
-              mkTest {
-                name = "test devshell ${name}";
-                script = ''
-                  nix flake new --template path:${self.outPath}#${name} example --accept-flake-config
-
-                  pushd ./example
-                  # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
-                  nix flake lock --override-input nickel-nix path:${self.outPath} --accept-flake-config
-                  nix run .#regenerate-lockfile --accept-flake-config
-                  nix develop --accept-flake-config --print-build-logs < /dev/null
-                  popd
-                '';
-              }
-          );
-          examples = pkgs.lib.flip pkgs.lib.mapAttrs (builtins.readDir ./examples) (
-            name: _:
-              mkTest {
-                name = "test ${name}";
-                script = ''
-                  cp -r ${self.outPath}/examples/${name} ./${name}
-                  chmod -R u+w ./${name}
-                  cd ./${name}
-                  nix flake lock --override-input nickel-nix path:${self.outPath}
-                  nix run .#regenerate-lockfile --accept-flake-config
-                  nix build --accept-flake-config
-                '';
-              }
-          );
         };
 
         devShells.default = pkgs.mkShell {
