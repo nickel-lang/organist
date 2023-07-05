@@ -57,7 +57,7 @@ Once the services have been defined in your `project.ncl` file, you can run `nix
 
 ### Deployment
 
-If you want to push things yet a bit further, Nixel can also interoperate with [tf-ncl](https://github.com/tweag/tf-ncl) to allow you to manage the deployment infrastructure for your project.
+If you want to push things yet a bit further, Nixel can also be used to manage the deployment of your project, using for instance [tf-ncl](https://github.com/tweag/tf-ncl) or [nickel-kubernetes](https://github.com/tweag/nickel-kubernetes/).
 
 > TODO: Document
 
