@@ -35,7 +35,7 @@ $ nix develop
 Nixel can be used to declare the dependencies for your project.
 These can then be instantiated using [Nix](https://nixos.org/nix).
 
-> TODO: Document
+More information on <./doc-ideal/dependency-management.md>.
 
 ### CI configuration
 
@@ -66,9 +66,8 @@ It describes the packages that should be included in your development environmen
 
 ```nickel
 let Nixel = import ".nickel-nix/lock.ncl" in
+let inputs = Nixel.nix.import_flake "." in
 {
-  inputs, # Provideed by Nixel from the declared Nix inputs
-
   shells = Nixel.shells.Rust,
   shells = Nixel.shells.Nickel,
 
