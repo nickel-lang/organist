@@ -104,7 +104,8 @@
 
         # Internal nickel-nix library. Each value is a function that accepts inputs from user flake.
         lib.nickel-nix-internals = {
-          naked_std_env = self.lib.${system}.importNcl ./. "naked-stdenv.ncl";
+          # Use importNclInternal to avoid infinite recursion over inputs
+          naked_std_env = lib.importNclInternal ./. "naked-stdenv.ncl";
         };
 
         # Helper function that generates ugly contents for "nickel.lock.ncl", see buildLockFile.

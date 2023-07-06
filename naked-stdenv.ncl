@@ -1,8 +1,5 @@
 {
-  inputs_spec = {
-    bash = { input = "nixpkgs" },
-    coreutils = { input = "nixpkgs" },
-  },
+  inputs_spec = {},
 
   # parameters
   inputs,
@@ -13,14 +10,14 @@
       name = "naked-stdenv",
       version = "0.1",
       build_command = {
-        cmd = nix-s%"%{inputs.bash}/bin/bash"%,
+        cmd = nix-s%"%{inputs.nixpkgs.bash}/bin/bash"%,
         args = [
           "-c",
           nix-s%"
-        %{inputs.coreutils}/bin/mkdir -p $out
+        %{inputs.nixpkgs.coreutils}/bin/mkdir -p $out
         target=$out/setup
-        %{inputs.coreutils}/bin/touch $target
-        %{inputs.coreutils}/bin/cp %{nix.lib.import_file "naked-stdenv.sh"} $target
+        %{inputs.nixpkgs.coreutils}/bin/touch $target
+        %{inputs.nixpkgs.coreutils}/bin/cp %{nix.lib.import_file "naked-stdenv.sh"} $target
       "%,
         ],
       },
