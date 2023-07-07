@@ -1,6 +1,6 @@
 let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
 
-{
+builders.NixpkgsPkg & {
   inputs_spec = {
     bash.input = "nixpkgs",
     coreutils.input = "nixpkgs",
@@ -17,18 +17,17 @@ let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
     {
       name = "hello",
       version = "0.1",
-      build_command = {
-        cmd = nix-s%"%{inputs.bash.outputPath}/bin/bash"%,
-        args = [
-          "-c",
-          nix-s%"
-            %{inputs.gcc.outputPath}/bin/gcc %{inputs.hello.outputPath} -o hello
-            %{inputs.coreutils.outputPath}/bin/mkdir -p $out/bin
-            %{inputs.coreutils.outputPath}/bin/cp hello $out/bin/hello
-          "%,
-        ]
+      structured_env = {
+        buildInputs.gcc = inputs.gcc,
+        buildInputs.coreutils = inputs.coreutils,
+        buildInputs.bash = inputs.bash,
       },
-      env = {},
-      dependencies = [inputs.bash, inputs.coreutils, inputs.gcc, inputs.hello],
-    } | builders.NickelPkg
+      env = {
+        buildCommand = nix-s%"
+          gcc %{inputs.hello.outputPath} -o hello
+          mkdir -p $out/bin
+          cp hello $out/bin/hello
+        "%,
+      },
+    }
 }

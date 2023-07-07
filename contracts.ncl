@@ -203,16 +203,16 @@ from the Nix world) or a derivation defined in Nickel.
             # Format
 
             `structured_env` is a record whose fields are environment variables
-            (`PATH`, `CLASSPATH`, `LD_PRELOAD`, etc.). The values are records
+            (`buildInputs`, etc.). The values are records
             themselves, which represents _named pieces_ that are joined together
             to form the final value of the variable.
 
             For example:
 
             ```nickel
-            structured_env.PATH = {
-              bash = nix-s%"%{inputs.bash}/bin"%,
-              curl = nix-s%"%{inputs.curl}/bin"%,
+            structured_env.buildInputs = {
+              bash = inputs.bash,
+              curl = inputs.curl,
             }
             ```
 
@@ -230,7 +230,7 @@ from the Nix world) or a derivation defined in Nickel.
             `builder2.ncl`:
 
             ```nickel
-            structured_env.PATH.other-package = nix-s"%{inputs.other-package}/bin"%,
+            structured_env.buildInputs.other-package = inputs.other-package,
             ```
 
             The final result will be a path with all three subpaths separated by
@@ -242,7 +242,7 @@ from the Nix world) or a derivation defined in Nickel.
             override them specifically using merging:
 
             ```nickel
-            structured_env.PATH.bash | force = nix-s"%{inputs.special-bash}/bin"%,
+            structured_env.buildInputs.bash | force = inputs.special-bash,
             ```
 
             # Interaction with `env`

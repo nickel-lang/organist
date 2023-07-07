@@ -1,5 +1,12 @@
-let { NickelDerivation, Derivation, .. } = import "contracts.ncl" in
+let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
 
+let concatStringsSep = fun sep values =>
+  if std.array.length values == 0 then "" else
+    let first = std.array.first values in
+    values
+    |> std.array.drop_first
+    |> std.array.fold_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) first
+in
 {
   NickelPkg
   # we should only need two '%%', but a current Nickel bug (#XXX) bug makes the example being
@@ -34,44 +41,29 @@ let { NickelDerivation, Derivation, .. } = import "contracts.ncl" in
       "%%%
     = NickelDerivation,
 
-  BashShell = {
-    inputs_spec = {
-      bash = {},
-      # Setting the following as a default value conflicts with InputsSpec's
-      # contract default value (`"nixpkgs"`). Maybe InputsSpec shouldn't set a
-      # default value at all?
-      # That being said, `naked_std_env` is an internal compatibility value:
-      # there doesn't seem to be a good reason to make it a default value. It
-      # can still be overridden using `force` if really needed
-      naked_std_env.input = "nickel-nix-internals",
-    },
-    inputs,
-
-    output =
-      {
-        version | default = "0.1",
-
-        # This is required otherwise nix develop will fail with a message that it
-        # only supports bash.
+  NixpkgsPkg
+    | doc m%%%"
+      Makes a derivation that runs all the build phases from nixpkgs' stdenv as the `build_command`.
+      Can be controlled with environment variables in the same way as `stdenv.mkDerivation`.
+    "%%%
+    = {
+      inputs_spec = {
+        bash.input | default = "nixpkgs",
+        stdenv.input | default = "nixpkgs",
+      },
+      inputs,
+      output = {
+        name,
+        version,
         build_command = {
           cmd = nix-s%"%{inputs.bash}/bin/bash"%,
-          args = [],
+          args = ["-c", "source $stdenv/setup; genericBuild"],
+        },
+        env = {
+          stdenv = inputs.stdenv,
         },
 
-        structured_env = {
-          # TODO: handle naked derivations without having to interpolate
-          stdenv.naked_std_env = nix-s%"%{inputs.naked_std_env}"%,
-        },
-
-        packages = { bash = inputs.bash },
-
-        structured_env.PATH =
-          packages
-          |> std.record.map
-            (
-              fun _n p =>
-                nix-s%"%{p}/bin"%
-            ),
+        structured_env = {},
 
         # Compute `env` from `structured_env`. Note that thanks to recursive
         # overriding, if stuff is added to `structured_env` through merging,
@@ -81,14 +73,42 @@ let { NickelDerivation, Derivation, .. } = import "contracts.ncl" in
           |> std.record.map
             (
               fun _n xs =>
-                # Intersperse ':' between environment variable fragments
-                let values = std.record.values xs in
-                let first = std.array.first values in
-                values
-                |> std.array.drop_first
-                |> std.array.fold_left (fun acc value => nix-s%"%{acc}:%{value}"%) first
+                # Intersperse ' ' between environment variable fragments
+                concatStringsSep " " (std.record.values xs)
             ),
-      } | (NickelPkg & { packages | { _ : Derivation } }),
+      } | NickelPkg,
+    },
+
+  Shell
+    | doc m%%%"
+      A derivation that is to be used as a shell, e.g. with `nix develop`.
+      Analogous to `mkShell`.
+    "%%%
+    = NixpkgsPkg & {
+      packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
+      hooks | doc "Bash scripts to run when entering the shell" = {},
+
+      output = {
+        name | default = "shell",
+        version | default = "dev",
+
+        env.buildCommand = nix-s%"
+          echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
+          exit 1
+        "%,
+        env.shellHook = concatStringsSep "\n" (std.record.values hooks),
+        structured_env.buildInputs = packages,
+      } | NickelPkg,
+    },
+
+  BashShell = Shell & {
+    inputs_spec = {
+      bash.input | default = "nixpkgs",
+    },
+    inputs,
+    output.packages = {
+      bash = inputs.bash,
+    },
   },
 
   RustShell =
