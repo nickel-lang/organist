@@ -57,7 +57,7 @@ in
         version,
         build_command = {
           cmd = nix-s%"%{inputs.bash}/bin/bash"%,
-          args = ["-c", "source $stdenv/setup; genericBuild"],
+          args = ["-c", "set -euo pipefail; source $stdenv/setup; genericBuild"],
         },
         env = {
           stdenv = inputs.stdenv,
