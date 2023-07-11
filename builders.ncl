@@ -1,6 +1,6 @@
 let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
 
-let concatStringsSep = fun sep values =>
+let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then "" else
     let first = std.array.first values in
     values
@@ -42,10 +42,10 @@ in
     = NickelDerivation,
 
   NixpkgsPkg
-    | doc m%%%"
+    | doc m%"
       Makes a derivation that runs all the build phases from nixpkgs' stdenv as the `build_command`.
       Can be controlled with environment variables in the same way as `stdenv.mkDerivation`.
-    "%%%
+    "%
     = {
       inputs_spec = {
         bash.input | default = "nixpkgs",
@@ -74,16 +74,16 @@ in
             (
               fun _n xs =>
                 # Intersperse ' ' between environment variable fragments
-                concatStringsSep " " (std.record.values xs)
+                concat_strings_sep " " (std.record.values xs)
             ),
       } | NickelPkg,
     },
 
   Shell
-    | doc m%%%"
+    | doc m%"
       A derivation that is to be used as a shell, e.g. with `nix develop`.
       Analogous to `mkShell`.
-    "%%%
+    "%
     = NixpkgsPkg & {
       packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
       hooks | doc "Bash scripts to run when entering the shell" = {},
@@ -96,7 +96,7 @@ in
           echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
           exit 1
         "%,
-        env.shellHook = concatStringsSep "\n" (std.record.values hooks),
+        env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
         structured_env.buildInputs = packages,
       } | NickelPkg,
     },
