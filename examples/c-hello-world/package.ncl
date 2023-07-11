@@ -1,14 +1,10 @@
-let builders = (import "./nickel.lock.ncl").nickel-nix.builders in
+let nickel-nix = (import "./nickel.lock.ncl").nickel-nix in
 
-builders.NixpkgsPkg & {
+nickel-nix.builders.NixpkgsPkg & {
   inputs_spec = {
     bash.input = "nixpkgs",
     coreutils.input = "nixpkgs",
     gcc.input = "nixpkgs",
-    hello = {
-      input = "sources",
-      path = "hello.c",
-    },
   },
 
   inputs,
@@ -24,7 +20,7 @@ builders.NixpkgsPkg & {
       },
       env = {
         buildCommand = nix-s%"
-          gcc %{inputs.hello.outputPath} -o hello
+          gcc %{nickel-nix.nix.lib.import_file "hello.c"} -o hello
           mkdir -p $out/bin
           cp hello $out/bin/hello
         "%,
