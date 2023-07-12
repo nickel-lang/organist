@@ -2,10 +2,7 @@ let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then "" else
-    let first = std.array.first values in
-    values
-    |> std.array.drop_first
-    |> std.array.fold_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) first
+    std.array.reduce_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) values
 in
 {
   NickelPkg
