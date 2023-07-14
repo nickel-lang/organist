@@ -96,16 +96,10 @@
         lib = pkgs.callPackage ./lib.nix {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel;
-          inherit (self.lib.${system}) nickel-nix-internals;
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         lib.importNcl = lib.importNcl;
-
-        # Internal nickel-nix library. Each value is a function that accepts inputs from user flake.
-        lib.nickel-nix-internals = {
-          naked_std_env = self.lib.${system}.importNcl ./. "naked-stdenv.ncl";
-        };
 
         # Helper function that generates ugly contents for "nickel.lock.ncl", see buildLockFile.
         lib.buildLockFileContents = contents: let
@@ -131,7 +125,6 @@
         #     nickel-nix = {
         #       builders = "/nix/store/...-source/builders.ncl";
         #       contracts = "/nix/store/...-source/contracts.ncl";
-        #       naked-stdenv = "/nix/store/...-source/naked-stdenv.ncl";
         #       nix = "/nix/store/...-source/nix.ncl";
         #     };
         #   }
@@ -140,7 +133,6 @@
         #     nickel-nix = {
         #       builders = import "/nix/store/...-source/builders.ncl",
         #       contracts = import "/nix/store/...-source/contracts.ncl",
-        #       naked-stdenv = import "/nix/store/...-source/naked-stdenv.ncl",
         #       nix = import "/nix/store/...-source/nix.ncl",
         #     },
         #   }
