@@ -3,7 +3,6 @@
   nickel,
   system,
   lib,
-  nickel-nix-internals,
 }: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__nixel_type";
@@ -235,11 +234,8 @@
       else if builtins.hasAttr inputTakeFrom flakeInputs
       then let
         input =
-          if inputTakeFrom == "nickel-nix-internals"
-          then flakeInputs.${inputTakeFrom}
-          else
-            flakeInputs.${inputTakeFrom}.legacyPackages.${system}
-            or flakeInputs.${inputTakeFrom}.packages.${system};
+          flakeInputs.${inputTakeFrom}.legacyPackages.${system}
+          or flakeInputs.${inputTakeFrom}.packages.${system};
 
         pkgPath = declaredInputs.${inputId}.path or [inputId];
       in
@@ -292,14 +288,8 @@
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
   importNcl = baseDir: nickelFile: flakeInputs: let
-    flakeInputsWithInternals =
-      flakeInputs
-      // {
-        nickel-nix-internals = builtins.mapAttrs (_: f: f flakeInputs) nickel-nix-internals;
-      };
     nickelResult = callNickel {
-      inherit nickelFile baseDir;
-      flakeInputs = flakeInputsWithInternals;
+      inherit nickelFile baseDir flakeInputs;
     };
   in
     {rawNickel = nickelResult.value;}
