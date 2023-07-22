@@ -109,10 +109,10 @@
     // value.env;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = context: system: baseDir: value: let
+  importFromNickel = flakeInputs: system: baseDir: value: let
     type = builtins.typeOf value;
     isNickelDerivation = type: type == "nickelDerivation";
-    importFromNickel_ = importFromNickel context system baseDir;
+    importFromNickel_ = importFromNickel flakeInputs system baseDir;
   in
     if (type == "set")
     then
@@ -128,7 +128,7 @@
           in
             derivation prepared
           else if nixelType == "nixDerivation"
-          then context.${value.drvPath}.${value.outputName or "out"}
+          then lib.getAttrFromPath value.attrPath flakeInputs
           else if nixelType == "nixString"
           then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if nixelType == "nixPath"
@@ -145,6 +145,7 @@
     baseDir,
     nickelFile,
     exportedPkgsNcl,
+    flakeInputs,
   }: let
     sources = builtins.path {
       path = baseDir;
@@ -159,7 +160,15 @@
 
     nickelWithImports = builtins.toFile "eval.ncl" ''
       let params = {
-        inputs = import "${exportedJSON}",
+        inputs = (import "${exportedJSON}") & {
+        ${lib.concatStrings (lib.mapAttrsToList (name: input: ''
+          "${name}" = import "${
+            # FIXME: Should cache in Nix derivation, but evaluating Nix inside Nix is troublesome
+            builtins.toFile "${name}.ncl" (builtins.unsafeDiscardStringContext (collectPkgs name input))
+          }",
+        '')
+        flakeInputs)}
+        },
         system = "${system}",
         nix = import "${./.}/nix.ncl",
       }
@@ -276,7 +285,7 @@
       {inherit declaredInputs flakeInputs baseDir;};
     pkgsExportResult = exportForNickel exportedPkgs.value;
     fileToCall = computeNickelFile {
-      inherit baseDir nickelFile;
+      inherit baseDir nickelFile flakeInputs;
       exportedPkgsNcl = pkgsExportResult.value;
     };
   in
@@ -291,18 +300,98 @@
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = baseDir: nickelFile: flakeInputs: let
-    flakeInputsWithInternals =
-      flakeInputs
+  importNcl = baseDir: nickelFile: flakeInputs:
+    importNclInternal baseDir nickelFile (flakeInputs
       // {
-        nickel-nix-internals = builtins.mapAttrs (_: f: f flakeInputs) nickel-nix-internals;
-      };
+        nickel-nix-internals = {packages.${system} = builtins.mapAttrs (_: f: f flakeInputs) nickel-nix-internals;};
+      });
+
+  importNclInternal = baseDir: nickelFile: flakeInputs: let
     nickelResult = callNickel {
-      inherit nickelFile baseDir;
-      flakeInputs = flakeInputsWithInternals;
+      inherit nickelFile baseDir flakeInputs;
     };
   in
     {rawNickel = nickelResult.value;}
-    // lib.traceVal (importFromNickel nickelResult.context system baseDir (builtins.fromJSON
+    // lib.traceVal (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult.value))));
-in {inherit importNcl;}
+
+  doCollect = attrPath: drvF: attrs: let
+    try = builtins.tryEval attrs;
+    result = try.value;
+  in
+    if !try.success || !(lib.isAttrs result)
+    then []
+    else if lib.isDerivation result
+    then [(drvF attrPath result)]
+    else if attrPath != [] && (!(result.recurseForDerivations or false))
+    then []
+    else
+      [(lib.optionalString (attrPath != []) "\"${lib.last attrPath}\" = ") "{\n"]
+      ++ lib.concatLists (lib.mapAttrsToList (name: doCollect (attrPath ++ [name]) drvF) result)
+      ++ ["}" (lib.optionalString (attrPath != []) ",\n")];
+
+  collectPkgs = name: input': let
+    input =
+      if name != "nixpkgs"
+      then input'
+      else smallNixpkgs input';
+    listToNcl = sep: lst: lib.concatStringsSep sep (map (x: ''"${x}"'') lst);
+    drvF = attrPrefix: attrPath: drv: ''
+      "${lib.last attrPath}"={${
+        ''"${typeField}"="nixDerivation",''
+        + ''outputPath="${drv.outPath}",''
+        + (lib.optionalString (drv ? version) ''version="${drv.version}",'')
+        + ''attrPath=[${listToNcl "," (attrPrefix ++ attrPath)}]''
+      }},
+    '';
+    drvsWithPaths = lib.concatLists (
+      (lib.optional (input ? packages && input.packages ? ${system}) (doCollect [] (drvF [name "packages" system]) input.packages.${system}))
+      ++ (lib.optional (input ? legacyPackages && input.legacyPackages ? ${system}) (doCollect [] (drvF [name "legacyPackages" system]) input.legacyPackages.${system}))
+    );
+  in
+    if builtins.length drvsWithPaths == 0
+    then "{}"
+    else lib.concatStrings drvsWithPaths;
+
+  # FIXME: This is only a small subset of nixpkgs required by our shells.
+  # Full nixpkgs cannot be handled by Nickel because of
+  # https://github.com/tweag/nickel/issues/1427 and https://github.com/tweag/nickel/issues/1428
+  smallNixpkgs = nixpkgs: {
+    legacyPackages.${system} = {
+      inherit
+        (nixpkgs.legacyPackages.${system})
+        bash
+        cargo
+        clang
+        clang-tools
+        clojure
+        clojure-lsp
+        coreutils
+        erlang
+        erlang-ls
+        git
+        go
+        gopls
+        metals
+        nix
+        nodejs
+        ormolu
+        path
+        php
+        python310
+        racket
+        rust-analyzer
+        rustc
+        rustfmt
+        scala
+        stack
+        zig
+        zls
+        ;
+      haskell.packages.ghc927.haskell-language-server = nixpkgs.legacyPackages.${system}.haskell.packages.ghc927.haskell-language-server;
+      haskell.packages.ghc927.recurseForDerivations = true;
+      haskell.packages.recurseForDerivations = true;
+      haskell.recurseForDerivations = true;
+    };
+  };
+in {inherit importNcl importNclInternal;}
