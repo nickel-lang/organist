@@ -96,7 +96,7 @@
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = system: value:
-    (builtins.removeAttrs value ["build_command" "env" "structured_env" "packages"])
+    (builtins.removeAttrs value ["build_command" "env" "structured_env" "attrs" "packages"])
     // {
       system =
         if value ? system
@@ -104,8 +104,9 @@
         else system;
       builder = value.build_command.cmd;
       args = value.build_command.args;
+      __structuredAttrs = true;
     }
-    // value.env;
+    // value.attrs;
 
   # Import a Nickel value produced by the Nixel DSL
   importFromNickel = context: system: baseDir: value: let

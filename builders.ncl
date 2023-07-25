@@ -54,25 +54,13 @@ in
         version,
         build_command = {
           cmd = nix-s%"%{inputs.bash}/bin/bash"%,
-          args = ["-c", "set -euo pipefail; source $stdenv/setup; genericBuild"],
+          args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
         },
+        structured_env = {},
         env = {
           stdenv = inputs.stdenv,
         },
-
-        structured_env = {},
-
-        # Compute `env` from `structured_env`. Note that thanks to recursive
-        # overriding, if stuff is added to `structured_env` through merging,
-        # `env` will be automatically up-to-date
-        env =
-          structured_env
-          |> std.record.map
-            (
-              fun _n xs =>
-                # Intersperse ' ' between environment variable fragments
-                concat_strings_sep " " (std.record.values xs)
-            ),
+        attrs = env & structured_env,
       } | NickelPkg,
     },
 
@@ -101,7 +89,7 @@ in
   ShellWithInputs = Shell & {
     inputs_spec,
     inputs,
-    packages = std.record.map (fun name _value => inputs."%{name}") inputs_spec,
+    packages = inputs,
   },
 
   BashShell = ShellWithInputs & {
