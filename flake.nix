@@ -2,7 +2,7 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel.url = "github:tweag/nickel/master";
+  inputs.nickel.url = "github:tweag/nickel/1.1.1";
   inputs.topiary.follows = "nickel/topiary";
 
   nixConfig = {
@@ -95,7 +95,7 @@
       system: let
         lib = pkgs.callPackage ./lib.nix {
           inherit system;
-          nickel = inputs.nickel.packages."${system}".nickel;
+          nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
           inherit (self.lib.${system}) nickel-nix-internals;
         };
         pkgs = nixpkgs.legacyPackages.${system};
@@ -240,7 +240,7 @@
 
         devShells.default = pkgs.mkShell {
           packages = [
-            inputs.nickel.packages."${system}".nickel
+            inputs.nickel.packages."${system}".default
           ];
         };
       }
