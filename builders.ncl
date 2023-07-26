@@ -297,7 +297,7 @@ let { NickelDerivation, Derivation, .. } = import "contracts.ncl" in
                 "-c",
                 # Sorry about Topiary formatting of the following lines
                 nix-s%"
-            export PATH="%{inputs.coreutils}/bin:$PATH"
+            export PATH='%{inputs.coreutils}/bin'":$PATH"
             mkdir -p $out/bin
             echo "$0" > $out/bin/stack
             chmod a+x $out/bin/*
