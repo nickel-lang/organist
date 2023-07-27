@@ -93,7 +93,7 @@
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
-        lib = pkgs.callPackage ./lib.nix {
+        lib = pkgs.callPackage ./lib/lib.nix {
           inherit system;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
@@ -158,7 +158,7 @@
         };
 
         # Provide an attribute set of all .ncl libraries in the root directory of this flake
-        lib.lockFileContents = pkgs.lib.pipe ./. [
+        lib.lockFileContents = pkgs.lib.pipe ./lib [
           # Collect all items in the directory like {"examples": "directory", "nix.ncl": regular, ...}
           builtins.readDir
           # List only regular files with .ncl suffix
@@ -170,7 +170,7 @@
                 name
             ) (pkgs.lib.attrNames files))
           # Generate attrs with file name without .ncl as a key: {nix = "/nix/store/...-source/nix.ncl";}
-          (map (f: pkgs.lib.nameValuePair (pkgs.lib.removeSuffix ".ncl" f) "${./.}/${f}"))
+          (map (f: pkgs.lib.nameValuePair (pkgs.lib.removeSuffix ".ncl" f) "${./lib}/${f}"))
           pkgs.lib.listToAttrs
         ];
 

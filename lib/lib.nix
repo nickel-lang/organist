@@ -161,7 +161,7 @@
       let params = {
         inputs = import "${exportedJSON}",
         system = "${system}",
-        nix = import "${./.}/nix.ncl",
+        nix = import "${./..}/lib/nix.ncl",
       }
       in
 
@@ -185,7 +185,7 @@
       # filter =
     };
     fileToCall = builtins.toFile "extract-inputs.ncl" ''
-      let contracts = import "${./.}/contracts.ncl" in
+      let contracts = (import "${./..}/lib/nix.ncl").contracts in
       let nickel_expr = import "${sources}/${nickelFile}" in
       nickel_expr.inputs_spec | {_: contracts.NickelInputSpec}
     '';
