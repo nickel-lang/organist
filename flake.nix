@@ -146,11 +146,7 @@
           let testScript = pkgs.writeShellApplication {
             name = "test-templates";
             runtimeInputs = [ inputs.nickel.packages."${system}".nickel-lang-cli ];
-            text = ''
-              set -euo pipefail
-              cd ${./.}
-              exec ${pkgs.runtimeShell} ./run-test.sh "$@"
-            '';
+            text = builtins.readFile ./run-test.sh;
           }; in
         {
           type = "app";

@@ -23,7 +23,7 @@ pushd_temp () {
 
 prepare_shell() {
   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
-  nix flake lock --override-input nickel-nix path:$PROJECT_ROOT --accept-flake-config
+  nix flake lock --override-input nickel-nix "path:$PROJECT_ROOT" --accept-flake-config
   nix run .#regenerate-lockfile --accept-flake-config
 }
 
@@ -47,12 +47,12 @@ test_template () {
   if [[ -n ${1+x} ]]; then
     test_one_template "$1"
   else
-    all_targets=$(nickel export --format raw <<<'std.record.fields (import "builders.ncl") |> std.string.join " "')
+    all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/nix.ncl").builders) |> std.string.join " "')
     for target in $all_targets; do
       if [[ "$target" == NickelPkg ]] || [[ "$target" == "NixpkgsPkg" ]]; then
         continue
       fi
-      test_one_template $target
+      test_one_template "$target"
     done
   fi
 }
@@ -61,7 +61,7 @@ test_example () (
   examplePath=$(realpath "$1")
   pushd_temp
   cp -r "$examplePath" .
-  pushd *
+  pushd ./*
   prepare_shell
   nix build --print-build-logs
   popd
