@@ -70,12 +70,12 @@ in
       Analogous to `mkShell`.
     "%
     = NixpkgsPkg & {
-      packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
       hooks | doc "Bash scripts to run when entering the shell" = {},
 
       output = {
         name | default = "shell",
         version | default = "dev",
+        packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
 
         env.buildCommand = nix-s%"
           echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
@@ -83,7 +83,7 @@ in
         "%,
         env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
         structured_env.buildInputs = packages,
-      } | NickelPkg,
+      } | (NickelPkg & { packages | { _ : Derivation } }),
     },
 
   BashShell = Shell & {
