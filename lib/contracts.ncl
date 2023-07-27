@@ -6,6 +6,10 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixPath",
+    is_nix_input = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nixInput",
     is_nix_derivation = fun x =>
       std.is_record x
       && std.record.has_field type_field x
@@ -25,6 +29,7 @@ let predicate | doc "Various predicates used to define contracts"
       is_derivation x
       || std.is_string x
       || is_nix_path x
+      || is_nix_input x
   }
   in
 
@@ -324,17 +329,27 @@ from the Nix world) or a derivation defined in Nickel.
         |> std.contract.apply (Array String) label,
 
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
-    = {
-      input
-        | String
-        | default
-        = "nixpkgs",
-      path
-        | InputPath
-        | optional,
-      # TODO: precise contract. We want to allow a path if input == "sources"
-      ..
-    },
+    =
+      let final = {
+        input
+          | String
+          | default
+          = "nixpkgs",
+        path
+          | InputPath
+          | optional,
+        # TODO: precise contract. We want to allow a path if input == "sources"
+        ..
+      } in
+      fun label value =>
+        if std.is_string value then
+          let splitted = std.contract.apply InputPath label value in
+          {
+            input = std.array.first splitted,
+            pkgPath = std.array.drop_first splitted,
+          } |> std.contract.apply final label
+        else
+          std.contract.apply final label value,
 
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
@@ -355,5 +370,9 @@ from the Nix world) or a derivation defined in Nickel.
   NixPath = {
     "%{type_field}" | force = "nixPath",
     path | String,
-  }
+  },
+  NixInput = {
+    "%{type_field}" | force = "nixInput",
+    spec | NickelInputSpec,
+  },
 }

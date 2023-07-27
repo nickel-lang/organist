@@ -19,6 +19,9 @@
           ```
         "%%
       = fun filepath => { path = filepath },
+    import_nix
+      | contracts.NickelInputSpec -> contracts.NixInput
+      = fun x => { spec = x },
   },
   builders = import "builders.ncl",
   contracts = import "contracts.ncl",

@@ -110,10 +110,10 @@
     // value.attrs;
 
   # Import a Nickel value produced by the Nixel DSL
-  importFromNickel = context: system: baseDir: value: let
+  importFromNickel = flakeInputs: context: system: baseDir: value: let
     type = builtins.typeOf value;
     isNickelDerivation = type: type == "nickelDerivation";
-    importFromNickel_ = importFromNickel context system baseDir;
+    importFromNickel_ = importFromNickel flakeInputs context system baseDir;
   in
     if (type == "set")
     then
@@ -134,6 +134,22 @@
           then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if nixelType == "nixPath"
           then baseDir + "/${value.path}"
+          else if nixelType == "nixInput"
+          then
+          let
+            pkgPath = value.spec.pkgPath;
+            possibleAttrPaths = [
+             ([ value.spec.input ] ++ pkgPath)
+             ([ value.spec.input "packages" system ] ++ pkgPath)
+             ([ value.spec.input "legacyPackages" system ] ++ pkgPath)
+            ];
+            notFound = throw "Missing input \"${value.spec.input}.${lib.strings.concatStringsSep "." pkgPath}\"";
+            chosenAttrPath = lib.findFirst
+              (path: lib.hasAttrByPath path flakeInputs)
+              notFound
+              possibleAttrPaths;
+          in
+            lib.getAttrFromPath chosenAttrPath flakeInputs
           else builtins.mapAttrs (_: importFromNickel_) value
       )
     else if (type == "list")
@@ -213,27 +229,7 @@
     addPackage = inputId: acc: let
       inputTakeFrom = declaredInputs.${inputId}.input;
     in
-      # "sources" is a special type of input for files. They mimic Nix style
-      # paths. We don't take them from flake inputs (where they aren't,
-      # anyway), but create a simple derivation wrapper around them to pass
-      # them to the Nickel side.
-      # TODO: should we get rid of sources, now that we have `import_file` and
-      # symbolic strings?
-      if inputTakeFrom == "sources"
-      then
-        # TODO: could we use flakeInputs.self.outPath instead of passing
-        # baseDir explicitly? Maybe, but the issue is that this path is the
-        # path of the git directory, not the subdirectory of the flake.nix.
-        # may need some massaging
-        let
-          as_nix_path =
-            baseDir
-            + "/${builtins.concatStringsSep "." declaredInputs.${inputId}.path}";
-        in
-          valueWithContext.setAttr acc inputId
-          (exportForNickel (runCommand (builtins.baseNameOf as_nix_path) {}
-              "cp -r ${as_nix_path} $out"))
-      else if builtins.hasAttr inputTakeFrom flakeInputs
+      if builtins.hasAttr inputTakeFrom flakeInputs
       then let
         input =
           flakeInputs.${inputTakeFrom}.legacyPackages.${system}
@@ -295,6 +291,6 @@
     };
   in
     {rawNickel = nickelResult.value;}
-    // lib.traceVal (importFromNickel nickelResult.context system baseDir (builtins.fromJSON
+    // lib.traceVal (importFromNickel flakeInputs nickelResult.context system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult.value))));
 in {inherit importNcl;}
