@@ -302,10 +302,11 @@ in
                 "-c",
                 # Sorry about Topiary formatting of the following lines
                 nix-s%"
+            source .attrs.sh
             export PATH='%{inputs.coreutils}/bin'":$PATH"
-            mkdir -p $out/bin
-            echo "$0" > $out/bin/stack
-            chmod a+x $out/bin/*
+            mkdir -p ${outputs[out]}/bin
+            echo "$0" > ${outputs[out]}/bin/stack
+            chmod a+x ${outputs[out]}/bin/*
           "%,
                 nix-s%"
             #!%{inputs.bash}/bin/bash
