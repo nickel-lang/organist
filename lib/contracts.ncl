@@ -10,10 +10,6 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixInput",
-    is_nix_derivation = fun x =>
-      std.is_record x
-      && std.record.has_field type_field x
-      && x."%{type_field}" == "nixDerivation",
     is_nix_string = fun value =>
       std.is_record value
       && std.record.has_field type_field value
@@ -24,7 +20,7 @@ let predicate | doc "Various predicates used to define contracts"
       && x."%{type_field}" == "nickelDerivation",
     is_derivation = fun x =>
       is_nickel_derivation x
-      || is_nix_derivation x,
+      || is_nix_input x,
     is_string_fragment = fun x =>
       is_derivation x
       || std.is_string x
@@ -157,13 +153,6 @@ from the Nix world) or a derivation defined in Nickel.
         let label = std.contract.label.append_note (std.serialize 'Json value) label in
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
-
-  NixDerivation | doc "A derivation coming from the Nix world"
-    = {
-      drvPath | String,
-      outputName | String,
-      "%{type_field}" | force = "nixDerivation",
-    },
 
   NickelDerivation
     | doc m%"
@@ -340,14 +329,29 @@ from the Nix world) or a derivation defined in Nickel.
           | optional,
         # TODO: precise contract. We want to allow a path if input == "sources"
         ..
-      } in
+      }
+      in
       fun label value =>
         if std.is_string value then
-          let splitted = std.contract.apply InputPath label value in
-          {
-            input = std.array.first splitted,
-            pkgPath = std.array.drop_first splitted,
-          } |> std.contract.apply final label
+          let hashPosition = (std.string.find "#" value).index in
+          let value' =
+            if hashPosition == -1 then
+              { input = value, pkgPath = [] }
+            else
+              {
+                input = std.string.substring 0 hashPosition value,
+                pkgPath =
+                  std.string.split
+                    "."
+                    (
+                      std.string.substring
+                        (hashPosition + 1)
+                        (std.string.length value)
+                        value
+                    ),
+              }
+          in
+          value' |> std.contract.apply final label
         else
           std.contract.apply final label value,
 
