@@ -65,7 +65,7 @@
       flake.outputsFromNickel = path: inputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
-          nickel-nix = "${./.}/lib/nix.ncl";
+          nickel-nix = "${self}/lib/nix.ncl";
         },
       }:
         flake-utils.lib.eachSystem systems (system: let
@@ -95,6 +95,7 @@
       system: let
         lib = pkgs.callPackage ./lib/lib.nix {
           inherit system;
+          flakeRoot = self.outPath;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
         pkgs = nixpkgs.legacyPackages.${system};
@@ -186,11 +187,11 @@
               mkTest {
                 name = "test devshell ${name}";
                 script = ''
-                  nix flake new --template path:${./.}#${name} example --accept-flake-config
+                  nix flake new --template path:${self.outPath}#${name} example --accept-flake-config
 
                   pushd ./example
                   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
-                  nix flake lock --override-input nickel-nix path:${./.} --accept-flake-config
+                  nix flake lock --override-input nickel-nix path:${self.outPath} --accept-flake-config
                   nix run .#regenerate-lockfile --accept-flake-config
                   nix develop --accept-flake-config --print-build-logs < /dev/null
                   popd
@@ -202,10 +203,10 @@
               mkTest {
                 name = "test ${name}";
                 script = ''
-                  cp -r ${./.}/examples/${name} ./${name}
+                  cp -r ${self.outPath}/examples/${name} ./${name}
                   chmod -R u+w ./${name}
                   cd ./${name}
-                  nix flake lock --override-input nickel-nix path:${./.}
+                  nix flake lock --override-input nickel-nix path:${self.outPath}
                   nix run .#regenerate-lockfile --accept-flake-config
                   nix build --accept-flake-config
                 '';
