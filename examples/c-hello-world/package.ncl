@@ -20,7 +20,7 @@ nickel-nix.builders.NixpkgsPkg & {
       },
       env = {
         buildCommand = nix-s%"
-          gcc %{nickel-nix.nix.lib.import_file "hello.c"} -o hello
+          gcc %{nickel-nix.lib.import_file "hello.c"} -o hello
           mkdir -p $out/bin
           cp hello $out/bin/hello
         "%,

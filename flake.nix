@@ -65,7 +65,7 @@
       flake.outputsFromNickel = path: inputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
-          nickel-nix = self.lib.x86_64-linux.lockFileContents;
+          nickel-nix = "${./.}/lib/nix.ncl";
         },
       }:
         flake-utils.lib.eachSystem systems (system: let
@@ -156,23 +156,6 @@
           type = "app";
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
-
-        # Provide an attribute set of all .ncl libraries in the root directory of this flake
-        lib.lockFileContents = pkgs.lib.pipe ./lib [
-          # Collect all items in the directory like {"examples": "directory", "nix.ncl": regular, ...}
-          builtins.readDir
-          # List only regular files with .ncl suffix
-          (files:
-            pkgs.lib.concatMap (
-              name:
-                pkgs.lib.optional
-                (files.${name} == "regular" && (pkgs.lib.hasSuffix ".ncl" name))
-                name
-            ) (pkgs.lib.attrNames files))
-          # Generate attrs with file name without .ncl as a key: {nix = "/nix/store/...-source/nix.ncl";}
-          (map (f: pkgs.lib.nameValuePair (pkgs.lib.removeSuffix ".ncl" f) "${./lib}/${f}"))
-          pkgs.lib.listToAttrs
-        ];
 
         apps.tests = let
           mkTest = {
