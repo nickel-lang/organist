@@ -65,7 +65,7 @@
       flake.outputsFromNickel = path: inputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
-          nickel-nix = self.lib.x86_64-linux.lockFileContents;
+          nickel-nix = "${self}/lib/nix.ncl";
         },
       }:
         flake-utils.lib.eachSystem systems (system: let
@@ -93,8 +93,9 @@
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
-        lib = pkgs.callPackage ./lib.nix {
+        lib = pkgs.callPackage ./lib/lib.nix {
           inherit system;
+          flakeRoot = self.outPath;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
         pkgs = nixpkgs.legacyPackages.${system};
@@ -157,23 +158,6 @@
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
 
-        # Provide an attribute set of all .ncl libraries in the root directory of this flake
-        lib.lockFileContents = pkgs.lib.pipe ./. [
-          # Collect all items in the directory like {"examples": "directory", "nix.ncl": regular, ...}
-          builtins.readDir
-          # List only regular files with .ncl suffix
-          (files:
-            pkgs.lib.concatMap (
-              name:
-                pkgs.lib.optional
-                (files.${name} == "regular" && (pkgs.lib.hasSuffix ".ncl" name))
-                name
-            ) (pkgs.lib.attrNames files))
-          # Generate attrs with file name without .ncl as a key: {nix = "/nix/store/...-source/nix.ncl";}
-          (map (f: pkgs.lib.nameValuePair (pkgs.lib.removeSuffix ".ncl" f) "${./.}/${f}"))
-          pkgs.lib.listToAttrs
-        ];
-
         apps.tests = let
           mkTest = {
             name,
@@ -203,11 +187,11 @@
               mkTest {
                 name = "test devshell ${name}";
                 script = ''
-                  nix flake new --template path:${./.}#${name} example --accept-flake-config
+                  nix flake new --template path:${self.outPath}#${name} example --accept-flake-config
 
                   pushd ./example
                   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
-                  nix flake lock --override-input nickel-nix path:${./.} --accept-flake-config
+                  nix flake lock --override-input nickel-nix path:${self.outPath} --accept-flake-config
                   nix run .#regenerate-lockfile --accept-flake-config
                   nix develop --accept-flake-config --print-build-logs < /dev/null
                   popd
@@ -219,10 +203,10 @@
               mkTest {
                 name = "test ${name}";
                 script = ''
-                  cp -r ${./.}/examples/${name} ./${name}
+                  cp -r ${self.outPath}/examples/${name} ./${name}
                   chmod -R u+w ./${name}
                   cd ./${name}
-                  nix flake lock --override-input nickel-nix path:${./.}
+                  nix flake lock --override-input nickel-nix path:${self.outPath}
                   nix run .#regenerate-lockfile --accept-flake-config
                   nix build --accept-flake-config
                 '';

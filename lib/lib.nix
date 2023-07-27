@@ -3,6 +3,7 @@
   nickel,
   system,
   lib,
+  flakeRoot,
 }: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__nixel_type";
@@ -161,7 +162,7 @@
       let params = {
         inputs = import "${exportedJSON}",
         system = "${system}",
-        nix = import "${./.}/nix.ncl",
+        nix = import "${flakeRoot}/lib/nix.ncl",
       }
       in
 
@@ -185,7 +186,7 @@
       # filter =
     };
     fileToCall = builtins.toFile "extract-inputs.ncl" ''
-      let contracts = import "${./.}/contracts.ncl" in
+      let contracts = (import "${flakeRoot}/lib/nix.ncl").contracts in
       let nickel_expr = import "${sources}/${nickelFile}" in
       nickel_expr.inputs_spec | {_: contracts.NickelInputSpec}
     '';
