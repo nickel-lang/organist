@@ -60,8 +60,8 @@ test_template () {
 test_example () (
   examplePath=$(realpath "$1")
   pushd_temp
-  cp -r "$examplePath" .
-  pushd ./*
+  cp -r "$examplePath" ./example
+  pushd ./example
   prepare_shell
   nix build --print-build-logs
   popd
