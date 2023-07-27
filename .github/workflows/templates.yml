@@ -25,4 +25,5 @@ jobs:
 
     - name: Test devshells
       run: |
-        nix develop --accept-flake-config --command bash test-template.sh
+        nix develop --accept-flake-config --command bash run-test.sh template
+        nix develop --accept-flake-config --command bash run-test.sh example examples/c-hello-world

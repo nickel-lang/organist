@@ -142,14 +142,14 @@
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
 
-        apps.test.templates =
+        apps.run-test =
           let testScript = pkgs.writeShellApplication {
             name = "test-templates";
-            runtimeInputs = [ inputs.nickel.packages."${system}".nickel ];
+            runtimeInputs = [ inputs.nickel.packages."${system}".nickel-lang-cli ];
             text = ''
               set -euo pipefail
               cd ${./.}
-              exec ${pkgs.runtimeShell} ./test-template.sh "$@"
+              exec ${pkgs.runtimeShell} ./run-test.sh "$@"
             '';
           }; in
         {
