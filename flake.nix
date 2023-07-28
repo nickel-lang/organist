@@ -62,12 +62,12 @@
             builtins.readDir
             (nixpkgs.lib.mapAttrsToList (name: value:
               {
-                "dev-shell.ncl" = nixpkgs.lib.nameValuePair "devShells" {
-                  default = lib.importNcl path name inputs;
-                };
-                "package.ncl" = nixpkgs.lib.nameValuePair "packages" {
-                  default = lib.importNcl path name inputs;
-                };
+                "dev-shell.ncl" = nixpkgs.lib.nameValuePair
+                  "devShells"
+                  (lib.importNcl path name inputs).shells;
+                "package.ncl" = nixpkgs.lib.nameValuePair
+                  "packages"
+                  { fromNickel = (lib.importNcl path name inputs).packages; };
               }
               .${name}
               or []))

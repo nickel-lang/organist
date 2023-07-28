@@ -67,7 +67,7 @@ test_example () (
   cp -r "$examplePath" ./example
   pushd ./example
   prepare_shell
-  nix build --print-build-logs
+  nix build --print-build-logs .#fromNickel.default
   popd
   popd
 )

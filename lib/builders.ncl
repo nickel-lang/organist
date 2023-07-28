@@ -45,7 +45,6 @@ in
       Can be controlled with environment variables in the same way as `stdenv.mkDerivation`.
     "%
     = {
-      output = {
         name,
         version,
         build_command = {
@@ -58,7 +57,6 @@ in
         },
         nix_drv = env & structured_env,
       } | NickelPkg,
-    },
 
   Shell
     | doc m%"
@@ -66,9 +64,8 @@ in
       Analogous to `mkShell`.
     "%
     = NixpkgsPkg & {
-      hooks | doc "Bash scripts to run when entering the shell" = {},
+        hooks | doc "Bash scripts to run when entering the shell" = {},
 
-      output = {
         name | default = "shell",
         version | default = "dev",
         packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
@@ -80,20 +77,24 @@ in
         env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
         structured_env.buildInputs = packages,
       } | (NickelPkg & { packages | { _ : Derivation } }),
-    },
 
-  BashShell = Shell & {
-    output.packages = {
-      bash = lib.import_nix "nixpkgs#bash",
+  BashShell = {
+    build = Shell & {
+      packages = {
+        bash = lib.import_nix "nixpkgs#bash",
+      },
     },
+    dev = build,
   },
 
   RustShell =
     BashShell
     & {
-      output.packages = {
+      build.packages = {
         cargo = lib.import_nix "nixpkgs#cargo",
         rustc = lib.import_nix "nixpkgs#rustc",
+      },
+      dev.packages = {
         rustfmt = lib.import_nix "nixpkgs#rustfmt",
         rust-analyzer = lib.import_nix "nixpkgs#rust-analyzer",
       },
@@ -102,63 +103,51 @@ in
   GoShell =
     BashShell
     & {
-      output.packages = {
-        go = lib.import_nix "nixpkgs#go",
-        gopls = lib.import_nix "nixpkgs#gopls",
-      },
+      build.packages.go = lib.import_nix "nixpkgs#go",
+      dev.packages.gopls = lib.import_nix "nixpkgs#gopls",
     },
 
   ClojureShell =
     BashShell
     & {
-      output.packages = {
-        clojure = lib.import_nix "nixpkgs#clojure",
-        clojure-lsp = lib.import_nix "nixpkgs#clojure-lsp",
-      },
+      build.packages.clojure = lib.import_nix "nixpkgs#clojure",
+      dev.packages.clojure-lsp = lib.import_nix "nixpkgs#clojure-lsp",
     },
 
   CShell =
     BashShell
     & {
-      output.packages = {
-        clang = lib.import_nix "nixpkgs#clang",
-        clang-tools = lib.import_nix "nixpkgs#clang-tools",
-      },
+      build.packages.clang = lib.import_nix "nixpkgs#clang",
+      dev.packages.clang-tools = lib.import_nix "nixpkgs#clang-tools",
     },
 
   # intelephense is currently broken in nixpkgs
   PhpShell =
     BashShell
     & {
-      output.packages = {
-        php = lib.import_nix "nixpkgs#php",
-        # Not included because unfree
-        # intelephense = lib.import_nix "nixpkgs#nodePackages.intelephense",
-      },
+      build.packages.php = lib.import_nix "nixpkgs#php",
+      # Not included because unfree
+      # dev.packages.intelephense = lib.import_nix "nixpkgs#nodePackages.intelephense",
     },
 
   ZigShell =
     BashShell
     & {
-      output.packages = {
-        zig = lib.import_nix "nixpkgs#zig",
-        zls = lib.import_nix "nixpkgs#zls",
-      },
+      build.packages.zig = lib.import_nix "nixpkgs#zig",
+      dev.packages.zls = lib.import_nix "nixpkgs#zls",
     },
 
   JavascriptShell =
     BashShell
     & {
-      output.packages = {
-        nodejs = lib.import_nix "nixpkgs#nodejs",
-        ts-lsp = lib.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
-      },
+      build.packages.nodejs = lib.import_nix "nixpkgs#nodejs",
+      dev.packages.ts-lsp = lib.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
     },
 
   RacketShell =
     BashShell
     & {
-      output.packages = {
+      build.packages = {
         racket = lib.import_nix "nixpkgs#racket",
       },
     },
@@ -166,35 +155,29 @@ in
   ScalaShell =
     BashShell
     & {
-      output.packages = {
-        scala = lib.import_nix "nixpkgs#scala",
-        metals = lib.import_nix "nixpkgs#metals",
-      },
+      build.packages.scala = lib.import_nix "nixpkgs#scala",
+      dev.packages.metals = lib.import_nix "nixpkgs#metals",
     },
 
   Python310Shell =
     BashShell
     & {
-      output.packages = {
-        python = lib.import_nix "nixpkgs#python310",
-        python-lsp = lib.import_nix "nixpkgs#python310Packages.python-lsp-server",
-      },
+      build.packages.python = lib.import_nix "nixpkgs#python310",
+      dev.packages.python-lsp = lib.import_nix "nixpkgs#python310Packages.python-lsp-server",
     },
 
   ErlangShell =
     BashShell
     & {
-      output.packages = {
-        erlang = lib.import_nix "nixpkgs#erlang",
-        erlang-lsp = lib.import_nix "nixpkgs#erlang-ls",
-      },
+      build.packages.erlang = lib.import_nix "nixpkgs#erlang",
+      dev.packages.erlang-lsp = lib.import_nix "nixpkgs#erlang-ls",
     },
 
   HaskellStackShell =
     BashShell
     & {
-      ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
-      output.packages =
+      build.ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
+      build.packages =
         let stack-wrapped =
           {
             name = "stack-wrapped",
@@ -227,10 +210,13 @@ in
         {
           stack = stack-wrapped,
           stack' = lib.import_nix "nixpkgs#stack",
-          ormolu = lib.import_nix "nixpkgs#ormolu",
           nix = lib.import_nix "nixpkgs#nix",
           git = lib.import_nix "nixpkgs#git",
-          haskell-language-server = lib.import_nix "nixpkgs#haskell.packages.ghc%{ghcVersion}.haskell-language-server",
+        },
+        dev.ghcVersion,
+        dev.packages = {
+          ormolu = lib.import_nix "nixpkgs#ormolu",
+          haskell-language-server = lib.import_nix "nixpkgs#haskell.packages.ghc%{dev.ghcVersion}.haskell-language-server",
         },
     },
 }

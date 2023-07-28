@@ -292,6 +292,12 @@ from the Nix world) or a derivation defined in Nickel.
     path | String,
   },
 
+  NixelShells = {
+    dev | NickelDerivation = build,
+    build | NickelDerivation,
+    "default" | NickelDerivation = dev,
+  },
+
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
   # it still obeys some rules: if the `type` field is set to a known predefined
@@ -299,6 +305,11 @@ from the Nix world) or a derivation defined in Nickel.
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  NixelExpression = Dyn,
+  NixelExpression = {
+    shells
+      | NixelShells
+      | optional,
+    ..
+  },
 
 }
