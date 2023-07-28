@@ -17,6 +17,6 @@ let contracts = import "contracts.ncl" in
           ```
         "%%
     = fun filepath => { path = filepath },
-  import_nix | contracts.NickelInputSpec -> contracts.NixInput
-    = fun x => { spec = x },
+  import_nix | contracts.NixInputSugar -> contracts.NixInput
+    = fun x => x,
 }

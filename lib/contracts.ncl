@@ -25,7 +25,6 @@ let predicate | doc "Various predicates used to define contracts"
       is_derivation x
       || std.is_string x
       || is_nix_path x
-      || is_nix_input x
   }
   in
 
@@ -45,7 +44,9 @@ in
   # instead?
   System = { arch | String, os | String },
 
-  NullOr = fun c label value =>
+  NullOr
+    | doc "Make a contract nullable"
+    = fun c label value =>
     if value == null then value else std.contract.apply c label value,
 
   # TODO: more precise contract
@@ -223,63 +224,53 @@ from the Nix world) or a derivation defined in Nickel.
   Params | doc "The parameters provided to the Nickel expression"
     = {
       system | System,
-      inputs | { _ | Derivation },
-      nix | { .. },
     },
 
   InputPath
+    | doc " The path of a package in an input (usually nixpkgs)"
+    = Array String,
+
+  NixInput
     | doc m%"
-        The path of a package in an input (usually nixpkgs). Can be either a
-        single attribute, represented as a string, or an array of string,
-        representing a composed path.
-
-        If a single attribute is provided (a `String`), this contract normalizes the
-        result by splitting it around dots to obtain an array:
-
-        # Examples
-
-        ```nickel
-        "gcc" | InputPath
-          => ["gcc"]
-          => Pass the contract
-        "nodePackages.markdownlint-cli" | InputPath
-          => ["nodePackages", "markdownlint-cli"]
-          => Pass the contract
-        ["nodePackages", "markdownlint-cli"] | InputPath
-          => Pass the contract
-        ```
+      The specification of a Nix input in a Nickel expression.
     "%
-    = fun label value =>
-      if std.is_string value then
-        std.string.split "." value
-      else
-        value
-        |> std.contract.apply (Array String) label,
-
-  NickelInputSpec | doc "The specification of an input in a Nickel expression"
-    =
-      let final = {
+    = {
+        "%{type_field}" | force = "nixInput",
         input
+          | doc "The flake input from which we'll resolve this input"
           | String
           | default
           = "nixpkgs",
-        path
+        attrPath
+          | doc m%"
+            The path to look for in the given flake input.
+
+            This follows the same search rules as the `nix build` cli, namely
+            that the library will consider the first valid values within:
+            - InputPath
+            - "packages".system.InputPath
+            - "legacyPackages".system.InputPath
+            "%
           | InputPath
           | optional,
-        # TODO: precise contract. We want to allow a path if input == "sources"
-        ..
-      }
-      in
+      },
+
+    NixInputSugar
+      | doc m%"
+        Syntactic sugar for defining a `NixInput` to allow writing inputs
+        directly as strings of the form `{inputName}#{path}`
+      "%
+      =
       fun label value =>
         if std.is_string value then
           let hashPosition = (std.string.find "#" value).index in
           let value' =
             if hashPosition == -1 then
-              { input = value, pkgPath = [] }
+              { input = value, attrPath = [] }
             else
               {
                 input = std.string.substring 0 hashPosition value,
-                pkgPath =
+                attrPath =
                   std.string.split
                     "."
                     (
@@ -290,9 +281,16 @@ from the Nix world) or a derivation defined in Nickel.
                     ),
               }
           in
-          value' |> std.contract.apply final label
+          value' |> std.contract.apply NixInput label
         else
-          std.contract.apply final label value,
+          std.contract.apply NixInput label value,
+
+  NixPath
+    | doc "A path to be imported in the Nix store"
+    = {
+    "%{type_field}" | force = "nixPath",
+    path | String,
+  },
 
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
@@ -301,21 +299,6 @@ from the Nix world) or a derivation defined in Nickel.
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  NickelExpressionResult = Dyn,
+  NixelExpression = Dyn,
 
-  NickelExpression | doc "A Nickel expression"
-    = {
-      inputs_spec | { _ | NickelInputSpec },
-      output | NickelExpressionResult,
-      ..
-    },
-
-  NixPath = {
-    "%{type_field}" | force = "nixPath",
-    path | String,
-  },
-  NixInput = {
-    "%{type_field}" | force = "nixInput",
-    spec | NickelInputSpec,
-  },
 }

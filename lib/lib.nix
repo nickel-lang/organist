@@ -48,13 +48,13 @@
           else if nixelType == "nixInput"
           then
           let
-            pkgPath = value.spec.pkgPath;
+            attrPath = value.attrPath;
             possibleAttrPaths = [
-             ([ value.spec.input ] ++ pkgPath)
-             ([ value.spec.input "packages" system ] ++ pkgPath)
-             ([ value.spec.input "legacyPackages" system ] ++ pkgPath)
+             ([ value.input ] ++ attrPath)
+             ([ value.input "packages" system ] ++ attrPath)
+             ([ value.input "legacyPackages" system ] ++ attrPath)
             ];
-            notFound = throw "Missing input \"${value.spec.input}.${lib.strings.concatStringsSep "." pkgPath}\"";
+            notFound = throw "Missing input \"${value.input}.${lib.strings.concatStringsSep "." attrPath}\"";
             chosenAttrPath = lib.findFirst
               (path: lib.hasAttrByPath path flakeInputs)
               notFound
@@ -82,13 +82,12 @@
     nickelWithImports = builtins.toFile "eval.ncl" ''
       let params = {
         system = "${system}",
-        nix = import "${flakeRoot}/lib/nix.ncl",
       }
       in
+      let nix = import "${flakeRoot}/lib/nix.ncl" in
 
-      let nickel_expr | params.nix.NickelExpression =
-        import "${sources}/${nickelFile}"
-      in
+      let nickel_expr | nix.contracts.NixelExpression =
+        import "${sources}/${nickelFile}" in
 
       (nickel_expr & params).output
     '';
@@ -106,7 +105,9 @@
       inherit baseDir nickelFile;
     };
   in
-  runCommand "nickel-res.json" {} ''
+  runCommand "nickel-res.json" {
+    ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
+  } ''
   ${nickel}/bin/nickel -f ${fileToCall} export > $out
   '';
 
