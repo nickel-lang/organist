@@ -166,15 +166,11 @@ in
     & {
       inputs_spec = {
         php = {},
-        intelephense = {
-          path = "nodePackages"."intelephense",
-        },
       },
       inputs,
 
       output.packages = {
         php = inputs.php,
-        intelephense = inputs.intelephense,
       },
     },
 
@@ -193,7 +189,6 @@ in
       },
     },
 
-  # nodePackages_latest.typescript-language-server is marked broken in nixpkgs
   JavascriptShell =
     BashShell
     & {
@@ -239,8 +234,6 @@ in
       },
     },
 
-  # broken: PyLTI-0.7.0 not supported for interpreter python3.10
-  # works with a regular nix shell though
   Python310Shell =
     BashShell
     & {
@@ -276,7 +269,7 @@ in
   HaskellStackShell =
     BashShell
     & {
-      ghcVersion, # User-defined. To keep in sync with the one used by stack
+      ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
       inputs_spec = {
         stack = {},
         ormolu = {},
