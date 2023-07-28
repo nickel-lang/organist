@@ -199,6 +199,7 @@ in
         let stack-wrapped =
           {
             name = "stack-wrapped",
+            # Should be stack.version, but import_nix doesn't allow to access derivation attributes
             version = "1.0",
             build_command = {
               cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
