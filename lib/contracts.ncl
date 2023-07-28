@@ -203,21 +203,21 @@ from the Nix world) or a derivation defined in Nickel.
             # Format
 
             `structured_env` is a record whose fields are environment variables
-            (`PATH`, `CLASSPATH`, `LD_PRELOAD`, etc.). The values are records
+            (`buildInputs`, etc.). The values are records
             themselves, which represents _named pieces_ that are joined together
             to form the final value of the variable.
 
             For example:
 
             ```nickel
-            structured_env.PATH = {
-              bash = nix-s%"%{inputs.bash}/bin"%,
-              curl = nix-s%"%{inputs.curl}/bin"%,
+            structured_env.buildInputs = {
+              bash = inputs.bash,
+              curl = inputs.curl,
             }
             ```
 
-            This structured environment corresponds to a variable `PATH` with
-            value `"%{inputs.bash}/bin:%{inputs.curl}/bin"`. Note that the order
+            This structured environment corresponds to a variable `buildInputs` with
+            value `"%{inputs.bash} %{inputs.curl}"`. Note that the order
             isn't preserved. The `bash` and `curl` names don't appear in the
             final value, but they are used for composability and overriding.
 
@@ -230,7 +230,7 @@ from the Nix world) or a derivation defined in Nickel.
             `builder2.ncl`:
 
             ```nickel
-            structured_env.PATH.other-package = nix-s"%{inputs.other-package}/bin"%,
+            structured_env.buildInputs.other-package = inputs.other-package,
             ```
 
             The final result will be a path with all three subpaths separated by
@@ -242,15 +242,14 @@ from the Nix world) or a derivation defined in Nickel.
             override them specifically using merging:
 
             ```nickel
-            structured_env.PATH.bash | force = nix-s"%{inputs.special-bash}/bin"%,
+            structured_env.buildInputs.bash | force = inputs.special-bash,
             ```
 
-            # Interaction with `env`
+            # Interaction with `env` and `attrs`
 
-            Usually, you should only work with `structured_env`. The default
-            value of `env` is built from `structured_env` automatically. If you
-            override `env` directly, be aware that **`structured_env` will then
-            be potentially completly ignored**.
+            Usually, you should only work with `structured_env`. If you override
+            `attrs` directly, be aware that **`structured_env` will then be
+            potentially completly ignored**.
           "%%%
         | { _ | { _ | NixString } }
         | default
@@ -259,19 +258,30 @@ from the Nix world) or a derivation defined in Nickel.
         | doc m%"
           Set additional environment variables for the builder.
 
-          By default, `env` should computed from `structured_env`, and
-          `structured_env` should be used preferably. Ultimately, `env` is the actual
-          source of truth being passed to Nix when building the derivation. See the
-          documentation of `structured_env` for more details.
+          You should use `structured_env` where possible.
+
+          If you override `attrs` directly, the value of `env` might be ignored.
           "%
         | { _ | NixString }
-        # TODO: should we compute `env` from `structured_env` directly here? Or
-        # let each builder do that by itself?
-        #
-        # Some parameters, like the separator, may vary. For now we have no
-        # choice anyway, because of merging not being idempotent on complex
-        # values, and because the `NickelDerivation` contract is applied several
-        # times, we have to move the computing logic to builders.
+        | default
+        = {},
+      attrs
+        | doc m%%"
+            *Directly* pass arbitrary attributes to the Nix derivation.
+
+            These attributes will appear as environment variables inside the
+            build, and will be available in `.attrs.json` file.
+
+            Unlike `env`, the fields here can be of any type, including
+            arbitrarily deep records. As a consequence, you should NOT pass
+            symbolic strings (including `nix-s%"..."%`) here.
+
+            By default, `attrs` is computed from values of `env` and
+            `structured_env`. It is almost always better to use `structured_env`
+            or `env` instead of `attrs`, unless you wish to pass deeply nested
+            attribute sets or non-string values.
+          "%%
+        | { _ | Dyn }
         | default
         = {},
       "%{type_field}" | force = "nickelDerivation",

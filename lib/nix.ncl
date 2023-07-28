@@ -1,5 +1,3 @@
-let contracts = import "contracts.ncl" in
-
 {
   Derivation = contracts.NickelDerivation,
   NickelExpression = contracts.NickelExpression,
@@ -23,6 +21,7 @@ let contracts = import "contracts.ncl" in
       = fun filepath => { path = filepath },
   },
   builders = import "builders.ncl",
+  contracts = import "contracts.ncl",
 }
 #TODO: currently, Nickel forbids doc at the toplevel. It's most definitely
 # temporary, as the implementation of RFC005 is ongoing. Once the capability is

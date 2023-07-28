@@ -5,6 +5,7 @@ This example builds a simple C hello world program through nickel-nix.
 ## Usage
 
 ```console
+$ nix run .#regenerate-lockfile
 $ nix build --impure
 [..]
 $ ./result/bin/hello

@@ -2,7 +2,7 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel.url = "github:tweag/nickel/master";
+  inputs.nickel.url = "github:tweag/nickel/1.1.1";
   inputs.topiary.follows = "nickel/topiary";
 
   nixConfig = {
@@ -48,7 +48,7 @@
 
                 First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-                Then run `nix develop --impure` to enter the dev shell.
+                Then run `nix develop` to enter the dev shell.
               '';
             }
         )
@@ -65,7 +65,7 @@
       flake.outputsFromNickel = path: inputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
-          nickel-nix = self.lib.x86_64-linux.lockFileContents;
+          nickel-nix = "${self}/lib/nix.ncl";
         },
       }:
         flake-utils.lib.eachSystem systems (system: let
@@ -93,19 +93,14 @@
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let
-        lib = pkgs.callPackage ./lib.nix {
+        lib = pkgs.callPackage ./lib/lib.nix {
           inherit system;
-          nickel = inputs.nickel.packages."${system}".nickel;
-          inherit (self.lib.${system}) nickel-nix-internals;
+          flakeRoot = self.outPath;
+          nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         lib.importNcl = lib.importNcl;
-
-        # Internal nickel-nix library. Each value is a function that accepts inputs from user flake.
-        lib.nickel-nix-internals = {
-          naked_std_env = self.lib.${system}.importNcl ./. "naked-stdenv.ncl";
-        };
 
         # Helper function that generates ugly contents for "nickel.lock.ncl", see buildLockFile.
         lib.buildLockFileContents = contents: let
@@ -131,7 +126,6 @@
         #     nickel-nix = {
         #       builders = "/nix/store/...-source/builders.ncl";
         #       contracts = "/nix/store/...-source/contracts.ncl";
-        #       naked-stdenv = "/nix/store/...-source/naked-stdenv.ncl";
         #       nix = "/nix/store/...-source/nix.ncl";
         #     };
         #   }
@@ -140,7 +134,6 @@
         #     nickel-nix = {
         #       builders = import "/nix/store/...-source/builders.ncl",
         #       contracts = import "/nix/store/...-source/contracts.ncl",
-        #       naked-stdenv = import "/nix/store/...-source/naked-stdenv.ncl",
         #       nix = import "/nix/store/...-source/nix.ncl",
         #     },
         #   }
@@ -164,23 +157,6 @@
           type = "app";
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
-
-        # Provide an attribute set of all .ncl libraries in the root directory of this flake
-        lib.lockFileContents = pkgs.lib.pipe ./. [
-          # Collect all items in the directory like {"examples": "directory", "nix.ncl": regular, ...}
-          builtins.readDir
-          # List only regular files with .ncl suffix
-          (files:
-            pkgs.lib.concatMap (
-              name:
-                pkgs.lib.optional
-                (files.${name} == "regular" && (pkgs.lib.hasSuffix ".ncl" name))
-                name
-            ) (pkgs.lib.attrNames files))
-          # Generate attrs with file name without .ncl as a key: {nix = "/nix/store/...-source/nix.ncl";}
-          (map (f: pkgs.lib.nameValuePair (pkgs.lib.removeSuffix ".ncl" f) "${./.}/${f}"))
-          pkgs.lib.listToAttrs
-        ];
 
         apps.tests = let
           mkTest = {
@@ -211,13 +187,13 @@
               mkTest {
                 name = "test devshell ${name}";
                 script = ''
-                  nix flake new --template path:${./.}#${name} example --accept-flake-config
+                  nix flake new --template path:${self.outPath}#${name} example --accept-flake-config
 
                   pushd ./example
                   # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
-                  nix flake lock --override-input nickel-nix path:${./.} --accept-flake-config
+                  nix flake lock --override-input nickel-nix path:${self.outPath} --accept-flake-config
                   nix run .#regenerate-lockfile --accept-flake-config
-                  nix develop --impure --accept-flake-config --print-build-logs < /dev/null
+                  nix develop --accept-flake-config --print-build-logs < /dev/null
                   popd
                 '';
               }
@@ -227,12 +203,12 @@
               mkTest {
                 name = "test ${name}";
                 script = ''
-                  cp -r ${./.}/examples/${name} ./${name}
+                  cp -r ${self.outPath}/examples/${name} ./${name}
                   chmod -R u+w ./${name}
                   cd ./${name}
-                  nix flake lock --override-input nickel-nix path:${./.}
+                  nix flake lock --override-input nickel-nix path:${self.outPath}
                   nix run .#regenerate-lockfile --accept-flake-config
-                  nix build --impure --accept-flake-config
+                  nix build --accept-flake-config
                 '';
               }
           );
@@ -240,7 +216,7 @@
 
         devShells.default = pkgs.mkShell {
           packages = [
-            inputs.nickel.packages."${system}".nickel
+            inputs.nickel.packages."${system}".default
           ];
         };
       }
