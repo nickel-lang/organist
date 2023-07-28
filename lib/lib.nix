@@ -14,17 +14,13 @@
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = system: value:
-    (builtins.removeAttrs value ["build_command" "env" "structured_env" "attrs" "packages"])
+    value
     // {
       system =
-        if value ? system
-        then "${value.system.arch}-${value.system.os}"
+        if value.system != null
+        then value.system
         else system;
-      builder = value.build_command.cmd;
-      args = value.build_command.args;
-      __structuredAttrs = true;
-    }
-    // value.attrs;
+    };
 
   # Import a Nickel value produced by the Nixel DSL
   importFromNickel = flakeInputs: system: baseDir: value: let
@@ -42,7 +38,7 @@
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
-            value);
+            value.nixDrv);
           in
             derivation prepared
           else if nixelType == "nixString"

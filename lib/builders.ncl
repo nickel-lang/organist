@@ -34,7 +34,6 @@ in
              "%
           ]
         },
-        env = {},
       } | nix.builders.NickelPkg
       ```
       "%%%
@@ -57,7 +56,7 @@ in
         env = {
           stdenv = lib.import_nix "nixpkgs#stdenv"
         },
-        attrs = env & structured_env,
+        nixDrv = env & structured_env,
       } | NickelPkg,
     },
 

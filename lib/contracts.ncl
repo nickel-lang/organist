@@ -45,6 +45,9 @@ in
   # instead?
   System = { arch | String, os | String },
 
+  NullOr = fun c label value =>
+    if value == null then value else std.contract.apply c label value,
+
   # TODO: more precise contract
   Derivation
     | doc m%"
@@ -154,131 +157,67 @@ from the Nix world) or a derivation defined in Nickel.
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
 
-  NickelDerivation
+  NixDerivation
     | doc m%"
         The basic, low-level interface for a symbolic derivation. A
-        NickelDerivation is intenteded to be passed (exported) to the Nix side,
+        NixDerivations is intenteded to be passed (exported) to the Nix side,
         which will take care of actually building it.
+
+        The fields directly map to the corresponding
+        [builtins.derivation](https://nixos.org/manual/nix/stable/language/derivations.html)
+        attribute on the Nix side
       "%
     = {
+      name | Name,
+      builder | NixString,
+      args | Array NixString,
+      system | NullOr String,
+      outputs | Array String | optional,
+      "__structuredAttrs" | Bool | default = true,
+      ..
+    },
+
+  NickelDerivation
+    | doc m%"
+    The representation of a symbolic derivation on the Nickel side.
+    This record is extensible as the different layers involved might add new attributes to this derivation.
+    The important part eventually is the `nixDrv` field which is computed from the rest and sent to Nix
+"%
+    = {
+      "%{type_field}" | force = "nickelDerivation",
+      nixDrv
+        | doc "The raw derivation sent to Nix"
+        | NixDerivation
+        =
+          let _name = name in
+          let _system = system in
+          let _version = version in
+          {
+            name = _name,
+            system = _system,
+            version = _version,
+            builder = build_command.cmd,
+            args = build_command.args
+          },
       name
         | doc "The name of the package."
         | Name,
-      # in Nix, the version isn't actually strictly required by the interface of
-      # derivation. But we probably want to impose it if we are to redefine the
-      # API on the Nickel side.
       version
         | doc "The version of the package."
         | optional
         | Version,
-      dependencies
-        | doc "The dependencies of the package."
-        | Array Derivation
-        | default
-        = [],
       system
         | doc "The system to build the package on. Defaults to the system used by importNcl."
-        | System
-        | optional,
+        | NullOr System
+        | default
+        = null,
       build_command
         | doc "The build command to execute."
         | {
           cmd | NixString,
           args | Array NixString
         },
-      structured_env
-        | doc m%%%"
-            Set additional environment variables for the builder.
-
-            `structured_env` is usually preferred over `env`, as the former is
-            easier to merge and to override.
-
-
-            # Format
-
-            `structured_env` is a record whose fields are environment variables
-            (`buildInputs`, etc.). The values are records
-            themselves, which represents _named pieces_ that are joined together
-            to form the final value of the variable.
-
-            For example:
-
-            ```nickel
-            structured_env.buildInputs = {
-              bash = inputs.bash,
-              curl = inputs.curl,
-            }
-            ```
-
-            This structured environment corresponds to a variable `buildInputs` with
-            value `"%{inputs.bash} %{inputs.curl}"`. Note that the order
-            isn't preserved. The `bash` and `curl` names don't appear in the
-            final value, but they are used for composability and overriding.
-
-            ## Combining
-
-            For example, imagine defining a shell in two different records, that
-            are merged together: `builder1 & builder2`. `builder1` defines the
-            structured environment given in the example above. Because
-            `structured_env.PATH` is a recod, you can simply write in
-            `builder2.ncl`:
-
-            ```nickel
-            structured_env.buildInputs.other-package = inputs.other-package,
-            ```
-
-            The final result will be a path with all three subpaths separated by
-            `:`.
-
-            ## Overriding
-
-            Because pieces are named (`bash`, `curl`, `other-package`), you can
-            override them specifically using merging:
-
-            ```nickel
-            structured_env.buildInputs.bash | force = inputs.special-bash,
-            ```
-
-            # Interaction with `env` and `attrs`
-
-            Usually, you should only work with `structured_env`. If you override
-            `attrs` directly, be aware that **`structured_env` will then be
-            potentially completly ignored**.
-          "%%%
-        | { _ | { _ | NixString } }
-        | default
-        = {},
-      env
-        | doc m%"
-          Set additional environment variables for the builder.
-
-          You should use `structured_env` where possible.
-
-          If you override `attrs` directly, the value of `env` might be ignored.
-          "%
-        | { _ | NixString }
-        | default
-        = {},
-      attrs
-        | doc m%%"
-            *Directly* pass arbitrary attributes to the Nix derivation.
-
-            These attributes will appear as environment variables inside the
-            build, and will be available in `.attrs.json` file.
-
-            Unlike `env`, the fields here can be of any type, including
-            arbitrarily deep records. As a consequence, you should NOT pass
-            symbolic strings (including `nix-s%"..."%`) here.
-
-            By default, `attrs` is computed from values of `env` and
-            `structured_env`. It is almost always better to use `structured_env`
-            or `env` instead of `attrs`, unless you wish to pass deeply nested
-            attribute sets or non-string values.
-          "%%
-        | { _ | Dyn }
-        | default
-        = {},
-      "%{type_field}" | force = "nickelDerivation",
+      ..
     },
 
   Params | doc "The parameters provided to the Nickel expression"
