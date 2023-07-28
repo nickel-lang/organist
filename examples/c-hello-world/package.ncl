@@ -1,22 +1,14 @@
 let nickel-nix = (import "./nickel.lock.ncl").nickel-nix in
 
 nickel-nix.builders.NixpkgsPkg & {
-  inputs_spec = {
-    bash.input = "nixpkgs",
-    coreutils.input = "nixpkgs",
-    gcc.input = "nixpkgs",
-  },
-
-  inputs,
-
   output =
     {
       name = "hello",
       version = "0.1",
       structured_env = {
-        buildInputs.gcc = inputs.gcc,
-        buildInputs.coreutils = inputs.coreutils,
-        buildInputs.bash = inputs.bash,
+        buildInputs.gcc = nickel-nix.lib.import_nix "nixpkgs#gcc",
+        buildInputs.coreutils = nickel-nix.lib.import_nix "nixpkgs#coreutils",
+        buildInputs.bash = nickel-nix.lib.import_nix "nixpkgs#bash",
       },
       env = {
         buildCommand = nix-s%"

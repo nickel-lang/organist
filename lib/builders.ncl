@@ -1,5 +1,7 @@
 let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
 
+let lib = import "lib.ncl" in
+
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then "" else
     std.array.reduce_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) values
@@ -44,21 +46,16 @@ in
       Can be controlled with environment variables in the same way as `stdenv.mkDerivation`.
     "%
     = {
-      inputs_spec = {
-        bash.input | default = "nixpkgs",
-        stdenv.input | default = "nixpkgs",
-      },
-      inputs,
       output = {
         name,
         version,
         build_command = {
-          cmd = nix-s%"%{inputs.bash}/bin/bash"%,
+          cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
           args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
         env = {
-          stdenv = inputs.stdenv,
+          stdenv = lib.import_nix "nixpkgs#stdenv"
         },
         attrs = env & structured_env,
       } | NickelPkg,
@@ -87,76 +84,46 @@ in
     },
 
   BashShell = Shell & {
-    inputs_spec = {
-      bash.input | default = "nixpkgs",
-    },
-    inputs,
     output.packages = {
-      bash = inputs.bash,
+      bash = lib.import_nix "nixpkgs#bash",
     },
   },
 
   RustShell =
     BashShell
     & {
-      inputs_spec = {
-        cargo = {},
-        rustc = {},
-        rustfmt = {},
-        rust-analyzer = {},
-      },
-      inputs,
-
       output.packages = {
-        cargo = inputs.cargo,
-        rustc = inputs.rustc,
-        rustfmt = inputs.rustfmt,
-        rust-analyzer = inputs.rust-analyzer,
+        cargo = lib.import_nix "nixpkgs#cargo",
+        rustc = lib.import_nix "nixpkgs#rustc",
+        rustfmt = lib.import_nix "nixpkgs#rustfmt",
+        rust-analyzer = lib.import_nix "nixpkgs#rust-analyzer",
       },
     },
 
   GoShell =
     BashShell
     & {
-      inputs_spec = {
-        go = {},
-        gopls = {},
-      },
-      inputs,
-
       output.packages = {
-        go = inputs.go,
-        gopls = inputs.gopls,
+        go = lib.import_nix "nixpkgs#go",
+        gopls = lib.import_nix "nixpkgs#gopls",
       },
     },
 
   ClojureShell =
     BashShell
     & {
-      inputs_spec = {
-        clojure = {},
-        clojure-lsp = {},
-      },
-      inputs,
-
       output.packages = {
-        clojure = inputs.clojure,
-        clojure-lsp = inputs.clojure-lsp,
+        clojure = lib.import_nix "nixpkgs#clojure",
+        clojure-lsp = lib.import_nix "nixpkgs#clojure-lsp",
       },
     },
 
   CShell =
     BashShell
     & {
-      inputs_spec = {
-        clang = {},
-        clang-tools = {},
-      },
-      inputs,
-
       output.packages = {
-        clang = inputs.clang,
-        clang-tools = inputs.clang-tools,
+        clang = lib.import_nix "nixpkgs#clang",
+        clang-tools = lib.import_nix "nixpkgs#clang-tools",
       },
     },
 
@@ -164,105 +131,63 @@ in
   PhpShell =
     BashShell
     & {
-      inputs_spec = {
-        php = {},
-      },
-      inputs,
-
       output.packages = {
-        php = inputs.php,
+        php = lib.import_nix "nixpkgs#php",
+        # Not included because unfree
+        # intelephense = lib.import_nix "nixpkgs#nodePackages.intelephense",
       },
     },
 
   ZigShell =
     BashShell
     & {
-      inputs_spec = {
-        zig = {},
-        zls = {},
-      },
-      inputs,
-
       output.packages = {
-        zig = inputs.zig,
-        zls = inputs.zls,
+        zig = lib.import_nix "nixpkgs#zig",
+        zls = lib.import_nix "nixpkgs#zls",
       },
     },
 
   JavascriptShell =
     BashShell
     & {
-      inputs_spec = {
-        nodejs = {},
-        typescript-language-server = {
-          path = "nodePackages_latest.typescript-language-server",
-        }
-      },
-      inputs,
-
       output.packages = {
-        nodejs = inputs.nodejs,
-        ts-lsp = inputs.typescript-language-server,
+        nodejs = lib.import_nix "nixpkgs#nodejs",
+        ts-lsp = lib.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
       },
     },
 
   RacketShell =
     BashShell
     & {
-      inputs_spec = {
-        racket = {},
-      },
-      inputs,
-
       output.packages = {
-        racket = inputs.racket,
+        racket = lib.import_nix "nixpkgs#racket",
       },
     },
 
   ScalaShell =
     BashShell
     & {
-      inputs_spec = {
-        scala = {},
-        metals = {},
-      },
-      inputs,
-
       output.packages = {
-        scala = inputs.scala,
-        metals = inputs.metals,
+        scala = lib.import_nix "nixpkgs#scala",
+        metals = lib.import_nix "nixpkgs#metals",
       },
     },
 
   Python310Shell =
     BashShell
     & {
-      inputs_spec = {
-        python310 = {},
-        python-lsp-server = {
-          path = "python310Packages.python-lsp-server",
-        }
-      },
-      inputs,
-
       output.packages = {
-        python = inputs.python310,
-        python-lsp = inputs.python-lsp-server,
+        python = lib.import_nix "nixpkgs#python310",
+        python-lsp = lib.import_nix "nixpkgs#python310Packages.python-lsp-server",
       },
     },
 
   ErlangShell =
     BashShell
     & {
-      inputs_spec = {
-        erlang = {},
-        erlang-ls = {},
-      },
-      inputs,
-
       output.packages = {
-        erlang = inputs.erlang,
-        erlang-lsp = inputs.erlang-ls,
+        erlang = lib.import_nix "nixpkgs#erlang",
+        erlang-lsp = lib.import_nix "nixpkgs#erlang-ls",
       },
     },
 
@@ -270,43 +195,30 @@ in
     BashShell
     & {
       ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
-      inputs_spec = {
-        stack = {},
-        ormolu = {},
-        nix = {},
-        git = {},
-        coreutils = {},
-        haskell-language-server = {
-          path = "haskell.packages.ghc%{ghcVersion}.haskell-language-server",
-        },
-        # This will point to a copy of nixpkgs in nix store
-        path = {},
-      },
-      inputs,
-
       output.packages =
         let stack-wrapped =
           {
             name = "stack-wrapped",
-            version = inputs.stack.version,
+            # Should be stack.version, but import_nix doesn't allow to access derivation attributes
+            version = "1.0",
             build_command = {
-              cmd = nix-s%"%{inputs.bash}/bin/bash"%,
+              cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
               args = [
                 "-c",
                 # Sorry about Topiary formatting of the following lines
                 nix-s%"
             source .attrs.sh
-            export PATH='%{inputs.coreutils}/bin'":$PATH"
+            export PATH='%{lib.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
             mkdir -p ${outputs[out]}/bin
             echo "$0" > ${outputs[out]}/bin/stack
             chmod a+x ${outputs[out]}/bin/*
           "%,
                 nix-s%"
-            #!%{inputs.bash}/bin/bash
-            %{inputs.stack}/bin/stack \
+            #!%{lib.import_nix "nixpkgs#bash"}/bin/bash
+            %{lib.import_nix "nixpkgs#stack"}/bin/stack \
               --nix \
               --no-nix-pure \
-              --nix-path="nixpkgs=%{inputs.path}" \
+              --nix-path="nixpkgs=%{lib.import_nix "nixpkgs#path"}" \
               "$@"
           "%,
               ],
@@ -315,11 +227,11 @@ in
         in
         {
           stack = stack-wrapped,
-          stack' = inputs.stack,
-          ormolu = inputs.ormolu,
-          nix = inputs.nix,
-          git = inputs.git,
-          haskell-language-server = inputs.haskell-language-server,
+          stack' = lib.import_nix "nixpkgs#stack",
+          ormolu = lib.import_nix "nixpkgs#ormolu",
+          nix = lib.import_nix "nixpkgs#nix",
+          git = lib.import_nix "nixpkgs#git",
+          haskell-language-server = lib.import_nix "nixpkgs#haskell.packages.ghc%{ghcVersion}.haskell-language-server",
         },
     },
 }

@@ -6,10 +6,10 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixPath",
-    is_nix_derivation = fun x =>
+    is_nix_input = fun x =>
       std.is_record x
       && std.record.has_field type_field x
-      && x."%{type_field}" == "nixDerivation",
+      && x."%{type_field}" == "nixInput",
     is_nix_string = fun value =>
       std.is_record value
       && std.record.has_field type_field value
@@ -20,11 +20,12 @@ let predicate | doc "Various predicates used to define contracts"
       && x."%{type_field}" == "nickelDerivation",
     is_derivation = fun x =>
       is_nickel_derivation x
-      || is_nix_derivation x,
+      || is_nix_input x,
     is_string_fragment = fun x =>
       is_derivation x
       || std.is_string x
       || is_nix_path x
+      || is_nix_input x
   }
   in
 
@@ -152,13 +153,6 @@ from the Nix world) or a derivation defined in Nickel.
         let label = std.contract.label.append_note (std.serialize 'Json value) label in
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
-
-  NixDerivation | doc "A derivation coming from the Nix world"
-    = {
-      drvPath | String,
-      outputName | String,
-      "%{type_field}" | force = "nixDerivation",
-    },
 
   NickelDerivation
     | doc m%"
@@ -324,17 +318,42 @@ from the Nix world) or a derivation defined in Nickel.
         |> std.contract.apply (Array String) label,
 
   NickelInputSpec | doc "The specification of an input in a Nickel expression"
-    = {
-      input
-        | String
-        | default
-        = "nixpkgs",
-      path
-        | InputPath
-        | optional,
-      # TODO: precise contract. We want to allow a path if input == "sources"
-      ..
-    },
+    =
+      let final = {
+        input
+          | String
+          | default
+          = "nixpkgs",
+        path
+          | InputPath
+          | optional,
+        # TODO: precise contract. We want to allow a path if input == "sources"
+        ..
+      }
+      in
+      fun label value =>
+        if std.is_string value then
+          let hashPosition = (std.string.find "#" value).index in
+          let value' =
+            if hashPosition == -1 then
+              { input = value, pkgPath = [] }
+            else
+              {
+                input = std.string.substring 0 hashPosition value,
+                pkgPath =
+                  std.string.split
+                    "."
+                    (
+                      std.string.substring
+                        (hashPosition + 1)
+                        (std.string.length value)
+                        value
+                    ),
+              }
+          in
+          value' |> std.contract.apply final label
+        else
+          std.contract.apply final label value,
 
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
@@ -355,5 +374,9 @@ from the Nix world) or a derivation defined in Nickel.
   NixPath = {
     "%{type_field}" | force = "nixPath",
     path | String,
-  }
+  },
+  NixInput = {
+    "%{type_field}" | force = "nixInput",
+    spec | NickelInputSpec,
+  },
 }
