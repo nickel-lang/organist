@@ -121,6 +121,6 @@
     };
   in
     {rawNickel = nickelResult;}
-    // lib.traceVal (importFromNickel flakeInputs system baseDir (builtins.fromJSON
+    // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 in {inherit importNcl;}
