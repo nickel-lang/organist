@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xeuo pipefail
+set -euo pipefail
 
 usage() {
   cat <<EOF
@@ -34,6 +34,10 @@ prepare_shell() {
 # Note: running in a subshell (hence the parens and not braces around the function body) so that the trap-based cleanup happens whenever we exit
 test_one_template () (
   target="$1"
+  if [[ "$target" == NickelPkg ]] || [[ "$target" == "NixpkgsPkg" ]] || [[ "$target" == "Shell" ]]; then
+    exit 0
+  fi
+  set -x
   pushd_temp
 
   nix flake new --template "path:$PROJECT_ROOT" example --accept-flake-config
@@ -51,17 +55,13 @@ test_template () {
   if [[ -n ${1+x} ]]; then
     test_one_template "$1"
   else
-    all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/nix.ncl").builders) |> std.string.join " "')
-    for target in $all_targets; do
-      if [[ "$target" == NickelPkg ]] || [[ "$target" == "NixpkgsPkg" ]]; then
-        continue
-      fi
-      test_one_template "$target"
-    done
+    all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/nix.ncl").builders) |> std.string.join "\n"')
+    echo "$all_targets" | parallel --tag "$0" template
   fi
 }
 
 test_example () (
+  set -x
   examplePath=$(realpath "$1")
   pushd_temp
   cp -r "$examplePath" ./example

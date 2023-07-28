@@ -156,6 +156,7 @@
         devShells.default = pkgs.mkShell {
           packages = [
             inputs.nickel.packages."${system}".default
+            pkgs.parallel
           ];
         };
       }
