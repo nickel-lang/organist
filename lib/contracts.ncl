@@ -46,8 +46,8 @@ in
 
   NullOr
     | doc "Make a contract nullable"
-    = fun c label value =>
-    if value == null then value else std.contract.apply c label value,
+    = fun contract label value =>
+    if value == null then value else std.contract.apply contract label value,
 
   # TODO: more precise contract
   Derivation
