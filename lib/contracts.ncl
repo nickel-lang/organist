@@ -241,7 +241,7 @@ from the Nix world) or a derivation defined in Nickel.
           | String
           | default
           = "nixpkgs",
-        attrPath
+        attr_path
           | doc m%"
             The path to look for in the given flake input.
 
