@@ -186,7 +186,7 @@ from the Nix world) or a derivation defined in Nickel.
 "%
     = {
       "%{type_field}" | force = "nickelDerivation",
-      nixDrv
+      nix_drv
         | doc "The raw derivation sent to Nix"
         | NixDerivation
         =
