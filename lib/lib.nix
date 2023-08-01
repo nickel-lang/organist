@@ -48,7 +48,7 @@
           else if nixelType == "nixInput"
           then
           let
-            attrPath = value.attrPath;
+            attr_path = value.attr_path;
             possibleAttrPaths = [
              ([ value.input ] ++ attrPath)
              ([ value.input "packages" system ] ++ attrPath)
