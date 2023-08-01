@@ -266,7 +266,7 @@ from the Nix world) or a derivation defined in Nickel.
           let hashPosition = (std.string.find "#" value).index in
           let value' =
             if hashPosition == -1 then
-              { input = value, attrPath = [] }
+              { input = value, attr_path = [] }
             else
               {
                 input = std.string.substring 0 hashPosition value,
