@@ -270,7 +270,7 @@ from the Nix world) or a derivation defined in Nickel.
             else
               {
                 input = std.string.substring 0 hashPosition value,
-                attrPath =
+                attr_path =
                   std.string.split
                     "."
                     (
