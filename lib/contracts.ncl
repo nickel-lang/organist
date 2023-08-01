@@ -161,7 +161,7 @@ from the Nix world) or a derivation defined in Nickel.
   NixDerivation
     | doc m%"
         The basic, low-level interface for a symbolic derivation. A
-        NixDerivations is intenteded to be passed (exported) to the Nix side,
+        NixDerivations is intended to be passed (exported) to the Nix side,
         which will take care of actually building it.
 
         The fields directly map to the corresponding
