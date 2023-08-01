@@ -5,7 +5,7 @@ nickel-nix.builders.NixpkgsPkg & {
     {
       name = "hello",
       version = "0.1",
-      nixDrv = {
+      nix_drv = {
         buildInputs.gcc = nickel-nix.lib.import_nix "nixpkgs#gcc",
         buildInputs.coreutils = nickel-nix.lib.import_nix "nixpkgs#coreutils",
         buildInputs.bash = nickel-nix.lib.import_nix "nixpkgs#bash",
