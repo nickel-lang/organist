@@ -182,7 +182,7 @@ from the Nix world) or a derivation defined in Nickel.
     | doc m%"
     The representation of a symbolic derivation on the Nickel side.
     This record is extensible as the different layers involved might add new attributes to this derivation.
-    The important part eventually is the `nixDrv` field which is computed from the rest and sent to Nix
+    The important part eventually is the `nix_drv` field which is computed from the rest and sent to Nix
 "%
     = {
       "%{type_field}" | force = "nickelDerivation",
