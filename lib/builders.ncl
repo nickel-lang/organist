@@ -56,7 +56,7 @@ in
         env = {
           stdenv = lib.import_nix "nixpkgs#stdenv"
         },
-        nixDrv = env & structured_env,
+        nix_drv = env & structured_env,
       } | NickelPkg,
     },
 
