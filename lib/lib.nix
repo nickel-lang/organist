@@ -38,7 +38,7 @@
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
-            value.nixDrv);
+            value.nix_drv);
           in
             derivation prepared
           else if nixelType == "nixString"
