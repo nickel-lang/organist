@@ -50,9 +50,9 @@
           let
             attr_path = value.attr_path;
             possibleAttrPaths = [
-             ([ value.input ] ++ attrPath)
-             ([ value.input "packages" system ] ++ attrPath)
-             ([ value.input "legacyPackages" system ] ++ attrPath)
+             ([ value.input ] ++ attr_path)
+             ([ value.input "packages" system ] ++ attr_path)
+             ([ value.input "legacyPackages" system ] ++ attr_path)
             ];
             notFound = throw "Missing input \"${value.input}.${lib.strings.concatStringsSep "." attrPath}\"";
             chosenAttrPath = lib.findFirst
