@@ -1,3 +1,3 @@
 {
-  nickel-nix = import "../../lib/nix.ncl"
+  nickel-nix = import "../../lib/nix.ncl",
 }

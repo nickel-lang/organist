@@ -1,4 +1,5 @@
-let nickel-nix = (import "./nickel.lock.ncl").nickel-nix in
+let inputs = import "./nickel.lock.ncl" in
+let nickel-nix = inputs.nickel-nix in
 
 nickel-nix.builders.NixpkgsPkg & {
   output =
