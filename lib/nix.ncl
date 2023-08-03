@@ -2,6 +2,7 @@
   lib = import "lib.ncl",
   builders = import "builders.ncl",
   contracts = import "contracts.ncl",
+  shells = import "shells.ncl",
 }
 #TODO: currently, Nickel forbids doc at the toplevel. It's most definitely
 # temporary, as the implementation of RFC005 is ongoing. Once the capability is
