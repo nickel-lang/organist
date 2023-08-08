@@ -1,8 +1,9 @@
-let nixel = (import "./nickel.lock.ncl").nickel-nix in
+let inputs = import "./nickel.lock.ncl" in
+let nickel-nix = inputs.nickel-nix in
 
 {
   output = {
     name = "nickel-shell",
   }
 }
-& nixel.builders.BashShell
+& nickel-nix.builders.BashShell
