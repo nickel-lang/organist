@@ -14,17 +14,13 @@
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
   prepareDerivation = system: value:
-    (builtins.removeAttrs value ["build_command" "env" "structured_env" "attrs" "packages"])
+    value
     // {
       system =
-        if value ? system
-        then "${value.system.arch}-${value.system.os}"
+        if value.system != null
+        then value.system
         else system;
-      builder = value.build_command.cmd;
-      args = value.build_command.args;
-      __structuredAttrs = true;
-    }
-    // value.attrs;
+    };
 
   # Import a Nickel value produced by the Nixel DSL
   importFromNickel = flakeInputs: system: baseDir: value: let
@@ -42,7 +38,7 @@
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
-            value);
+            value.nix_drv);
           in
             derivation prepared
           else if nixelType == "nixString"
@@ -52,13 +48,13 @@
           else if nixelType == "nixInput"
           then
           let
-            pkgPath = value.spec.pkgPath;
+            attr_path = value.attr_path;
             possibleAttrPaths = [
-             ([ value.spec.input ] ++ pkgPath)
-             ([ value.spec.input "packages" system ] ++ pkgPath)
-             ([ value.spec.input "legacyPackages" system ] ++ pkgPath)
+             ([ value.input ] ++ attr_path)
+             ([ value.input "packages" system ] ++ attr_path)
+             ([ value.input "legacyPackages" system ] ++ attr_path)
             ];
-            notFound = throw "Missing input \"${value.spec.input}.${lib.strings.concatStringsSep "." pkgPath}\"";
+            notFound = throw "Missing input \"${value.input}.${lib.strings.concatStringsSep "." attr_path}\"";
             chosenAttrPath = lib.findFirst
               (path: lib.hasAttrByPath path flakeInputs)
               notFound
@@ -86,13 +82,12 @@
     nickelWithImports = builtins.toFile "eval.ncl" ''
       let params = {
         system = "${system}",
-        nix = import "${flakeRoot}/lib/nix.ncl",
       }
       in
+      let nix = import "${flakeRoot}/lib/nix.ncl" in
 
-      let nickel_expr | params.nix.NickelExpression =
-        import "${sources}/${nickelFile}"
-      in
+      let nickel_expr | nix.contracts.NixelExpression =
+        import "${sources}/${nickelFile}" in
 
       (nickel_expr & params).output
     '';
@@ -110,7 +105,9 @@
       inherit baseDir nickelFile;
     };
   in
-  runCommand "nickel-res.json" {} ''
+  runCommand "nickel-res.json" {
+    ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
+  } ''
   ${nickel}/bin/nickel -f ${fileToCall} export > $out
   '';
 
@@ -124,6 +121,6 @@
     };
   in
     {rawNickel = nickelResult;}
-    // lib.traceVal (importFromNickel flakeInputs system baseDir (builtins.fromJSON
+    // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 in {inherit importNcl;}

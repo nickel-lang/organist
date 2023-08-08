@@ -1,6 +1,4 @@
 {
-  Derivation = contracts.NickelDerivation,
-  NickelExpression = contracts.NickelExpression,
   lib = import "lib.ncl",
   builders = import "builders.ncl",
   contracts = import "contracts.ncl",
