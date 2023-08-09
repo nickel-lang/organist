@@ -42,8 +42,7 @@
       #
       # apps.${system}.regenerate-lockfile generated from optional lockFileContents argument,
       #   defaulting to `nickel-nix` pointing to this flake
-      # devShells.${system}.default generated from dev-shell.ncl
-      # packages.${system}.default generated from package.ncl
+      # devShells.${system} and packages.${system} generated from project.ncl
       #
       # (to be extended with more features later)
       flake.outputsFromNickel = path: inputs: {
@@ -54,26 +53,15 @@
       }:
         flake-utils.lib.eachSystem systems (system: let
           lib = self.lib.${system};
+          pkgs = nixpkgs.legacyPackages.${system};
         in
           {
             apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
-          }
-          // nixpkgs.lib.pipe path [
-            builtins.readDir
-            (nixpkgs.lib.mapAttrsToList (name: value:
-              {
-                "dev-shell.ncl" = nixpkgs.lib.nameValuePair
-                  "devShells"
-                  (lib.importNcl path name inputs).shells;
-                "package.ncl" = nixpkgs.lib.nameValuePair
-                  "packages"
-                  { fromNickel = (lib.importNcl path name inputs).packages; };
-              }
-              .${name}
-              or []))
-            nixpkgs.lib.flatten
-            nixpkgs.lib.listToAttrs
-          ]);
+          } // pkgs.lib.optionalAttrs (builtins.readDir path ? "project.ncl") rec {
+            nickelOutputs = lib.importNcl path "project.ncl" inputs;
+            packages.default = nickelOutputs.packages.default or {};
+            devShells = nickelOutputs.shells or {};
+          });
     }
     // flake-utils.lib.eachDefaultSystem (
       system: let

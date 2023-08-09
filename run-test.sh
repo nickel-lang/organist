@@ -40,7 +40,7 @@ test_one_template () (
   nix flake new --template "path:$PROJECT_ROOT" example --accept-flake-config
 
   pushd ./example
-  sed -i "s/shells\.Bash/shells.$target/" dev-shell.ncl
+  sed -i "s/shells\.Bash/shells.$target/" project.ncl
   prepare_shell
   nix develop --accept-flake-config --print-build-logs < /dev/null
   popd
@@ -64,7 +64,7 @@ test_example () (
   cp -r "$examplePath" ./example
   pushd ./example
   prepare_shell
-  nix build --print-build-logs .#fromNickel.default
+  nix build --print-build-logs
   popd
   popd
 )
