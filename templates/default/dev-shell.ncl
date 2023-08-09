@@ -2,8 +2,5 @@ let inputs = import "./nickel.lock.ncl" in
 let nickel-nix = inputs.nickel-nix in
 
 {
-  output = {
-    name = "nickel-shell",
-  }
+  shells = nickel-nix.builders.BashShell
 }
-& nickel-nix.builders.BashShell

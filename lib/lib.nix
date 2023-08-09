@@ -89,7 +89,7 @@
       let nickel_expr | nix.contracts.NixelExpression =
         import "${sources}/${nickelFile}" in
 
-      (nickel_expr & params).output
+      nickel_expr & params
     '';
   in
     nickelWithImports;
