@@ -63,7 +63,9 @@ in
       A derivation that is to be used as a shell, e.g. with `nix develop`.
       Analogous to `mkShell`.
     "%
-    = NixpkgsPkg & {
+    =
+      NixpkgsPkg
+      & {
         hooks | doc "Bash scripts to run when entering the shell" = {},
 
         name | default = "shell",
@@ -76,147 +78,6 @@ in
         "%,
         env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
         structured_env.buildInputs = packages,
-      } | (NickelPkg & { packages | { _ : Derivation } }),
-
-  BashShell = {
-    build = Shell & {
-      packages = {
-        bash = lib.import_nix "nixpkgs#bash",
-      },
-    },
-    dev = build,
-  },
-
-  RustShell =
-    BashShell
-    & {
-      build.packages = {
-        cargo = lib.import_nix "nixpkgs#cargo",
-        rustc = lib.import_nix "nixpkgs#rustc",
-      },
-      dev.packages = {
-        rustfmt = lib.import_nix "nixpkgs#rustfmt",
-        rust-analyzer = lib.import_nix "nixpkgs#rust-analyzer",
-      },
-    },
-
-  GoShell =
-    BashShell
-    & {
-      build.packages.go = lib.import_nix "nixpkgs#go",
-      dev.packages.gopls = lib.import_nix "nixpkgs#gopls",
-    },
-
-  ClojureShell =
-    BashShell
-    & {
-      build.packages.clojure = lib.import_nix "nixpkgs#clojure",
-      dev.packages.clojure-lsp = lib.import_nix "nixpkgs#clojure-lsp",
-    },
-
-  CShell =
-    BashShell
-    & {
-      build.packages.clang = lib.import_nix "nixpkgs#clang",
-      dev.packages.clang-tools = lib.import_nix "nixpkgs#clang-tools",
-    },
-
-  # intelephense is currently broken in nixpkgs
-  PhpShell =
-    BashShell
-    & {
-      build.packages.php = lib.import_nix "nixpkgs#php",
-      # Not included because unfree
-      # dev.packages.intelephense = lib.import_nix "nixpkgs#nodePackages.intelephense",
-    },
-
-  ZigShell =
-    BashShell
-    & {
-      build.packages.zig = lib.import_nix "nixpkgs#zig",
-      dev.packages.zls = lib.import_nix "nixpkgs#zls",
-    },
-
-  JavascriptShell =
-    BashShell
-    & {
-      build.packages.nodejs = lib.import_nix "nixpkgs#nodejs",
-      dev.packages.ts-lsp = lib.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
-    },
-
-  RacketShell =
-    BashShell
-    & {
-      build.packages = {
-        racket = lib.import_nix "nixpkgs#racket",
-      },
-    },
-
-  ScalaShell =
-    BashShell
-    & {
-      build.packages.scala = lib.import_nix "nixpkgs#scala",
-      dev.packages.metals = lib.import_nix "nixpkgs#metals",
-    },
-
-  Python310Shell =
-    BashShell
-    & {
-      build.packages.python = lib.import_nix "nixpkgs#python310",
-      dev.packages.python-lsp = lib.import_nix "nixpkgs#python310Packages.python-lsp-server",
-    },
-
-  ErlangShell =
-    BashShell
-    & {
-      build.packages.erlang = lib.import_nix "nixpkgs#erlang",
-      dev.packages.erlang-lsp = lib.import_nix "nixpkgs#erlang-ls",
-    },
-
-  HaskellStackShell =
-    BashShell
-    & {
-      build.ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
-      build.packages =
-        let stack-wrapped =
-          {
-            name = "stack-wrapped",
-            # Should be stack.version, but import_nix doesn't allow to access derivation attributes
-            version = "1.0",
-            build_command = {
-              cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
-              args = [
-                "-c",
-                # Sorry about Topiary formatting of the following lines
-                nix-s%"
-            source .attrs.sh
-            export PATH='%{lib.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
-            mkdir -p ${outputs[out]}/bin
-            echo "$0" > ${outputs[out]}/bin/stack
-            chmod a+x ${outputs[out]}/bin/*
-          "%,
-                nix-s%"
-            #!%{lib.import_nix "nixpkgs#bash"}/bin/bash
-            %{lib.import_nix "nixpkgs#stack"}/bin/stack \
-              --nix \
-              --no-nix-pure \
-              --nix-path="nixpkgs=%{lib.import_nix "nixpkgs#path"}" \
-              "$@"
-          "%,
-              ],
-            },
-          } | NickelPkg
-        in
-        {
-          stack = stack-wrapped,
-          stack' = lib.import_nix "nixpkgs#stack",
-          nix = lib.import_nix "nixpkgs#nix",
-          git = lib.import_nix "nixpkgs#git",
-        },
-        dev.ghcVersion,
-        dev.packages = {
-          ormolu = lib.import_nix "nixpkgs#ormolu",
-          haskell-language-server = lib.import_nix "nixpkgs#haskell.packages.ghc%{dev.ghcVersion}.haskell-language-server",
-        },
-    },
+      }
+        | (NickelPkg & { packages | { _ : Derivation } }),
 }
