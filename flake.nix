@@ -41,14 +41,14 @@
       # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
       #
       # apps.${system}.regenerate-lockfile generated from optional lockFileContents argument,
-      #   defaulting to `nickel-nix` pointing to this flake
+      #   defaulting to `organist` pointing to this flake
       # devShells.${system} and packages.${system} generated from project.ncl
       #
       # (to be extended with more features later)
       flake.outputsFromNickel = path: inputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
-          nickel-nix = "${self}/lib/nix.ncl";
+          organist = "${self}/lib/nix.ncl";
         },
       }:
         flake-utils.lib.eachSystem systems (system: let
@@ -95,7 +95,7 @@
         # File contents is piped through topiary to make them pretty and check for correctnes
         # Example inputs:
         #   {
-        #     nickel-nix = {
+        #     organist = {
         #       builders = "/nix/store/...-source/builders.ncl";
         #       contracts = "/nix/store/...-source/contracts.ncl";
         #       nix = "/nix/store/...-source/nix.ncl";
@@ -103,7 +103,7 @@
         #   }
         # Result:
         #   {
-        #     nickel-nix = {
+        #     organist = {
         #       builders = import "/nix/store/...-source/builders.ncl",
         #       contracts = import "/nix/store/...-source/contracts.ncl",
         #       nix = import "/nix/store/...-source/nix.ncl",
@@ -121,8 +121,8 @@
 
         # Flake app to generate nickel.lock.ncl file. Example usage:
         #   apps = {
-        #     regenerate-lockfile = nickel-nix.lib.${system}.regenerateLockFileApp {
-        #       nickel-nix = nickel-nix.lib.${system}.lockFileContents;
+        #     regenerate-lockfile = organist.lib.${system}.regenerateLockFileApp {
+        #       organist = organist.lib.${system}.lockFileContents;
         #     };
         #   };
         lib.regenerateLockFileApp = contents: {

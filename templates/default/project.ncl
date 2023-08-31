@@ -1,6 +1,14 @@
 let inputs = import "./nickel.lock.ncl" in
-let nickel-nix = inputs.nickel-nix in
+let organist = inputs.organist in
 
 {
-  shells = inputs.nickel-nix.shells.Bash,
-} | inputs.nickel-nix.contracts.NixelExpression
+  shells = organist.shells.Bash,
+
+  shells.build = {
+    packages = {},
+  },
+
+  shells.dev = {
+    packages.hello = organist.lib.import_nix "nixpkgs#hello",
+  },
+} | organist.contracts.NixelExpression

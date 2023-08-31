@@ -1,53 +1,49 @@
-# Managing your dependencies with Nixel
+# Managing your dependencies with Organist
 
-Nixel can be used to manage your development dependencies, and the whole environment.
+Organist can be used to manage your development dependencies, and the whole environment.
 
 ## Getting started
 
 After running `nix flake init`, you should end-up with a `project.ncl` looking like:
 
 ```nickel
-let Nixel = import ".nickel-nix/lock.ncl" in
-let inputs = Nixel.nix.import_flake "." in
+let inputs = import "./nickel.lock.ncl" in
+let organist = inputs.organist in
+
 {
-  shells = Nixel.shells.Nickel,
+  shells = organist.shells.Bash,
 
   shells.build = {
-    packages = [],
-  },
-  shells.dev = {
-    packages = [],
+    packages = {},
   },
 
-  # More stuff
-}
+  shells.dev = {
+    packages.hello = organist.lib.import_nix "nixpkgs#hello",
+  },
+} | organist.contracts.NixelExpression
 ```
 
-This defines two variants of the shell: `build` and `dev`, both of which inherit from `Nixel.shells.Nickel` (more precisely, `build` inherits from `Nixel.shells.Nickel.build` and `dev` inherits from `Nixel.shells.Nickel.dev`).
+This defines two variants of the shell: `build` and `dev`, both of which inherit from `Organist.shells.Bash` (more precisely, `build` inherits from `Nixel.shells.Bash.build` and `dev` inherits from `Nixel.shells.Bash.dev`).
 
 You can enter the `dev` shell by running `nix develop` or `nix develop .#dev` and the build shell with `nix develop .#build`.
 
 ## Customizing the base shell
 
-You can use a different base for your shell by replacing `shells = Nixel.shells.Nickel` byt something else, liks `shells = Nixel.shells.Rust`.
+You can use a different base for your shell by replacing `shells = Organist.shells.Bash` byt something else, liks `shells = Nixel.shells.Rust`.
 You can even depend on multiple ones at the same time with
 
 ```ncl
-  shells = Nixel.shells.Nickel,
-  shells = Nixel.shells.Rust,
+  shells = Organist.shells.Nickel,
+  shells = Organist.shells.Rust,
 ```
 
-(the merging system taking care of combining their definitions)
+The merging system will take care of combining their definitions.
 
 ## Adding new Nix dependencies
 
 Beyond these predefined generic environments, you can also customize the shells by adding some extra dependencies to them in the `packages` attribute.
 
-Most of the time, these dependencies will come from `inputs.nixpkgs`, the main Nix package collection.
-
-```nickel
-shell.build.packages = [ inputs.nixpkgs.hello, inputs.nixpkgs.haskellPackages.pandoc ],
-```
+Most of the time, these packages will come from `nixpkgs` through the `nix_import` function.
 
 You can find the packages you need on https://search.nixos.org.
 
@@ -67,7 +63,5 @@ For instance, if you want your dev environment to use `jemalloc` as its `malloc`
 ```nickel
 shells.build.env.LD_PRELOAD = nix-s%"%{inputs.nixpkgs.jemalloc}/lib/libjemalloc.so}"%
 ```
-
-XXX: This is a crappy example. Need to find a better one.
 
 [symbolic strings]: https://nickel-lang.org/user-manual/syntax#symbolic-strings
