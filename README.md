@@ -25,7 +25,7 @@ $ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 Then bootstrap a project with:
 
 ```console
-$ nix flake init -t github:nickel-lang/nickel-nix
+$ nix flake init -t github:nickel-lang/organist
 # Edit the project file to fit your needs
 $ $EDITOR project.ncl
 # Enter the environment

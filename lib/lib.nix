@@ -6,7 +6,7 @@
   flakeRoot,
 }: let
   # Export a Nix value to be consumed by Nickel
-  typeField = "$__nixel_type";
+  typeField = "$__organist_type";
 
   isInStore = lib.hasPrefix builtins.storeDir;
 
@@ -22,7 +22,7 @@
         else system;
     };
 
-  # Import a Nickel value produced by the Nixel DSL
+  # Import a Nickel value produced by the Organist DSL
   importFromNickel = flakeInputs: system: baseDir: value: let
     type = builtins.typeOf value;
     isNickelDerivation = type: type == "nickelDerivation";
@@ -32,20 +32,20 @@
     then
       (
         let
-          nixelType = value."${typeField}" or "";
+          organistType = value."${typeField}" or "";
         in
-          if isNickelDerivation nixelType
+          if isNickelDerivation organistType
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
             value.nix_drv);
           in
             derivation prepared
-          else if nixelType == "nixString"
+          else if organistType == "nixString"
           then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
-          else if nixelType == "nixPath"
+          else if organistType == "nixPath"
           then baseDir + "/${value.path}"
-          else if nixelType == "nixInput"
+          else if organistType == "nixInput"
           then
           let
             attr_path = value.attr_path;
@@ -67,7 +67,7 @@
     then builtins.map importFromNickel_ value
     else value;
 
-  # Generate a Nickel program that evaluates the nickel-nix output, passing
+  # Generate a Nickel program that evaluates the organist output, passing
   # the given exported packages, and write it to outFile.
   computeNickelFile = {
     baseDir,
@@ -86,7 +86,7 @@
       in
       let nix = import "${flakeRoot}/lib/nix.ncl" in
 
-      let nickel_expr | nix.contracts.NixelExpression =
+      let nickel_expr | nix.contracts.OrganistExpression =
         import "${sources}/${nickelFile}" in
 
       nickel_expr & params

@@ -20,7 +20,7 @@ let organist = inputs.organist in
   shells.dev = {
     packages.hello = organist.lib.import_nix "nixpkgs#hello",
   },
-} | organist.contracts.NixelExpression
+} | organist.contracts.OrganistExpression
 ```
 
 This defines two variants of the shell: `build` and `dev`, both of which inherit from `organist.shells.Bash` (more precisely, `build` inherits from `organist.shells.Bash.build` and `dev` inherits from `organist.shells.Bash.dev`).
