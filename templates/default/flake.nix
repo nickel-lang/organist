@@ -3,8 +3,8 @@
   inputs.organist.url = "github:nickel-lang/organist";
 
   nixConfig = {
-    extra-substituters = ["https://nickel-nix.cachix.org"];
-    extra-trusted-public-keys = ["nickel-nix.cachix.org-1:/Ziozgt3g0CfGwGS795wyjRa9ArE89s3tbz31S6xxFM="];
+    extra-substituters = ["https://organist.cachix.org"];
+    extra-trusted-public-keys = ["organist.cachix.org-1:GB9gOx3rbGl7YEh6DwOscD1+E/Gc5ZCnzqwObNH2Faw="];
   };
 
   outputs = {organist, ...} @ inputs:

@@ -22,7 +22,7 @@ jobs:
       uses: ./.github/actions/common-setup
       with:
         SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
+        CACHIX_TOKEN: ${{ secrets.ORGANIST_CACHIX_TOKEN }}
 
     - name: Run flake checks
       run: |
