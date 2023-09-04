@@ -1,6 +1,6 @@
 # C hello world
 
-This example builds a simple C hello world program through nickel-nix.
+This example builds a simple C hello world program through organist.
 
 ## Usage
 
@@ -12,19 +12,19 @@ $ ./result/bin/hello
 Hello, world!
 ```
 
-If you're using this example in a standalone way, outside of the `nickel-nix`
+If you're using this example in a standalone way, outside of the `organist`
 repository, comment the following line inside `flake.nix`:
 
 ```diff
--  inputs.nickel-nix.url = "path:../../";
-+  # inputs.nickel-nix.url = "path:../../";
+-  inputs.organist.url = "path:../../";
++  # inputs.organist.url = "path:../../";
 ```
 
 and uncomment the line just before:
 
 ```diff
--  # inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
-+  inputs.nickel-nix.url = "github:nickel-lang/nickel-nix";
+-  # inputs.organist.url = "github:nickel-lang/organist";
++  inputs.organist.url = "github:nickel-lang/organist";
 ```
 
 ## Additional context

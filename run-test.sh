@@ -23,9 +23,9 @@ pushd_temp () {
 
 prepare_shell() {
   NIXPKGS_PATH="$(nix flake metadata --json --inputs-from "path:$PROJECT_ROOT" nixpkgs | nix eval --impure --raw --expr '(builtins.fromJSON (builtins.readFile "/dev/stdin")).path')"
-  # We test against the local version of `nickel-nix`, not the one in main (hence the --override-input).
+  # We test against the local version of `organist` not the one in main (hence the --override-input).
   nix flake lock \
-    --override-input nickel-nix "path:$PROJECT_ROOT" \
+    --override-input organist "path:$PROJECT_ROOT" \
     --override-input nixpkgs "path:$NIXPKGS_PATH" \
     --accept-flake-config
   nix run .#regenerate-lockfile --accept-flake-config

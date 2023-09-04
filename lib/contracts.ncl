@@ -1,4 +1,4 @@
-let type_field = "$__nixel_type" in
+let type_field = "$__organist_type" in
 
 let predicate | doc "Various predicates used to define contracts"
   = {
@@ -292,7 +292,7 @@ from the Nix world) or a derivation defined in Nickel.
     path | String,
   },
 
-  NixelShells = {
+  OrganistShells = {
     dev | NickelDerivation = build,
     build | NickelDerivation,
     "default" | NickelDerivation = dev,
@@ -305,9 +305,9 @@ from the Nix world) or a derivation defined in Nickel.
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  NixelExpression = {
+  OrganistExpression = {
     shells
-      | NixelShells
+      | OrganistShells
       | optional,
     ..
   },
