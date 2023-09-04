@@ -130,13 +130,17 @@
           program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
         };
 
-        apps.run-test =
-          let testScript = pkgs.writeShellApplication {
+        apps.run-test = let
+          testScript = pkgs.writeShellApplication {
             name = "test-templates";
-            runtimeInputs = [ inputs.nickel.packages."${system}".nickel-lang-cli ];
+            runtimeInputs = [
+              inputs.nickel.packages."${system}".nickel-lang-cli
+              pkgs.parallel
+              pkgs.gnused
+            ];
             text = builtins.readFile ./run-test.sh;
-          }; in
-        {
+          };
+        in {
           type = "app";
           program = pkgs.lib.getExe testScript;
         };
