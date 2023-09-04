@@ -28,7 +28,6 @@ prepare_shell() {
     --override-input organist "path:$PROJECT_ROOT" \
     --override-input nixpkgs "path:$NIXPKGS_PATH" \
     --accept-flake-config
-  nix run .#regenerate-lockfile --accept-flake-config
 }
 
 # Note: running in a subshell (hence the parens and not braces around the function body) so that the trap-based cleanup happens whenever we exit

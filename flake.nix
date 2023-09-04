@@ -28,9 +28,7 @@
         welcomeText = ''
           You have created a devshell that is built using nickel!
 
-          First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
-
-          Then run `nix develop` to enter the dev shell.
+          You can run `nix develop` to enter the dev shell.
         '';
       };
 
@@ -55,7 +53,7 @@
             apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
           }
           // pkgs.lib.optionalAttrs (builtins.readDir path ? "project.ncl") rec {
-            nickelOutputs = lib.importNcl path "project.ncl" inputs;
+            nickelOutputs = lib.importNcl path "project.ncl" inputs lockFileContents;
             packages.default = nickelOutputs.packages.default or {};
             devShells = nickelOutputs.shells or {};
           });
@@ -66,6 +64,7 @@
           inherit system;
           flakeRoot = self.outPath;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
+          organistLib = self.lib.${system};
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
@@ -109,9 +108,7 @@
           pkgs.writeShellApplication {
             name = "regenerate-lockfile";
             text = ''
-              cat > nickel.lock.ncl <<EOF
-              ${self.lib.${system}.buildLockFileContents contents}
-              EOF
+              cat > nickel.lock.ncl <${builtins.toFile "nickel.lock.ncl" (self.lib.${system}.buildLockFileContents contents)}
             '';
           };
 

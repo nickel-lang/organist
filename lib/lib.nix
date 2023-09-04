@@ -1,9 +1,11 @@
 {
   runCommand,
+  writeText,
   nickel,
   system,
   lib,
   flakeRoot,
+  organistLib,
 }: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__organist_type";
@@ -67,11 +69,13 @@
     then builtins.map importFromNickel_ value
     else value;
 
-  # Generate a Nickel program that evaluates the organist output, passing
-  # the given exported packages, and write it to outFile.
-  computeNickelFile = {
-    baseDir,
+  # Call Nickel on a given Nickel expression with the inputs declared in it.
+  # See importNcl for details about the flakeInputs parameter.
+  callNickel = {
     nickelFile,
+    flakeInputs,
+    baseDir,
+    lockFileContents,
   }: let
     sources = builtins.path {
       path = baseDir;
@@ -79,7 +83,11 @@
       # filter =
     };
 
-    nickelWithImports = builtins.toFile "eval.ncl" ''
+    lockfilePath = "${sources}/nickel.lock.ncl";
+    expectedLockfileContents = organistLib.buildLockFileContents lockFileContents;
+    needNewLockfile = !builtins.pathExists lockfilePath || (builtins.readFile lockfilePath) != expectedLockfileContents;
+
+    nickelWithImports = src: ''
       let params = {
         system = "${system}",
       }
@@ -87,37 +95,45 @@
       let nix = import "${flakeRoot}/lib/nix.ncl" in
 
       let nickel_expr | nix.contracts.OrganistExpression =
-        import "${sources}/${nickelFile}" in
+        import "${src}/${nickelFile}" in
 
       nickel_expr & params
     '';
   in
-    nickelWithImports;
-
-  # Call Nickel on a given Nickel expression with the inputs declared in it.
-  # See importNcl for details about the flakeInputs parameter.
-  callNickel = {
-    nickelFile,
-    flakeInputs,
-    baseDir,
-  }: let
-    fileToCall = computeNickelFile {
-      inherit baseDir nickelFile;
-    };
-  in
     runCommand "nickel-res.json" {
       ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
-    } ''
-      ${nickel}/bin/nickel -f ${fileToCall} export > $out
-    '';
+    } (
+      if needNewLockfile
+      then
+        lib.warn ''
+          Lockfile contents are outdated. Please run "nix run .#regenerate-lockfile" to update them.
+        ''
+        ''
+          cp -r "${sources}" sources
+          chmod +w sources sources/nickel.lock.ncl
+          cat > sources/nickel.lock.ncl <<EOF
+          ${expectedLockfileContents}
+          EOF
+          cat > eval.ncl <<EOF
+          ${nickelWithImports "sources"}
+          EOF
+          ${nickel}/bin/nickel -f eval.ncl export > $out
+        ''
+      else ''
+        cat > eval.ncl <<EOF
+        ${nickelWithImports sources}
+        EOF
+        ${nickel}/bin/nickel -f eval.ncl export > $out
+      ''
+    );
 
   # Import a Nickel expression as a Nix value. flakeInputs are where the packages
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = baseDir: nickelFile: flakeInputs: let
+  importNcl = baseDir: nickelFile: flakeInputs: lockFileContents: let
     nickelResult = callNickel {
-      inherit nickelFile baseDir flakeInputs;
+      inherit nickelFile baseDir flakeInputs lockFileContents;
     };
   in
     {rawNickel = nickelResult;}
