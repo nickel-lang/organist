@@ -23,18 +23,18 @@ let organist = inputs.organist in
 } | organist.contracts.NixelExpression
 ```
 
-This defines two variants of the shell: `build` and `dev`, both of which inherit from `Organist.shells.Bash` (more precisely, `build` inherits from `Nixel.shells.Bash.build` and `dev` inherits from `Nixel.shells.Bash.dev`).
+This defines two variants of the shell: `build` and `dev`, both of which inherit from `organist.shells.Bash` (more precisely, `build` inherits from `organist.shells.Bash.build` and `dev` inherits from `organist.shells.Bash.dev`).
 
 You can enter the `dev` shell by running `nix develop` or `nix develop .#dev` and the build shell with `nix develop .#build`.
 
 ## Customizing the base shell
 
-You can use a different base for your shell by replacing `shells = Organist.shells.Bash` byt something else, liks `shells = Nixel.shells.Rust`.
+You can use a different base for your shell by replacing `shells = organist.shells.Bash` but something else, like `shells = organist.shells.Rust`.
 You can even depend on multiple ones at the same time with
 
 ```ncl
-  shells = Organist.shells.Nickel,
-  shells = Organist.shells.Rust,
+  shells = organist.shells.Nickel,
+  shells = organist.shells.Rust,
 ```
 
 The merging system will take care of combining their definitions.
