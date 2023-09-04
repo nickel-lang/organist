@@ -46,16 +46,16 @@
           else if organistType == "nixPath"
           then baseDir + "/${value.path}"
           else if organistType == "nixInput"
-          then
-          let
+          then let
             attr_path = value.attr_path;
             possibleAttrPaths = [
-             ([ value.input ] ++ attr_path)
-             ([ value.input "packages" system ] ++ attr_path)
-             ([ value.input "legacyPackages" system ] ++ attr_path)
+              ([value.input] ++ attr_path)
+              ([value.input "packages" system] ++ attr_path)
+              ([value.input "legacyPackages" system] ++ attr_path)
             ];
             notFound = throw "Missing input \"${value.input}.${lib.strings.concatStringsSep "." attr_path}\"";
-            chosenAttrPath = lib.findFirst
+            chosenAttrPath =
+              lib.findFirst
               (path: lib.hasAttrByPath path flakeInputs)
               notFound
               possibleAttrPaths;
@@ -71,7 +71,7 @@
   # the given exported packages, and write it to outFile.
   computeNickelFile = {
     baseDir,
-    nickelFile
+    nickelFile,
   }: let
     sources = builtins.path {
       path = baseDir;
@@ -105,11 +105,11 @@
       inherit baseDir nickelFile;
     };
   in
-  runCommand "nickel-res.json" {
-    ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
-  } ''
-  ${nickel}/bin/nickel -f ${fileToCall} export > $out
-  '';
+    runCommand "nickel-res.json" {
+      ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
+    } ''
+      ${nickel}/bin/nickel -f ${fileToCall} export > $out
+    '';
 
   # Import a Nickel expression as a Nix value. flakeInputs are where the packages
   # passed to the Nickel expression are taken from. If the Nickel expression
