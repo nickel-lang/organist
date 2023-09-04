@@ -24,6 +24,10 @@ jobs:
         SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         CACHIX_TOKEN: ${{ secrets.CACHIX_TOKEN }}
 
+    - name: Run flake checks
+      run: |
+        nix flake check
+
     - name: Test devshells
       run: |
         nix run .#run-test template

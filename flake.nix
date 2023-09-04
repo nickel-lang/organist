@@ -28,14 +28,14 @@
     {
       templates.default = {
         path = ./templates/default;
-          description = "A devshell using nickel.";
-          welcomeText = ''
-            You have created a devshell that is built using nickel!
+        description = "A devshell using nickel.";
+        welcomeText = ''
+          You have created a devshell that is built using nickel!
 
-            First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
+          First run `nix run .#regenerate-lockfile` to fill `nickel.lock.ncl` with proper references.
 
-            Then run `nix develop` to enter the dev shell.
-          '';
+          Then run `nix develop` to enter the dev shell.
+        '';
       };
 
       # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
@@ -57,7 +57,8 @@
         in
           {
             apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
-          } // pkgs.lib.optionalAttrs (builtins.readDir path ? "project.ncl") rec {
+          }
+          // pkgs.lib.optionalAttrs (builtins.readDir path ? "project.ncl") rec {
             nickelOutputs = lib.importNcl path "project.ncl" inputs;
             packages.default = nickelOutputs.packages.default or {};
             devShells = nickelOutputs.shells or {};
@@ -149,8 +150,14 @@
           packages = [
             inputs.nickel.packages."${system}".default
             pkgs.parallel
+            pkgs.alejandra
           ];
         };
+
+        checks.alejandra = pkgs.runCommand "check-alejandra" {} ''
+          ${pkgs.lib.getExe pkgs.alejandra} --check ${self}
+          touch $out
+        '';
       }
     );
 }
