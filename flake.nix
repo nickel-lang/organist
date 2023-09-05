@@ -3,17 +3,14 @@
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nickel.url = "github:tweag/nickel";
-  inputs.topiary.follows = "nickel/topiary";
 
   nixConfig = {
     extra-substituters = [
       "https://tweag-nickel.cachix.org"
-      "https://tweag-topiary.cachix.org"
       "https://organist.cachix.org"
     ];
     extra-trusted-public-keys = [
       "tweag-nickel.cachix.org-1:GIthuiK4LRgnW64ALYEoioVUQBWs0jexyoYVeLDBwRA="
-      "tweag-topiary.cachix.org-1:8TKqya43LAfj4qNHnljLpuBnxAY/YwEBfzo3kzXxNY0="
       "organist.cachix.org-1:GB9gOx3rbGl7YEh6DwOscD1+E/Gc5ZCnzqwObNH2Faw="
     ];
   };
@@ -23,7 +20,6 @@
     nixpkgs,
     flake-utils,
     nickel,
-    topiary,
   } @ inputs:
     {
       templates.default = {
@@ -75,25 +71,24 @@
       in {
         lib.importNcl = lib.importNcl;
 
-        # Helper function that generates ugly contents for "nickel.lock.ncl", see buildLockFile.
+        # Helper function that generates contents for "nickel.lock.ncl", see buildLockFile.
         lib.buildLockFileContents = contents: let
           lib = pkgs.lib;
-          getLinesOne = name: thing:
+          getLinesOne = indent: name: thing:
             if lib.isAttrs thing
             then
               [
-                ((lib.optionalString (name != null) "${name} = ") + "{")
+                (indent + (lib.optionalString (name != null) "${name} = ") + "{")
               ]
-              ++ lib.mapAttrsToList getLinesOne thing
+              ++ lib.mapAttrsToList (getLinesOne (indent + "  ")) thing
               ++ [
-                ("}" + (lib.optionalString (name != null) ","))
+                (indent + "}" + (lib.optionalString (name != null) ","))
               ]
-            else [''${name} = import "${builtins.toString thing}",''];
+            else [''${indent}${name} = import "${builtins.toString thing}",''];
         in
-          lib.concatLines (lib.flatten (getLinesOne null contents));
+          lib.concatLines (lib.flatten (getLinesOne "" null contents));
 
         # A script that generates contents of "nickel.lock.ncl" file from a recursive attribute set of strings.
-        # File contents is piped through topiary to make them pretty and check for correctnes
         # Example inputs:
         #   {
         #     organist = {
@@ -114,7 +109,7 @@
           pkgs.writeShellApplication {
             name = "regenerate-lockfile";
             text = ''
-              ${pkgs.lib.getExe topiary.packages.${system}.default} -l nickel > nickel.lock.ncl <<EOF
+              cat > nickel.lock.ncl <<EOF
               ${self.lib.${system}.buildLockFileContents contents}
               EOF
             '';
