@@ -28,6 +28,14 @@ jobs:
       run: |
         nix flake check
 
+    - name: Check flake.lock
+      run: |
+        if git status --porcelain | grep flake.lock; then
+          echo "flake.lock was changed:"
+          git diff
+          exit 1
+        fi
+
     - name: Test devshells
       run: |
         nix run .#run-test template
