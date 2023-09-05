@@ -19,5 +19,5 @@ runs:
     - name: Configure Cachix
       uses: cachix/cachix-action@v12
       with:
-        name: nickel-nix
+        name: organist
         authToken: ${{ inputs.CACHIX_TOKEN }}
