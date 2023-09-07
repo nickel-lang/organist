@@ -11,4 +11,5 @@ let organist = inputs.organist in
   shells.dev = {
     packages.hello = organist.lib.import_nix "nixpkgs#hello",
   },
-} | organist.contracts.OrganistExpression
+}
+  | organist.contracts.OrganistExpression

@@ -3,7 +3,9 @@ let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
 let lib = import "lib.ncl" in
 
 let concat_strings_sep = fun sep values =>
-  if std.array.length values == 0 then "" else
+  if std.array.length values == 0 then
+    ""
+  else
     std.array.reduce_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) values
 in
 {
@@ -44,7 +46,8 @@ in
       Makes a derivation that runs all the build phases from nixpkgs' stdenv as the `build_command`.
       Can be controlled with environment variables in the same way as `stdenv.mkDerivation`.
     "%
-    = {
+    =
+      {
         name,
         version,
         build_command = {
@@ -56,7 +59,8 @@ in
           stdenv = lib.import_nix "nixpkgs#stdenv"
         },
         nix_drv = env & structured_env,
-      } | NickelPkg,
+      }
+        | NickelPkg,
 
   Shell
     | doc m%"

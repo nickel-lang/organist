@@ -47,7 +47,7 @@ in
   NullOr
     | doc "Make a contract nullable"
     = fun contract label value =>
-    if value == null then value else std.contract.apply contract label value,
+      if value == null then value else std.contract.apply contract label value,
 
   # TODO: more precise contract
   Derivation
@@ -235,14 +235,14 @@ from the Nix world) or a derivation defined in Nickel.
       The specification of a Nix input in a Nickel expression.
     "%
     = {
-        "%{type_field}" | force = "nixInput",
-        input
-          | doc "The flake input from which we'll resolve this input"
-          | String
-          | default
-          = "nixpkgs",
-        attr_path
-          | doc m%"
+      "%{type_field}" | force = "nixInput",
+      input
+        | doc "The flake input from which we'll resolve this input"
+        | String
+        | default
+        = "nixpkgs",
+      attr_path
+        | doc m%"
             The path to look for in the given flake input.
 
             This follows the same search rules as the `nix build` cli, namely
@@ -250,47 +250,46 @@ from the Nix world) or a derivation defined in Nickel.
             - InputPath
             - "packages".system.InputPath
             - "legacyPackages".system.InputPath
-            "%
-          | InputPath
-          | optional,
-      },
+          "%
+        | InputPath
+        | optional,
+    },
 
-    NixInputSugar
-      | doc m%"
+  NixInputSugar
+    | doc m%"
         Syntactic sugar for defining a `NixInput` to allow writing inputs
         directly as strings of the form `{inputName}#{path}`
       "%
-      =
-      fun label value =>
-        if std.is_string value then
-          let hashPosition = (std.string.find "#" value).index in
-          let value' =
-            if hashPosition == -1 then
-              { input = value, attr_path = [] }
-            else
-              {
-                input = std.string.substring 0 hashPosition value,
-                attr_path =
-                  std.string.split
-                    "."
-                    (
-                      std.string.substring
-                        (hashPosition + 1)
-                        (std.string.length value)
-                        value
-                    ),
-              }
-          in
-          value' |> std.contract.apply NixInput label
-        else
-          std.contract.apply NixInput label value,
+    = fun label value =>
+      if std.is_string value then
+        let hashPosition = (std.string.find "#" value).index in
+        let value' =
+          if hashPosition == -1 then
+            { input = value, attr_path = [] }
+          else
+            {
+              input = std.string.substring 0 hashPosition value,
+              attr_path =
+                std.string.split
+                  "."
+                  (
+                    std.string.substring
+                      (hashPosition + 1)
+                      (std.string.length value)
+                      value
+                  ),
+            }
+        in
+        value' |> std.contract.apply NixInput label
+      else
+        std.contract.apply NixInput label value,
 
   NixPath
     | doc "A path to be imported in the Nix store"
     = {
-    "%{type_field}" | force = "nixPath",
-    path | String,
-  },
+      "%{type_field}" | force = "nixPath",
+      path | String,
+    },
 
   OrganistShells = {
     dev | NickelDerivation = build,
@@ -311,5 +310,4 @@ from the Nix world) or a derivation defined in Nickel.
       | optional,
     ..
   },
-
 }

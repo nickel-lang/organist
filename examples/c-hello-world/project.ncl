@@ -17,7 +17,8 @@ let organist = inputs.organist in
           gcc %{organist.lib.import_file "hello.c"} -o hello
           mkdir -p $out/bin
           cp hello $out/bin/hello
-        "% | organist.contracts.NixString,
+        "%
+            | organist.contracts.NixString,
       },
     }
 }
