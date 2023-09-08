@@ -120,22 +120,21 @@ in
               cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
               args = [
                 "-c",
-                # Sorry about Topiary formatting of the following lines
                 nix-s%"
-            source .attrs.sh
-            export PATH='%{lib.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
-            mkdir -p ${outputs[out]}/bin
-            echo "$0" > ${outputs[out]}/bin/stack
-            chmod a+x ${outputs[out]}/bin/*
-          "%,
+                  source .attrs.sh
+                  export PATH='%{lib.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
+                  mkdir -p ${outputs[out]}/bin
+                  echo "$0" > ${outputs[out]}/bin/stack
+                  chmod a+x ${outputs[out]}/bin/*
+                "%,
                 nix-s%"
-            #!%{lib.import_nix "nixpkgs#bash"}/bin/bash
-            %{lib.import_nix "nixpkgs#stack"}/bin/stack \
-              --nix \
-              --no-nix-pure \
-              --nix-path="nixpkgs=%{lib.import_nix "nixpkgs#path"}" \
-              "$@"
-          "%,
+                  #!%{lib.import_nix "nixpkgs#bash"}/bin/bash
+                  %{lib.import_nix "nixpkgs#stack"}/bin/stack \
+                    --nix \
+                    --no-nix-pure \
+                    --nix-path="nixpkgs=%{lib.import_nix "nixpkgs#path"}" \
+                    "$@"
+                "%,
               ],
             },
           }
