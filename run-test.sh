@@ -42,7 +42,8 @@ test_one_template () (
   pushd ./example
   sed -i "s/shells\.Bash/shells.$target/" project.ncl
   prepare_shell
-  nix develop --accept-flake-config --print-build-logs < /dev/null
+  nickel export --format raw <<<'(import "'"$PROJECT_ROOT"'/lib/shell-tests.ncl").'"$target"'.script' \
+    | nix develop --accept-flake-config --print-build-logs --command bash
   popd
   popd
   clean
@@ -53,7 +54,10 @@ test_template () {
     test_one_template "$1"
   else
     all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/nix.ncl").shells) |> std.string.join "\n"')
-    echo "$all_targets" | parallel --tag "$0" template
+    # --line-buffer outputs one line at a time, as opposed to dumping all output at once when job finishes
+    # --keep-order makes sure that the order of the output corresponds to the job order, keeping output for each job together
+    # --tag prepends each line with the name of the job
+    echo "$all_targets" | parallel --line-buffer --keep-order --tag "$0" template
   fi
 }
 
