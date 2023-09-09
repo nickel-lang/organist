@@ -1,6 +1,7 @@
 {
   runCommand,
   writeText,
+  writeShellApplication,
   nickel,
   system,
   lib,
@@ -22,6 +23,46 @@
         if value.system != null
         then value.system
         else system;
+    };
+  # Helper function that generates contents for "nickel.lock.ncl", see buildLockFile.
+  buildLockFileContents = contents: let
+    getLinesOne = indent: name: thing:
+      if lib.isAttrs thing
+      then
+        [
+          (indent + (lib.optionalString (name != null) "${name} = ") + "{")
+        ]
+        ++ lib.mapAttrsToList (getLinesOne (indent + "  ")) thing
+        ++ [
+          (indent + "}" + (lib.optionalString (name != null) ","))
+        ]
+      else [''${indent}${name} = import "${builtins.toString thing}",''];
+  in
+    lib.concatLines (lib.flatten (getLinesOne "" null contents));
+
+  # A script that generates contents of "nickel.lock.ncl" file from a recursive attribute set of strings.
+  # Example inputs:
+  #   {
+  #     organist = {
+  #       builders = "/nix/store/...-source/builders.ncl";
+  #       contracts = "/nix/store/...-source/contracts.ncl";
+  #       nix = "/nix/store/...-source/nix.ncl";
+  #     };
+  #   }
+  # Result:
+  #   {
+  #     organist = {
+  #       builders = import "/nix/store/...-source/builders.ncl",
+  #       contracts = import "/nix/store/...-source/contracts.ncl",
+  #       nix = import "/nix/store/...-source/nix.ncl",
+  #     },
+  #   }
+  buildLockFile = contents:
+    writeShellApplication {
+      name = "regenerate-lockfile";
+      text = ''
+        cat > nickel.lock.ncl <${builtins.toFile "nickel.lock.ncl" (buildLockFileContents contents)}
+      '';
     };
 
   # Import a Nickel value produced by the Organist DSL
@@ -84,7 +125,7 @@
     };
 
     lockfilePath = "${sources}/nickel.lock.ncl";
-    expectedLockfileContents = organistLib.buildLockFileContents lockFileContents;
+    expectedLockfileContents = buildLockFileContents lockFileContents;
     needNewLockfile = !builtins.pathExists lockfilePath || (builtins.readFile lockfilePath) != expectedLockfileContents;
 
     nickelWithImports = src: ''
@@ -139,4 +180,4 @@
     {rawNickel = nickelResult;}
     // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
-in {inherit importNcl;}
+in {inherit importNcl buildLockFile;}
