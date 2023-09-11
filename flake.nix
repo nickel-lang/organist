@@ -59,10 +59,8 @@
     // flake-utils.lib.eachDefaultSystem (
       system: let
         lib = pkgs.callPackage ./lib/lib.nix {
-          inherit system;
           flakeRoot = self.outPath;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
-          organistLib = self.lib.${system};
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {

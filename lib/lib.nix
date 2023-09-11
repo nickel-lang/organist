@@ -6,7 +6,6 @@
   system,
   lib,
   flakeRoot,
-  organistLib,
 }: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__organist_type";
