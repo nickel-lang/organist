@@ -64,18 +64,7 @@
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
-        lib.importNcl = lib.importNcl;
-
-        # Flake app to generate nickel.lock.ncl file. Example usage:
-        #   apps = {
-        #     regenerate-lockfile = organist.lib.${system}.regenerateLockFileApp {
-        #       organist = organist.lib.${system}.lockFileContents;
-        #     };
-        #   };
-        lib.regenerateLockFileApp = contents: {
-          type = "app";
-          program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
-        };
+        inherit lib;
 
         apps.run-test = let
           testScript = pkgs.writeShellApplication {

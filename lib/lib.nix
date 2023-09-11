@@ -63,6 +63,16 @@
         cat > nickel.lock.ncl <${builtins.toFile "nickel.lock.ncl" (buildLockFileContents contents)}
       '';
     };
+  # Flake app to generate nickel.lock.ncl file. Example usage:
+  #   apps = {
+  #     regenerate-lockfile = organist.lib.${system}.regenerateLockFileApp {
+  #       organist = organist.lib.${system}.lockFileContents;
+  #     };
+  #   };
+  regenerateLockFileApp = contents: {
+    type = "app";
+    program = lib.getExe (buildLockFile contents);
+  };
 
   # Import a Nickel value produced by the Organist DSL
   importFromNickel = flakeInputs: system: baseDir: value: let
@@ -179,4 +189,11 @@
     {rawNickel = nickelResult;}
     // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
-in {inherit importNcl buildLockFile;}
+in {
+  inherit
+    importNcl
+    buildLockFile
+    buildLockFileContents
+    regenerateLockFileApp
+    ;
+}
