@@ -59,67 +59,12 @@
     // flake-utils.lib.eachDefaultSystem (
       system: let
         lib = pkgs.callPackage ./lib/lib.nix {
-          inherit system;
           flakeRoot = self.outPath;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
-          organistLib = self.lib.${system};
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
-        lib.importNcl = lib.importNcl;
-
-        # Helper function that generates contents for "nickel.lock.ncl", see buildLockFile.
-        lib.buildLockFileContents = contents: let
-          lib = pkgs.lib;
-          getLinesOne = indent: name: thing:
-            if lib.isAttrs thing
-            then
-              [
-                (indent + (lib.optionalString (name != null) "${name} = ") + "{")
-              ]
-              ++ lib.mapAttrsToList (getLinesOne (indent + "  ")) thing
-              ++ [
-                (indent + "}" + (lib.optionalString (name != null) ","))
-              ]
-            else [''${indent}${name} = import "${builtins.toString thing}",''];
-        in
-          lib.concatLines (lib.flatten (getLinesOne "" null contents));
-
-        # A script that generates contents of "nickel.lock.ncl" file from a recursive attribute set of strings.
-        # Example inputs:
-        #   {
-        #     organist = {
-        #       builders = "/nix/store/...-source/builders.ncl";
-        #       contracts = "/nix/store/...-source/contracts.ncl";
-        #       nix = "/nix/store/...-source/nix.ncl";
-        #     };
-        #   }
-        # Result:
-        #   {
-        #     organist = {
-        #       builders = import "/nix/store/...-source/builders.ncl",
-        #       contracts = import "/nix/store/...-source/contracts.ncl",
-        #       nix = import "/nix/store/...-source/nix.ncl",
-        #     },
-        #   }
-        lib.buildLockFile = contents:
-          pkgs.writeShellApplication {
-            name = "regenerate-lockfile";
-            text = ''
-              cat > nickel.lock.ncl <${builtins.toFile "nickel.lock.ncl" (self.lib.${system}.buildLockFileContents contents)}
-            '';
-          };
-
-        # Flake app to generate nickel.lock.ncl file. Example usage:
-        #   apps = {
-        #     regenerate-lockfile = organist.lib.${system}.regenerateLockFileApp {
-        #       organist = organist.lib.${system}.lockFileContents;
-        #     };
-        #   };
-        lib.regenerateLockFileApp = contents: {
-          type = "app";
-          program = pkgs.lib.getExe (self.lib.${system}.buildLockFile contents);
-        };
+        inherit lib;
 
         apps.run-test = let
           testScript = pkgs.writeShellApplication {
