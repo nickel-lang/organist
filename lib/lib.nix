@@ -113,6 +113,8 @@
               possibleAttrPaths;
           in
             lib.getAttrFromPath chosenAttrPath flakeInputs
+          else if organistType == "nixPlaceholder"
+          then builtins.placeholder value.output
           else builtins.mapAttrs (_: importFromNickel_) value
       )
     else if (type == "list")
