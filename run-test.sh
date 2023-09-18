@@ -41,8 +41,20 @@ test_one_template () (
   pushd ./example
   sed -i "s/shells\.Bash/shells.$target/" project.ncl
   prepare_shell
-  nickel export --format raw <<<'(import "'"$PROJECT_ROOT"'/lib/shell-tests.ncl").'"$target"'.script' \
-    | nix develop --accept-flake-config --print-build-logs --command bash
+
+  TEST_SCRIPT="$(nickel export --format raw <<<'(import "'"$PROJECT_ROOT"'/lib/shell-tests.ncl").'"$target"'.script')"
+
+  echo "Running with incorrect nickel.lock.ncl" 1>&2
+  nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
+
+  echo "Running without nickel.lock.ncl" 1>&2
+  rm nickel.lock.ncl
+  nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
+
+  echo "Run with proper nickel.lock.ncl" 1>&2
+  nix run .\#regenerate-lockfile
+  nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
+
   popd
   popd
   clean

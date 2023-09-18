@@ -162,7 +162,11 @@
         ''
         ''
           cp -r "${sources}" sources
-          chmod +w sources sources/nickel.lock.ncl
+          if [ -f sources/nickel.lock.ncl ]; then
+            chmod +w sources sources/nickel.lock.ncl
+          else
+            chmod +w sources
+          fi
           cat > sources/nickel.lock.ncl <<EOF
           ${expectedLockfileContents}
           EOF
