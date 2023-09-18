@@ -6,6 +6,10 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixPath",
+    is_nix_placeholder = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nixPlaceholder",
     is_nix_input = fun x =>
       std.is_record x
       && std.record.has_field type_field x
@@ -25,6 +29,7 @@ let predicate | doc "Various predicates used to define contracts"
       is_derivation x
       || std.is_string x
       || is_nix_path x
+      || is_nix_placeholder x
   }
   in
 
@@ -289,6 +294,13 @@ from the Nix world) or a derivation defined in Nickel.
     = {
       "%{type_field}" | force = "nixPath",
       path | String,
+    },
+
+  NixPlaceholder
+    | doc "A path to the given output resolved later in the Nix store"
+    = {
+      "%{type_field}" | force = "nixPlaceholder",
+      output | String,
     },
 
   OrganistShells = {

@@ -19,4 +19,6 @@ let contracts = import "contracts.ncl" in
     = fun filepath => { path = filepath },
   import_nix | contracts.NixInputSugar -> contracts.NixInput
     = fun x => x,
+  placeholder | String -> contracts.NixPlaceholder
+    = fun _output => { output = _output }
 }
