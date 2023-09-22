@@ -82,25 +82,6 @@
       in {
         inherit lib;
 
-        apps =
-          computedOutputs.apps.${system}
-          // {
-            run-test = let
-              testScript = pkgs.writeShellApplication {
-                name = "test-templates";
-                runtimeInputs = [
-                  inputs.nickel.packages."${system}".nickel-lang-cli
-                  pkgs.parallel
-                  pkgs.gnused
-                ];
-                text = builtins.readFile ./run-test.sh;
-              };
-            in {
-              type = "app";
-              program = pkgs.lib.getExe testScript;
-            };
-          };
-
         checks.alejandra = pkgs.runCommand "check-alejandra" {} ''
           ${pkgs.lib.getExe pkgs.alejandra} --check ${self}
           touch $out

@@ -1,4 +1,4 @@
-let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
+let { NickelDerivation, Derivation, NixString, NullOr, .. } = import "contracts.ncl" in
 
 let lib = import "lib.ncl" in
 
@@ -7,6 +7,15 @@ let concat_strings_sep = fun sep values =>
     ""
   else
     std.array.reduce_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) values
+in
+
+let MutExclusiveWith = fun other name other_name label value =>
+  if value == null && other == null then
+    std.fail_with "You must specify either %{name} or %{other_name} field"
+  else if value != null && other != null then
+    std.fail_with "You can set only one of %{name} or %{other_name} fields"
+  else
+    value
 in
 {
   NickelPkg
@@ -84,4 +93,75 @@ in
         structured_env.buildInputs = packages,
       }
         | (NickelPkg & { packages | { _ : Derivation } }),
+
+  ShellApplication
+    | doc m%"
+    "%
+    =
+      {
+        name,
+        version | default = "0.0.0",
+        text | NullOr NixString | MutExclusiveWith file "text" "file" | default = null,
+        file | NullOr String | default = null,
+        runtime_inputs | { _ : Derivation } = {},
+        shell_binary | NixString | default = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
+
+        build_command = {
+          cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
+          args = [
+            "-c",
+            nix-s%"
+              set -euo pipefail
+              source .attrs.sh
+              PATH="%{lib.import_nix "nixpkgs#coreutils"}/bin:$PATH"
+              mkdir -p "${outputs[out]}/bin"
+              target="${outputs[out]}/bin/${name}"
+              %{if text != null then
+                m%"cat > "$target" <<<"$script""%
+                else
+                m%"(cat <<<"$scriptHeader"; cat "$scriptPath") > "$target""%
+              }
+              chmod +x "$target"
+              "%{shell_binary}" -n -O extglob "$target"
+              "%{lib.import_nix "nixpkgs#shellcheck"}/bin/shellcheck" "$target"
+            "%
+          ],
+        },
+        nix_drv =
+          let path_line | NixString =
+              if std.record.is_empty runtime_inputs then
+                ""
+              else
+                let paths =
+                  runtime_inputs
+                  |> std.record.values
+                  |> std.array.map (fun s => nix-s%"%{s}/bin"%)
+                  |> concat_strings_sep ":"
+                in
+                nix-s%"export PATH="%{paths}:$PATH""%
+            in
+          let script_header | NixString = nix-s%"
+            #!%{shell_binary}
+            set -o errexit
+            set -o nounset
+            set -o pipefail
+            %{path_line}
+          "%
+            in
+          if text != null then
+            # text != null && file == null
+            {
+              script | NixString = nix-s%"
+                    %{script_header}
+                    %{text}
+                  "%,
+            }
+          else
+            # file != null && text == null
+            {
+              scriptPath | NixString = lib.import_file file,
+              scriptHeader = script_header,
+            },
+      }
+        | NickelPkg,
 }
