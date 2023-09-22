@@ -73,33 +73,11 @@
     }
     // computedOutputs
     // flake-utils.lib.eachDefaultSystem (
-      system: let
-        lib = pkgs.callPackage ./lib/lib.nix {
+      system: {
+        lib = nixpkgs.legacyPackages.${system}.callPackage ./lib/lib.nix {
           organistSrc = self;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
-        pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        inherit lib;
-
-        apps =
-          computedOutputs.apps.${system}
-          // {
-            run-test = let
-              testScript = pkgs.writeShellApplication {
-                name = "test-templates";
-                runtimeInputs = [
-                  inputs.nickel.packages."${system}".nickel-lang-cli
-                  pkgs.parallel
-                  pkgs.gnused
-                ];
-                text = builtins.readFile ./run-test.sh;
-              };
-            in {
-              type = "app";
-              program = pkgs.lib.getExe testScript;
-            };
-          };
       }
     );
 }
