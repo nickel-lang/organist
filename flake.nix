@@ -37,7 +37,7 @@
       # devShells.${system} and packages.${system} generated from project.ncl
       #
       # (to be extended with more features later)
-      flake.outputsFromNickel = path: inputs: {
+      flake.outputsFromNickel = baseDir: flakeInputs: {
         systems ? flake-utils.lib.defaultSystems,
         lockFileContents ? {
           organist = "${self}/lib/nix.ncl";
@@ -50,8 +50,10 @@
           {
             apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
           }
-          // pkgs.lib.optionalAttrs (builtins.readDir path ? "project.ncl") rec {
-            nickelOutputs = lib.importNcl path "project.ncl" inputs lockFileContents;
+          // pkgs.lib.optionalAttrs (builtins.readDir baseDir ? "project.ncl") rec {
+            nickelOutputs = lib.importNcl {
+              inherit baseDir flakeInputs lockFileContents;
+            };
             packages.default = nickelOutputs.packages.default or {};
             devShells = nickelOutputs.shells or {};
           });
@@ -59,7 +61,7 @@
     // flake-utils.lib.eachDefaultSystem (
       system: let
         lib = pkgs.callPackage ./lib/lib.nix {
-          flakeRoot = self.outPath;
+          organistSrc = self;
           nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
         pkgs = nixpkgs.legacyPackages.${system};

@@ -3,9 +3,10 @@
   writeText,
   writeShellApplication,
   nickel,
+  pkgs,
   system,
   lib,
-  flakeRoot,
+  organistSrc,
 }: let
   # Export a Nix value to be consumed by Nickel
   typeField = "$__organist_type";
@@ -144,7 +145,7 @@
         system = "${system}",
       }
       in
-      let nix = import "${flakeRoot}/lib/nix.ncl" in
+      let nix = (import "${src}/nickel.lock.ncl").organist in
 
       let nickel_expr | nix.contracts.OrganistExpression =
         import "${src}/${nickelFile}" in
@@ -153,7 +154,9 @@
     '';
   in
     runCommand "nickel-res.json" {
-      ___ = flakeRoot; # Make it available in the sandbox as the lockfile relies on it
+      # If expectedLockfileContents references current flake in context, propagate it even if we don't need it.
+      inherit expectedLockfileContents;
+      passAsFile = ["expectedLockfileContents"];
     } (
       if needNewLockfile
       then
@@ -167,9 +170,7 @@
           else
             chmod +w sources
           fi
-          cat > sources/nickel.lock.ncl <<EOF
-          ${expectedLockfileContents}
-          EOF
+          cp $expectedLockfileContentsPath sources/nickel.lock.ncl
           cat > eval.ncl <<EOF
           ${nickelWithImports "sources"}
           EOF
@@ -187,7 +188,16 @@
   # passed to the Nickel expression are taken from. If the Nickel expression
   # declares an input hello from input "nixpkgs", then flakeInputs must have an
   # attribute "nixpkgs" with a package "hello".
-  importNcl = baseDir: nickelFile: flakeInputs: lockFileContents: let
+  importNcl = {
+    baseDir,
+    nickelFile ? "project.ncl",
+    flakeInputs ? {
+      nixpkgs = pkgs;
+    },
+    lockFileContents ? {
+      organist = "${organistSrc}/lib/nix.ncl";
+    },
+  }: let
     nickelResult = callNickel {
       inherit nickelFile baseDir flakeInputs lockFileContents;
     };
