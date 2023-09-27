@@ -31,5 +31,7 @@ let import_nix = organist.lib.import_nix in
       type = "app",
       program | organist.contracts.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
     },
+
+  flake.checks = import "tests/main.ncl",
 }
   | organist.contracts.OrganistExpression

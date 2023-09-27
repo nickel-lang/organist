@@ -82,30 +82,34 @@
       in {
         inherit lib;
 
-        checks.alejandra = pkgs.runCommand "check-alejandra" {} ''
-          ${pkgs.lib.getExe pkgs.alejandra} --check ${self}
-          touch $out
-        '';
+        checks =
+          computedOutputs.checks.${system}
+          // {
+            alejandra = pkgs.runCommand "check-alejandra" {} ''
+              ${pkgs.lib.getExe pkgs.alejandra} --check ${self}
+              touch $out
+            '';
 
-        checks.nickel-format =
-          pkgs.runCommand "check-nickel-format" {
-            buildInputs = [
-              inputs.nickel.packages.${system}.nickel-lang-cli
-            ];
-          } ''
-            cd ${self}
-            failed=""
-            for f in $(find . -name future -prune -or -name '*.ncl' -print); do
-              if ! diff -u "$f" <(nickel format -f "$f"); then
-                failed="$failed $f"
-              fi
-            done
-            if [ "$failed" != "" ]; then
-              echo "Following files need to be formatted: $failed"
-              exit 1
-            fi
-            touch $out
-          '';
+            nickel-format =
+              pkgs.runCommand "check-nickel-format" {
+                buildInputs = [
+                  inputs.nickel.packages.${system}.nickel-lang-cli
+                ];
+              } ''
+                cd ${self}
+                failed=""
+                for f in $(find . -name future -prune -or -name '*.ncl' -print); do
+                  if ! diff -u "$f" <(nickel format -f "$f"); then
+                    failed="$failed $f"
+                  fi
+                done
+                if [ "$failed" != "" ]; then
+                  echo "Following files need to be formatted: $failed"
+                  exit 1
+                fi
+                touch $out
+              '';
+          };
       }
     );
 }

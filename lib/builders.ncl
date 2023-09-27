@@ -64,9 +64,9 @@ in
           args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
-        env = {
-          stdenv = lib.import_nix "nixpkgs#stdenv"
-        },
+        env | { _ : NixString } = {
+            stdenv = lib.import_nix "nixpkgs#stdenv"
+          },
         nix_drv = env & structured_env,
       }
         | NickelPkg,
