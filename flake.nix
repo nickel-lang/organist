@@ -35,21 +35,24 @@
       flake-utils.lib.eachSystem systems (system: let
         lib = self.lib.${system};
         pkgs = nixpkgs.legacyPackages.${system};
+        nickelOutputs = lib.importNcl {
+          inherit baseDir flakeInputs lockFileContents;
+        };
       in
-        {
-          apps.regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
-        }
-        // pkgs.lib.optionalAttrs (builtins.readDir baseDir ? "project.ncl") rec {
-          nickelOutputs = lib.importNcl {
-            inherit baseDir flakeInputs lockFileContents;
-          };
-          packages =
-            if nickelOutputs ? packages && nickelOutputs.packages ? default
-            then {
-              default = nickelOutputs.packages.default;
+        # Can't do just `{inherit nickelOutputs;} // nickelOutputs.flake` because of infinite recursion over self
+        pkgs.lib.optionalAttrs (builtins.readDir baseDir ? "project.ncl") {
+          inherit nickelOutputs;
+          packages = nickelOutputs.packages or {} // nickelOutputs.flake.packages or {};
+          checks = nickelOutputs.flake.checks or {};
+          # Can't define this app in Nickel, yet
+          apps =
+            {
+              regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
             }
-            else {};
-          devShells = nickelOutputs.shells or {};
+            // nickelOutputs.flake.apps or {};
+          # We can't just copy `shells` to `flake.devShells` in the contract
+          # because of a bug in Nickel: https://github.com/tweag/nickel/issues/1630
+          devShells = nickelOutputs.shells or {} // nickelOutputs.flake.devShells or {};
         });
 
     computedOutputs = outputsFromNickel ./. inputs {
