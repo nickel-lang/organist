@@ -11,6 +11,9 @@ let import_nix = organist.lib.import_nix in
         parallel = import_nix "nixpkgs#parallel",
         gnused = import_nix "nixpkgs#gnused",
       },
+      dev.packages = {
+        nls = import_nix "nickel#lsp-nls",
+      },
     },
 }
   | organist.contracts.OrganistExpression
