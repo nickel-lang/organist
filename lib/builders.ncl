@@ -164,4 +164,19 @@ in
             },
       }
         | NickelPkg,
+  TextFile
+    | doc m%"
+    A plain text file written to the store.
+  "%
+    =
+      {
+        name | String,
+        content | NixString,
+        version = "0.0",
+        env.buildCommand = nix-s%"
+      echo "$content" > $out
+    "%,
+        env.content = content,
+      }
+        | NixpkgsPkg,
 }
