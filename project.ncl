@@ -7,12 +7,12 @@ let import_nix = organist.lib.import_nix in
     organist.shells.Bash
     & {
       build.packages = {
-        nickel-lang-cli = import_nix "nickel#nickel-lang-cli",
+        nickel = import_nix "nixpkgs#nickel",
         parallel = import_nix "nixpkgs#parallel",
         gnused = import_nix "nixpkgs#gnused",
       },
       dev.packages = {
-        nls = import_nix "nickel#lsp-nls",
+        nls = import_nix "nixpkgs#nls",
       },
     },
 
@@ -21,7 +21,7 @@ let import_nix = organist.lib.import_nix in
         name = "run-test.sh",
         file = "./run-test.sh",
         runtime_inputs = {
-          nickel = organist.lib.import_nix "nickel#nickel-lang-cli",
+          nickel = organist.lib.import_nix "nixpkgs#nickel",
           parallel = import_nix "nixpkgs#parallel",
           gnused = import_nix "nixpkgs#gnused",
         },

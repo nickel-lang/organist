@@ -2,7 +2,6 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel.url = "github:tweag/nickel";
 
   nixConfig = {
     extra-substituters = [
@@ -17,7 +16,6 @@
     self,
     nixpkgs,
     flake-utils,
-    nickel,
   } @ inputs: let
     # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
     #
@@ -76,7 +74,6 @@
       system: let
         lib = pkgs.callPackage ./lib/lib.nix {
           organistSrc = self;
-          nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
         };
         pkgs = nixpkgs.legacyPackages.${system};
       in {
@@ -93,7 +90,7 @@
             nickel-format =
               pkgs.runCommand "check-nickel-format" {
                 buildInputs = [
-                  inputs.nickel.packages.${system}.nickel-lang-cli
+                  pkgs.nickel
                 ];
               } ''
                 cd ${self}
