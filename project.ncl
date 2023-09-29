@@ -55,5 +55,7 @@ let import_nix = organist.lib.import_nix in
         "%,
       },
     },
+
+  flake.checks = import "tests/main.ncl",
 }
   | organist.contracts.OrganistExpression

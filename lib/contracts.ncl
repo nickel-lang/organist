@@ -10,6 +10,10 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixPlaceholder",
+    is_nix_to_file = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "nixToFile",
     is_nix_input = fun x =>
       std.is_record x
       && std.record.has_field type_field x
@@ -30,6 +34,7 @@ let predicate | doc "Various predicates used to define contracts"
       || std.is_string x
       || is_nix_path x
       || is_nix_placeholder x
+      || is_nix_to_file x
   }
   in
 
@@ -331,6 +336,14 @@ from the Nix world) or a derivation defined in Nickel.
           std.contract.blame_with_message "Must be string, array of strings or record with string values" label
       in
       std.contract.apply Contract label value,
+
+  NixToFile
+    | doc "A path to the given output resolved later in the Nix store"
+    = {
+      "%{type_field}" | force = "nixToFile",
+      name | String,
+      text | NixString,
+    },
 
   OrganistShells = {
     dev | NickelDerivation = build,

@@ -20,5 +20,7 @@ let contracts = import "contracts.ncl" in
   import_nix | contracts.NixInputSugar -> contracts.NixInput
     = fun x => x,
   placeholder | String -> contracts.NixPlaceholder
-    = fun _output => { output = _output }
+    = fun _output => { output = _output },
+  to_file | String -> contracts.NixString -> contracts.NixToFile
+    = fun _name _text => { name = _name, text = _text },
 }
