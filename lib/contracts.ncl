@@ -14,16 +14,6 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixInput",
-    is_nix_symbolic_string = fun value =>
-      std.is_record value
-      && std.record.has_field "tag" value
-      && value.tag == 'SymbolicString
-      && std.record.has_field "prefix" value
-      && value.prefix == 'nix,
-    is_nix_string = fun value =>
-      std.is_record value
-      && std.record.has_field type_field value
-      && value."%{type_field}" == "nixString",
     is_nickel_derivation = fun x =>
       std.is_record x
       && std.record.has_field type_field x
@@ -38,13 +28,6 @@ let predicate | doc "Various predicates used to define contracts"
       || is_nix_placeholder x
   }
   in
-
-let mk_nix_string = fun fs =>
-  {
-    "%{type_field}" = "nixString",
-    fragments = fs,
-  }
-in
 
 {
   # Nix may require name, version, etc. to have a certain format, but we're not sure.
@@ -154,14 +137,8 @@ from the Nix world) or a derivation defined in Nickel.
       `lib.import_file`), pure Nickel strings, and maybe more in the future.
     "%%
     = fun label value =>
-      # A contract must always be idempotent (be a no-op if applied a second
-      # time), so we accept something that is already a NixString
-      if predicate.is_nix_string value || predicate.is_nix_symbolic_string value then
-        value
-        # We accept a single string fragment (a plain string, a derivation or a
-        # Nix path). We normalize it by wrapping it into symbolic string
-      else if predicate.is_string_fragment value then
-        nix-s%"%{std.contract.apply NixStringFragment label value}"%
+      if predicate.is_string_fragment value then
+        std.contract.apply NixStringFragment label value
       else
         std.contract.apply NixSymbolicString label value,
 
