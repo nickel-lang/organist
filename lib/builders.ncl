@@ -179,4 +179,51 @@ in
         env.content = content,
       }
         | NixpkgsPkg,
+  FileTree
+    | doc m%"
+    Turn a record of derivations the form
+
+    ```
+    {
+      "path1" = drv1,
+      "path2/with/subpath" = drv2,
+    }
+    ```
+
+    to a single derivation whose content is a tree of symlinks of the form
+
+    ```
+    |- path1 -> drv1
+    |- path2
+        |- with
+            |- subpath -> drv2
+    ```
+  "%
+    =
+      {
+        input_paths | { _ : NixString },
+        # TODO: Sanity-check the inputs
+        # - Escape the values
+        # - Raise a proper error is there's some overlap between the
+        #     paths
+        env.buildCommand = nix-s%"
+          mkdir -p "$out"
+          cd "$out"
+          %{
+            std.record.to_array input_paths
+            |> std.array.fold_right
+            (fun { field, value } acc =>
+            nix-s%"
+              mkdir -p "$(dirname '%{field}')"
+              ln -s '%{value}' '%{field}'
+
+              %{acc}
+            "%
+            )
+            ""
+          }
+      "%,
+        version = "0.0",
+      }
+        | NixpkgsPkg
 }

@@ -1,6 +1,7 @@
 let organist = import "../lib/nix.ncl" in
-let
-  someText = organist.builders.TextFile & {
+let someText =
+  organist.builders.TextFile
+  & {
     name = "foo",
     content = "Heyio"
   }
@@ -16,4 +17,3 @@ organist.builders.NixpkgsPkg
   "%
       | organist.contracts.NixString,
 }
-    
