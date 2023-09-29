@@ -303,6 +303,35 @@ from the Nix world) or a derivation defined in Nickel.
       output | String,
     },
 
+  NixEnvironmentVariable
+    | doc m%"
+        Covers all types that are allowed in Nix derivation's environment variables:
+        - strings
+        - arrays of strings
+        - records with string values
+      "%
+    = fun label value =>
+      let Contract =
+        if std.is_string value then
+          NixString
+        else if std.is_record value then
+          if std.record.has_field type_field value
+          || (
+            std.record.has_field "tag" value
+            && value.tag == 'SymbolicString
+            && std.record.has_field "prefix" value
+            && value.prefix == 'nix
+          ) then
+            NixString
+          else
+            { _ | NixString }
+        else if std.is_array value then
+          Array NixString
+        else
+          std.contract.blame_with_message "Must be string, array of strings or record with string values" label
+      in
+      std.contract.apply Contract label value,
+
   OrganistShells = {
     dev | NickelDerivation = build,
     build | NickelDerivation,

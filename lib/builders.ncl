@@ -1,4 +1,4 @@
-let { NickelDerivation, Derivation, NixString, .. } = import "contracts.ncl" in
+let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, .. } = import "contracts.ncl" in
 
 let lib = import "lib.ncl" in
 
@@ -55,9 +55,9 @@ in
           args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
-        env = {
-          stdenv = lib.import_nix "nixpkgs#stdenv"
-        },
+        env | { _ : NixEnvironmentVariable } = {
+            stdenv | default = lib.import_nix "nixpkgs#stdenv",
+          },
         nix_drv = env & structured_env,
       }
         | NickelPkg,
