@@ -94,7 +94,7 @@
             value.nix_drv);
           in
             derivation prepared
-          else if organistType == "nixString"
+          else if organistType == "nixString" || (organistType == "" && value.tag or "" == "SymbolicString" && value.prefix or "" == "nix")
           then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if organistType == "nixPath"
           then baseDir + "/${value.path}"

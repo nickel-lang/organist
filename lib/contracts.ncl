@@ -14,6 +14,12 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixInput",
+    is_nix_symbolic_string = fun value =>
+      std.is_record value
+      && std.record.has_field "tag" value
+      && value.tag == 'SymbolicString
+      && std.record.has_field "prefix" value
+      && value.prefix == 'nix,
     is_nix_string = fun value =>
       std.is_record value
       && std.record.has_field type_field value
@@ -150,18 +156,14 @@ from the Nix world) or a derivation defined in Nickel.
     = fun label value =>
       # A contract must always be idempotent (be a no-op if applied a second
       # time), so we accept something that is already a NixString
-      if predicate.is_nix_string value then
+      if predicate.is_nix_string value || predicate.is_nix_symbolic_string value then
         value
         # We accept a single string fragment (a plain string, a derivation or a
-        # Nix path). We normalize it by wrapping it as a one-element array
+        # Nix path). We normalize it by wrapping it into symbolic string
       else if predicate.is_string_fragment value then
-        mk_nix_string [std.contract.apply NixStringFragment label value]
+        nix-s%"%{std.contract.apply NixStringFragment label value}"%
       else
-        # TODO: it's for debugging, but we should remove the serializing at some
-        # point.
-        let label = std.contract.label.append_note (std.serialize 'Json value) label in
-        let { fragments, .. } = std.contract.apply NixSymbolicString label value in
-        mk_nix_string fragments,
+        std.contract.apply NixSymbolicString label value,
 
   NixDerivation
     | doc m%"
