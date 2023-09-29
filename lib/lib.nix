@@ -94,8 +94,6 @@
             value.nix_drv);
           in
             derivation prepared
-          else if organistType == "nixString"
-          then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if organistType == "nixPath"
           then baseDir + "/${value.path}"
           else if organistType == "nixInput"
@@ -116,6 +114,8 @@
             lib.getAttrFromPath chosenAttrPath flakeInputs
           else if organistType == "nixPlaceholder"
           then builtins.placeholder value.output
+          else if value.tag or "" == "SymbolicString" && value.prefix or "" == "nix"
+          then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else builtins.mapAttrs (_: importFromNickel_) value
       )
     else if (type == "list")
