@@ -1,6 +1,6 @@
-let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, .. } = import "contracts.ncl" in
+let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, .. } = import "derivation.ncl" in
 
-let lib = import "lib.ncl" in
+let lib = import "builtins.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then

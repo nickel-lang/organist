@@ -29,7 +29,7 @@
     outputsFromNickel = baseDir: flakeInputs: {
       systems ? flake-utils.lib.defaultSystems,
       lockFileContents ? {
-        organist = "${self}/lib/nix.ncl";
+        organist = "${self}/lib/organist.ncl";
       },
     }:
       flake-utils.lib.eachSystem systems (system: let
@@ -56,7 +56,7 @@
         });
 
     computedOutputs = outputsFromNickel ./. inputs {
-      lockFileContents.organist = "./lib/nix.ncl";
+      lockFileContents.organist = "./lib/organist.ncl";
     };
   in
     {

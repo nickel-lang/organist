@@ -1,4 +1,4 @@
-let organist = import "../lib/nix.ncl" in
+let organist = import "../lib/organist.ncl" in
 let helloScriptFromText =
   {
     name = "hello",
@@ -8,14 +8,14 @@ let helloScriptFromText =
       echo "Hello World"
     "%,
   }
-    | organist.builders.ShellApplication
+    | organist.nix.builders.ShellApplication
 in
 let helloScriptFromFile =
   {
     name = "hello",
-    content.file = organist.lib.import_file "tests/hello.sh",
+    content.file = organist.nix.builtins.import_file "tests/hello.sh",
   }
-    | organist.builders.ShellApplication
+    | organist.nix.builders.ShellApplication
 in
 {
   name = "test-shellapplication",

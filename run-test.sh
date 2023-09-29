@@ -91,7 +91,7 @@ test_template () {
   if [[ -n ${1+x} ]]; then
     test_one_template "$1"
   else
-    all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/nix.ncl").shells) |> std.string.join "\n"')
+    all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/organist.ncl").shells) |> std.string.join "\n"')
     # --line-buffer outputs one line at a time, as opposed to dumping all output at once when job finishes
     # --keep-order makes sure that the order of the output corresponds to the job order, keeping output for each job together
     # --tag prepends each line with the name of the job
