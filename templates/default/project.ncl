@@ -9,7 +9,7 @@ let organist = inputs.organist in
   },
 
   shells.dev = {
-    packages.hello = organist.lib.import_nix "nixpkgs#hello",
+    packages.hello = organist.import_nix "nixpkgs#hello",
   },
 }
-  | organist.contracts.OrganistExpression
+  | organist.OrganistExpression

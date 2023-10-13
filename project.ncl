@@ -1,6 +1,6 @@
 let inputs = import "./nickel.lock.ncl" in
 let organist = inputs.organist in
-let import_nix = organist.lib.import_nix in
+let import_nix = organist.nix.import_nix in
 
 {
   shells =
@@ -17,11 +17,11 @@ let import_nix = organist.lib.import_nix in
     },
 
   flake.apps.run-test =
-    let testScript | organist.builders.ShellApplication = {
+    let testScript | organist.nix.builders.ShellApplication = {
         name = "run-test.sh",
-        content.file = organist.lib.import_file "run-test.sh",
+        content.file = organist.nix.builtins.import_file "run-test.sh",
         runtime_inputs = {
-          nickel = organist.lib.import_nix "nickel#nickel-lang-cli",
+          nickel = import_nix "nickel#nickel-lang-cli",
           parallel = import_nix "nixpkgs#parallel",
           gnused = import_nix "nixpkgs#gnused",
         },
@@ -29,7 +29,7 @@ let import_nix = organist.lib.import_nix in
       in
     {
       type = "app",
-      program | organist.contracts.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
+      program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
     },
 
   flake.checks
@@ -42,7 +42,7 @@ let import_nix = organist.lib.import_nix in
         ..
       }
     }
-    | { _ | organist.builders.NixpkgsPkg }
+    | { _ | organist.nix.builders.NixpkgsPkg }
     = {
       alejandra = {
         name = "check-alejandra",
@@ -74,4 +74,4 @@ let import_nix = organist.lib.import_nix in
 
   flake.checks = import "tests/main.ncl",
 }
-  | organist.contracts.OrganistExpression
+  | organist.OrganistExpression

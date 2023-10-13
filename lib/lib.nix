@@ -46,7 +46,7 @@
   #     organist = {
   #       builders = "/nix/store/...-source/builders.ncl";
   #       contracts = "/nix/store/...-source/contracts.ncl";
-  #       nix = "/nix/store/...-source/nix.ncl";
+  #       nix = "/nix/store/...-source/organist.ncl";
   #     };
   #   }
   # Result:
@@ -54,7 +54,7 @@
   #     organist = {
   #       builders = import "/nix/store/...-source/builders.ncl",
   #       contracts = import "/nix/store/...-source/contracts.ncl",
-  #       nix = import "/nix/store/...-source/nix.ncl",
+  #       nix = import "/nix/store/...-source/organist.ncl",
   #     },
   #   }
   buildLockFile = contents:
@@ -147,9 +147,9 @@
         system = "${system}",
       }
       in
-      let nix = (import "${src}/nickel.lock.ncl").organist in
+      let organist = (import "${src}/nickel.lock.ncl").organist in
 
-      let nickel_expr | nix.contracts.OrganistExpression =
+      let nickel_expr | organist.OrganistExpression =
         import "${src}/${nickelFile}" in
 
       nickel_expr & params
@@ -197,7 +197,7 @@
       nixpkgs = pkgs;
     },
     lockFileContents ? {
-      organist = "${organistSrc}/lib/nix.ncl";
+      organist = "${organistSrc}/lib/organist.ncl";
     },
   }: let
     nickelResult = callNickel {

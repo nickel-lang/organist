@@ -1,3 +1,3 @@
 {
-  organist = import "../../lib/nix.ncl",
+  organist = import "../../lib/organist.ncl",
 }

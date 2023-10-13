@@ -11,7 +11,7 @@ std.record.map
           |> std.record.merge_all,
       }
   )
-  (import "./shells.ncl")
+  (import "./organist.ncl").shells
 & {
   # Override all cases where `--version` does not work or is not enough
   Go.tests = {

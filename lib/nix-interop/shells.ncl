@@ -1,6 +1,6 @@
 let builders = import "builders.ncl" in
 let contracts = import "contracts.ncl" in
-let lib = import "lib.ncl" in
+let lib = import "builtins.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then
