@@ -1,5 +1,6 @@
 let nix = import "./nix-interop/nix.ncl" in
 let filegen = import "files.ncl" in
+let git = import "git.ncl" in
 {
   OrganistShells = {
     dev | nix.derivation.NickelDerivation = build,
@@ -30,4 +31,5 @@ let filegen = import "files.ncl" in
       ..
     }
     & filegen.Schema
+    & git.Schema,
 }
