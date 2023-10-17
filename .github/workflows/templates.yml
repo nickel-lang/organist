@@ -40,3 +40,4 @@ jobs:
       run: |
         nix run .#run-test template
         nix run .#run-test example examples/c-hello-world
+        nix run .#run-test example examples/filegen
