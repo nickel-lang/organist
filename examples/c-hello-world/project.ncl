@@ -2,7 +2,10 @@ let inputs = import "./nickel.lock.ncl" in
 let organist = inputs.organist in
 
 {
-  packages."default" = packages.hello,
+
+  shells = organist.shells.Bash,
+  shells.build.packages.hello = packages.hello,
+
   packages.hello =
     organist.nix.builders.NixpkgsPkg
     & {
@@ -20,5 +23,7 @@ let organist = inputs.organist in
         "%
             | organist.nix.derivation.NixString,
       },
-    }
+    },
+
 }
+  | organist.OrganistExpression
