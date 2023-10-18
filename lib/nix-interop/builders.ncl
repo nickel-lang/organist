@@ -96,6 +96,13 @@ in
 
   ShellApplication
     | doc m%"
+      A derivation that writes contents of `content.file` to `bin/$name` in the output and makes it executable.
+      `content.file` defaults to a file with text from `content.text`.
+      The script is prepended with:
+      - #! line that points to `shell_binary` (defaults to `nixpkgs#runtimeShell`)
+      - sane shell configuration
+      - if `runtime_inputs` is specified, `/bin` directories of those inputs are added to PATH
+      The result is verified with `bash -n` and `shellcheck`.
     "%
     =
       NixpkgsPkg
