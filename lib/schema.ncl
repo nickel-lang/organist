@@ -1,4 +1,5 @@
 let nix = import "./nix-interop/nix.ncl" in
+let filegen = import "files.ncl" in
 {
   OrganistShells = {
     dev | nix.derivation.NickelDerivation = build,
@@ -20,11 +21,13 @@ let nix = import "./nix-interop/nix.ncl" in
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  OrganistExpression = {
-    shells
-      | OrganistShells
-      | optional,
-    flake | FlakeOutputs | optional,
-    ..
-  },
+  OrganistExpression =
+    {
+      shells
+        | OrganistShells
+        | optional,
+      flake | FlakeOutputs = {},
+      ..
+    }
+    & filegen.Schema
 }
