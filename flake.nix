@@ -64,9 +64,12 @@
         path = ./templates/default;
         description = "A devshell using nickel.";
         welcomeText = ''
-          You have created a devshell that is built using nickel!
+          You have just created an _Organist_-powered development shell.
 
-          You can run `nix develop` to enter the dev shell.
+          - Enter the environment with `nix develop`
+          - Tweak it by modifying `project.ncl`
+
+          _Hint_: To be able to leverage the Nickel language server for instant feedback on your configuration, run `nix run .#regenerate-lockfile` first.
         '';
       };
       flake.outputsFromNickel = outputsFromNickel;
