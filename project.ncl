@@ -61,7 +61,7 @@ let import_nix = organist.nix.import_nix in
           cd %{import_nix "self"}
           failed=""
           for f in $(find . -name future -prune -or -name '*.ncl' -print); do
-            if ! diff -u "$f" <(nickel format -f "$f"); then
+            if ! diff -u "$f" <(nickel format < "$f"); then
               failed="$failed $f"
             fi
           done
