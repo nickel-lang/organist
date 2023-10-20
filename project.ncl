@@ -11,9 +11,6 @@ let import_nix = organist.nix.import_nix in
         parallel = import_nix "nixpkgs#parallel",
         gnused = import_nix "nixpkgs#gnused",
       },
-      dev.packages = {
-        nls = import_nix "nickel#lsp-nls",
-      },
     },
 
   flake.apps.run-test =
@@ -31,6 +28,11 @@ let import_nix = organist.nix.import_nix in
       type = "app",
       program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
     },
+
+  packages = {
+    # Re-exported to make it easy for downstream to depend on them
+    nickel = import_nix "nickel#default",
+  },
 
   flake.checks
     | {

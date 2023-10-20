@@ -57,7 +57,7 @@
           devShells = nickelOutputs.shells or {} // nickelOutputs.flake.devShells or {};
         });
 
-    computedOutputs = outputsFromNickel ./. inputs {
+    computedOutputs = outputsFromNickel ./. (inputs // {organist = self;}) {
       lockFileContents.organist = "./lib/organist.ncl";
     };
   in

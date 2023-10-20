@@ -195,6 +195,7 @@
     nickelFile ? "project.ncl",
     flakeInputs ? {
       nixpkgs = pkgs;
+      organist = import organistSrc;
     },
     lockFileContents ? {
       organist = "${organistSrc}/lib/organist.ncl";
