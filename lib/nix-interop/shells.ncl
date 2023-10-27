@@ -110,7 +110,14 @@ in
   HaskellStack =
     Bash
     & {
-      build.ghcVersion | default = "927", # User-defined. To keep in sync with the one used by stack
+      build.ghcVersion
+        | doc m%"
+            The GHC version used in the build.
+            Must be kept in sync with the one expected by Stack.
+          "%
+        | String
+        | default
+        = "927",
       build.packages =
         let stack-wrapped =
           {
@@ -146,7 +153,7 @@ in
           nix = lib.import_nix "nixpkgs#nix",
           git = lib.import_nix "nixpkgs#git",
         },
-      dev.ghcVersion,
+      dev.ghcVersion | force = build.ghcVersion,
       dev.packages = {
         ormolu = lib.import_nix "nixpkgs#ormolu",
         haskell-language-server = lib.import_nix "nixpkgs#haskell.packages.ghc%{dev.ghcVersion}.haskell-language-server",
