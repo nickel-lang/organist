@@ -38,7 +38,7 @@ $ nix develop
 Organist can be used to declare the dependencies for your project.
 These can then be instantiated using [Nix](https://nixos.org/nix).
 
-More information on <./doc/dependency-management.md>.
+More information on [doc/dependency-management.md](doc/dependency-management.md).
 
 ## Using without flakes
 
