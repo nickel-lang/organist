@@ -64,11 +64,12 @@ test_one_template () (
   rm flake.*
   cat > shell.nix <<EOF
 let
-  pkgs = import <nixpkgs> {};
-  organistSrc = builtins.path { path = "$PROJECT_ROOT"; name = "source"; };
-  organist = pkgs.callPackage "\${organistSrc}/lib/lib.nix" {inherit organistSrc;};
+  organist = import "$PROJECT_ROOT";
 in
-  (organist.importNcl {baseDir = ./.;}).shells.default
+  (organist.flake.outputsFromNickel ./. {
+    inherit organist;
+    nixpkgs = import <nixpkgs> {};
+  } {}).devShells.\${builtins.currentSystem}.default
 EOF
 
   echo "Running with incorrect nickel.lock.ncl" 1>&2
