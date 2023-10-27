@@ -40,6 +40,12 @@ These can then be instantiated using [Nix](https://nixos.org/nix).
 
 More information on [doc/dependency-management.md](doc/dependency-management.md).
 
+## Generating files
+
+Development projects tend to require a lot of boilerplaty files to configure
+all the tools involved.
+Organist can take care of these through the [`files` option](doc/filegen.md)
+
 ## Using without flakes
 
 While Organist is focused on usage with flakes, you can use it without them like this:
