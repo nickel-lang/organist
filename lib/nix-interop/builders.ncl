@@ -1,4 +1,4 @@
-let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, .. } = import "derivation.ncl" in
+let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
 
 let lib = import "builtins.ncl" in
 
@@ -119,13 +119,18 @@ in
           "%,
         content.text
           | doc "A string representing the body of the script"
-          | NixString
-          | optional,
+          | NullOr NixString
+          | default
+          = null,
         content.file
           | doc "File from which to read the body of the script"
-          | NixString
+          | NullOr NixString
           | default
-          = lib.to_file name content.text,
+          =
+            if content.text == null then
+              null
+            else
+              lib.to_file name content.text,
         runtime_inputs
           | doc m%"
             Packages which will be added to the `PATH` of the script when

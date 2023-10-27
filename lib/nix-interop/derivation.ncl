@@ -62,8 +62,8 @@ in
   # TODO: more precise contract
   Derivation
     | doc m%"
-        Contract representing either a Nix derivation (evaluated and imported
-from the Nix world) or a derivation defined in Nickel.
+      Contract representing either a Nix derivation (evaluated and imported
+      from the Nix world) or a derivation defined in Nickel.
       "%
     = Dyn,
 
