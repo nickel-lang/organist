@@ -32,6 +32,7 @@ $ $EDITOR project.ncl
 $ nix develop
 ```
 
+It is also possible to use Organist without flakes, see [doc/bootstrap-no-flake.md](doc/bootstrap-no-flake.md)
 
 ## Managing your dependencies with organist
 
@@ -45,30 +46,3 @@ More information on [doc/dependency-management.md](doc/dependency-management.md)
 Development projects tend to require a lot of boilerplaty files to configure
 all the tools involved.
 Organist can take care of these through the [`files` option](doc/filegen.md)
-
-## Using without flakes
-
-While Organist is focused on usage with flakes, you can use it without them like this:
-
-```nix
-# shell.nix
-let
-  pkgs = import <nixpkgs> {};
-  organistSrc = builtins.fetchTarball "https://github.com/nickel-lang/organist/archive/main.tar.gz";
-  organist = pkgs.callPackage "${organistSrc}/lib/lib.nix" {inherit organistSrc;};
-in
-  (organist.importNcl {baseDir = ./.;}).shells.default
-```
-
-And then use `nix develop -f shell.nix` as usual. Note that this will not use nixpkgs and Nickel from Organist's flake.lock.
-You can use flake-compat to use them:
-
-```nix
-# shell.nix
-let
-  flake-compat = builtins.fetchTarball "https://github.com/edolstra/flake-compat/archive/master.tar.gz";
-  organistSrc = builtins.fetchTarball "https://github.com/nickel-lang/organist/archive/main.tar.gz";
-  organist = ((import flake-compat) {src = organistSrc;}).defaultNix.lib.${builtins.currentSystem};
-in
-  (organist.importNcl {baseDir = ./.;}).shells.default
-```
