@@ -1,4 +1,4 @@
-let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, .. } = import "derivation.ncl" in
+let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
 
 let lib = import "builtins.ncl" in
 
@@ -64,7 +64,10 @@ in
           args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
-        env | { _ : NixEnvironmentVariable } = {
+        env
+          | doc "Environment variables that will be set in the derivation"
+          | { _ : NixEnvironmentVariable }
+          = {
             stdenv | default = lib.import_nix "nixpkgs#stdenv",
           },
         nix_drv = env & structured_env,
@@ -92,7 +95,7 @@ in
         env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
         structured_env.buildInputs = packages,
       }
-        | (NickelPkg & { packages | { _ : Derivation } }),
+        | NickelPkg,
 
   ShellApplication
     | doc m%"
@@ -109,10 +112,49 @@ in
       & {
         name,
         version | default = "0.0.0",
-        content.text | NixString | optional,
-        content.file | NixString | default = lib.to_file name content.text,
-        runtime_inputs | { _ : Derivation } = {},
-        shell_binary | NixString | default = lib.import_nix "nixpkgs#runtimeShell",
+        content
+          | doc m%"
+            The body of the script. Can be either passed directly as a string,
+            or read from a file
+          "%,
+        content.text
+          | doc "A string representing the body of the script"
+          | NullOr NixString
+          | default
+          = null,
+        content.file
+          | doc "File from which to read the body of the script"
+          | NullOr NixString
+          | default
+          =
+            if content.text == null then
+              null
+            else
+              lib.to_file name content.text,
+        runtime_inputs
+          | doc m%"
+            Packages which will be added to the `PATH` of the script when
+            it runs.
+
+            # Example
+
+            ```nickel
+            {
+              jq = import_nix "nixpkgs#jq",
+              nickel = import_nix "nixpkgs#awk",
+            }
+            ```
+          "%
+          | { _ : Derivation }
+          = {},
+        shell_binary
+          | doc m%"
+            The binary that will be run to execute the script.
+            Needs to be bash-compatible.
+          "%
+          | NixString
+          | default
+          = lib.import_nix "nixpkgs#runtimeShell",
 
         env.buildInputs.coreutils = lib.import_nix "nixpkgs#coreutils",
         env.buildCommand = nix-s%"

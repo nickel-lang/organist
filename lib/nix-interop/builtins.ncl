@@ -17,10 +17,40 @@ let contracts = import "contracts.ncl" in
           ```
         "%%
     = fun filepath => { path = filepath },
-  import_nix | contracts.NixInputSugar -> contracts.NixInput
+  import_nix
+    | doc m%%"
+      Import a Nix value from one of the flake inputs.
+      The value should be passed in a flakeref-like format
+      `input_name#attribute_path`.
+
+      # Example
+
+      ```nickel
+      cmd = nix-s%"%{import_nix "nixpkgs#hello"}/bin/hello > $out"%
+      ```
+    "%%
+    | contracts.NixInputSugar -> contracts.NixInput
     = fun x => x,
-  placeholder | String -> contracts.NixPlaceholder
+  placeholder
+    | doc m%"
+      Return a placeholder string for the specified output that will be
+      substituted by the corresponding output path at build time.
+
+      Wrapper around the Nix
+      [placeholder](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-placeholder)
+      builtin.
+    "%
+    | String -> contracts.NixPlaceholder
     = fun _output => { output = _output },
-  to_file | String -> contracts.NixString -> contracts.NixToFile
+  to_file
+    | doc m%"
+      Store the string s in a file in the Nix store and return its path.
+      The file has suffix name.
+
+      Wrapper around the Nix
+      [toFile](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-toFile)
+      builtin.
+    "%
+    | String -> contracts.NixString -> contracts.NixToFile
     = fun _name _text => { name = _name, text = _text },
 }
