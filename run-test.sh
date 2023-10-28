@@ -24,7 +24,7 @@ pushd_temp () {
 prepare_shell() {
   NIXPKGS_PATH="$(nix flake metadata --json --inputs-from "path:$PROJECT_ROOT" nixpkgs | nix eval --impure --raw --expr '(builtins.fromJSON (builtins.readFile "/dev/stdin")).path')"
   # We test against the local version of `organist` not the one in main (hence the --override-input).
-  nix flake lock \
+  nix flake update \
     --override-input organist "path:$PROJECT_ROOT" \
     --override-input nixpkgs "path:$NIXPKGS_PATH" \
     --accept-flake-config
@@ -64,11 +64,12 @@ test_one_template () (
   rm flake.*
   cat > shell.nix <<EOF
 let
-  pkgs = import <nixpkgs> {};
-  organistSrc = builtins.path { path = "$PROJECT_ROOT"; name = "source"; };
-  organist = pkgs.callPackage "\${organistSrc}/lib/lib.nix" {inherit organistSrc;};
+  organist = import "$PROJECT_ROOT";
 in
-  (organist.importNcl {baseDir = ./.;}).shells.default
+  (organist.flake.outputsFromNickel ./. {
+    inherit organist;
+    nixpkgs = import <nixpkgs> {};
+  } {}).devShells.\${builtins.currentSystem}.default
 EOF
 
   echo "Running with incorrect nickel.lock.ncl" 1>&2

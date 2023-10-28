@@ -35,19 +35,11 @@ let import_nix = organist.nix.import_nix in
   },
 
   flake.checks
-    | {
-      _ | {
-        version
-        = "",
-        env.stdenv
-        = import_nix "nixpkgs#stdenvNoCC",
-        ..
-      }
-    }
     | { _ | organist.nix.builders.NixpkgsPkg }
     = {
       alejandra = {
         name = "check-alejandra",
+        version = "0.0",
         env.buildCommand = nix-s%"
           %{import_nix "nixpkgs#alejandra"}/bin/alejandra --check %{import_nix "self"}
           touch $out
@@ -56,12 +48,13 @@ let import_nix = organist.nix.import_nix in
 
       nickel-format = {
         name = "check-nickel-format",
+        version = "0.0",
         env.buildInputs.nickel = import_nix "nickel#nickel-lang-cli",
         env.buildCommand = nix-s%"
           cd %{import_nix "self"}
           failed=""
           for f in $(find . -name future -prune -or -name '*.ncl' -print); do
-            if ! diff -u "$f" <(nickel format -f "$f"); then
+            if ! diff -u "$f" <(nickel format < "$f"); then
               failed="$failed $f"
             fi
           done

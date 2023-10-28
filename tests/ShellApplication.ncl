@@ -19,6 +19,7 @@ let helloScriptFromFile =
 in
 {
   name = "test-shellapplication",
+  version = "0.1",
   env.buildCommand = nix-s%"
     [[ $(%{helloScriptFromText}/bin/hello) == "Hello World" ]]
     [[ $(%{helloScriptFromFile}/bin/hello) == "Hello World" ]]

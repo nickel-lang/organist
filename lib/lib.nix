@@ -176,13 +176,13 @@
           cat > eval.ncl <<EOF
           ${nickelWithImports "sources"}
           EOF
-          ${nickel}/bin/nickel -f eval.ncl export > $out
+          ${nickel}/bin/nickel export eval.ncl > $out
         ''
       else ''
         cat > eval.ncl <<EOF
         ${nickelWithImports sources}
         EOF
-        ${nickel}/bin/nickel -f eval.ncl export > $out
+        ${nickel}/bin/nickel export eval.ncl > $out
       ''
     );
 
