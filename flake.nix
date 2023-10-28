@@ -3,6 +3,7 @@
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nickel.url = "github:tweag/nickel";
+  inputs.flake-compat.url = "github:edolstra/flake-compat";
 
   nixConfig = {
     extra-substituters = [
@@ -18,6 +19,7 @@
     nixpkgs,
     flake-utils,
     nickel,
+    flake-compat,
   } @ inputs: let
     # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
     #
@@ -55,7 +57,7 @@
           devShells = nickelOutputs.shells or {} // nickelOutputs.flake.devShells or {};
         });
 
-    computedOutputs = outputsFromNickel ./. inputs {
+    computedOutputs = outputsFromNickel ./. (inputs // {organist = self;}) {
       lockFileContents.organist = "./lib/organist.ncl";
     };
   in

@@ -18,7 +18,7 @@ in
           bash = lib.import_nix "nixpkgs#bash",
         },
       },
-    dev = build,
+    dev.packages.nickel = lib.import_nix "organist#nickel",
   },
 
   Rust =
