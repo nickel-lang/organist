@@ -20,5 +20,8 @@ let organist = inputs.organist in
         "%
             | organist.nix.derivation.NixString,
       },
-    }
-}
+    },
+
+  shells = organist.shells.Bash,
+  shells.build.packages.hello = packages.hello,
+} | organist.OrganistExpression

@@ -107,7 +107,8 @@ test_example () (
   cp -r "$examplePath" ./example
   pushd ./example
   prepare_shell
-  nix build --print-build-logs
+  nix run .\#regenerate-files --print-build-logs
+  nix develop --print-build-logs --command bash test.sh
   popd
   popd
 )
