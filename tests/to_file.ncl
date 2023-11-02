@@ -7,7 +7,7 @@ organist.nix.builders.NixpkgsPkg
   version = "0.1",
   env.buildCommand = nix-s%"
     [[ $(cat %{file1}) == "important data" ]]
-    [[ $(cat %{file2}) == "see /nix/store/ypiiqm7ig0fzqfz3v4j05g54ffk8svg9-file1" ]]
+    [[ $(cat %{file2}) == "see /nix/store/wr3qac28s69nkm4x8gg9rrs8518kiwa0-file1" ]]
     echo OK > $out
   "%,
 }

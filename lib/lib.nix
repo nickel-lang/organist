@@ -117,7 +117,7 @@
           else if organistType == "nixPlaceholder"
           then builtins.placeholder value.output
           else if organistType == "nixToFile"
-          then builtins.toFile value.name (importFromNickel_ value.text)
+          then writeText value.name (importFromNickel_ value.text)
           else builtins.mapAttrs (_: importFromNickel_) value
       )
     else if (type == "list")
