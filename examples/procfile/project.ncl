@@ -39,6 +39,8 @@ let redis_listen_port = 64442 in
     redis = nix-s%"%{organist.import_nix "nixpkgs#redis"}/bin/redis-server --port %{std.to_string redis_listen_port}"%,
   },
 }
-& organist.tools.editorconfig.Schema
-& organist.tools.procfile.Schema
-  | organist.OrganistExpression
+  | (
+    organist.OrganistExpression
+    & organist.tools.editorconfig.Schema
+    & organist.tools.procfile.Schema
+  )

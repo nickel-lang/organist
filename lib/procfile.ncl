@@ -32,6 +32,5 @@ let generate_procfile | ProcfileSchema -> nix.derivation.NixString = fun schema 
         }
       else
         {},
-    ..
   }
 }

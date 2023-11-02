@@ -27,7 +27,6 @@ let filegen = import "files.ncl" in
         | OrganistShells
         | optional,
       flake | FlakeOutputs = {},
-      ..
     }
     & filegen.Schema
 }
