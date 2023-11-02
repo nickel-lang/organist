@@ -4,6 +4,8 @@
   schema = import "./schema.ncl",
   OrganistExpression = schema.OrganistExpression,
   import_nix = nix.builtins.import_nix,
+
+  tools.editorconfig = import "./editorconfig.ncl",
 }
 #TODO: currently, Nickel forbids doc at the toplevel. It's most definitely
 # temporary, as the implementation of RFC005 is ongoing. Once the capability is
