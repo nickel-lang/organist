@@ -39,4 +39,4 @@ jobs:
     - name: Test devshells
       run: |
         nix run .#run-test template
-        nix run .#run-test example examples/c-hello-world
+        find examples -maxdepth 1 -mindepth 1 -type d -print0 -exec nix run .#run-test example {} \;

@@ -61,7 +61,7 @@ in
         version,
         build_command = {
           cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
-          args = ["-c", "set -euo pipefail; source .attrs.sh; source $stdenv/setup; genericBuild"],
+          args = ["-c", "set -euo pipefail; source \"${NIX_ATTRS_SH_FILE:-.attrs.sh}\"; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
         env
@@ -70,7 +70,9 @@ in
           = {
             stdenv | default = lib.import_nix "nixpkgs#stdenv",
           },
-        nix_drv = env & structured_env,
+        nix_drv =
+          let env' = env in
+          env' & structured_env & { env = env' },
       }
         | NickelPkg,
 
