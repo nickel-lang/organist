@@ -29,7 +29,7 @@ let import_nix = organist.nix.import_nix in
       program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
     },
 
-  packages = {
+  flake.packages = {
     # Re-exported to make it easy for downstream to depend on them
     nickel = import_nix "nickel#default",
   },

@@ -23,5 +23,7 @@ let organist = inputs.organist in
     },
   },
 }
-& organist.tools.editorconfig.Schema
-  | organist.OrganistExpression
+  | (
+    organist.OrganistExpression
+    & organist.tools.editorconfig.Schema
+  )

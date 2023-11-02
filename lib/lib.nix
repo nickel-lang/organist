@@ -149,7 +149,7 @@
       in
       let organist = (import "${src}/nickel.lock.ncl").organist in
 
-      let nickel_expr | organist.OrganistExpression =
+      let nickel_expr | (organist.OrganistExpression & {..}) =
         import "${src}/${nickelFile}" in
 
       nickel_expr & params
