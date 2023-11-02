@@ -6,7 +6,8 @@ usage() {
   cat <<EOF
 Usage:
 
-$0 template <shellName> -- test instantiating the template using the given shell
+$0 template [--full] <shellName> -- test instantiating the template using the given shell
+$0 template -- test instantiating all the templates
 $0 example <examplePath> -- Try running the example at <examplePath>
 EOF
   exit 1
@@ -32,6 +33,11 @@ prepare_shell() {
 
 # Note: running in a subshell (hence the parens and not braces around the function body) so that the trap-based cleanup happens whenever we exit
 test_one_template () (
+  local isFull=false
+  if [[ ${1:-""} == "--full" ]]; then
+    isFull=true
+    shift
+  fi
   target="$1"
   set -x
   pushd_temp
@@ -47,6 +53,10 @@ test_one_template () (
 
   echo "Running with incorrect nickel.lock.ncl" 1>&2
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
+
+  if [[ $isFull == false ]]; then
+    return
+  fi
 
   echo "Running without nickel.lock.ncl" 1>&2
   rm nickel.lock.ncl
@@ -90,7 +100,7 @@ EOF
 
 test_template () {
   if [[ -n ${1+x} ]]; then
-    test_one_template "$1"
+    test_one_template "$@"
   else
     all_targets=$(nickel export --format raw <<<'std.record.fields ((import "lib/organist.ncl").shells) |> std.string.join "\n"')
     # --line-buffer outputs one line at a time, as opposed to dumping all output at once when job finishes
