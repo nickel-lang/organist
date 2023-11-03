@@ -5,8 +5,9 @@
   OrganistExpression = schema.OrganistExpression,
   import_nix = nix.builtins.import_nix,
 
+  services = import "./services.ncl",
+
   tools.editorconfig = import "./editorconfig.ncl",
-  tools.procfile = import "./procfile.ncl",
   tools.direnv = import "./direnv.ncl",
 }
 #TODO: currently, Nickel forbids doc at the toplevel. It's most definitely
