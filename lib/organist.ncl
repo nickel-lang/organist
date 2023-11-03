@@ -7,6 +7,7 @@
 
   tools.editorconfig = import "./editorconfig.ncl",
   tools.procfile = import "./procfile.ncl",
+  tools.direnv = import "./direnv.ncl",
 }
 #TODO: currently, Nickel forbids doc at the toplevel. It's most definitely
 # temporary, as the implementation of RFC005 is ongoing. Once the capability is
