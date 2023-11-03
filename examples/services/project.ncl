@@ -21,7 +21,7 @@ let redis_listen_port = 64442 in
     env.REDIS_URI = "redis://localhost:%{std.to_string redis_listen_port}",
   },
 
-  procfile = {
+  services = {
     postgres =
       let start_script =
         {
@@ -42,5 +42,5 @@ let redis_listen_port = 64442 in
   | (
     organist.OrganistExpression
     & organist.tools.editorconfig.Schema
-    & organist.tools.procfile.Schema
+    & organist.services.Schema
   )
