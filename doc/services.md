@@ -20,3 +20,11 @@ let redis_listen_port = 64442 in
 then running `nix run .#start-services start` will run a local `redis` instance listening on port 64442.
 
 A more complete example can be found [here](../examples/services/project.ncl).
+
+## Exposed options
+
+### `services`
+
+ - `{ _ : NixString }`
+
+Services required for development.

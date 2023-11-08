@@ -2,9 +2,35 @@ let nix = import "./nix-interop/nix.ncl" in
 let filegen = import "files.ncl" in
 {
   OrganistShells = {
-    dev | nix.derivation.NickelDerivation = build,
-    build | nix.derivation.NickelDerivation,
-    "default" | nix.derivation.NickelDerivation = dev,
+    dev
+      | doc m%"
+          Development shell.
+
+          Contains everything needed to build and work on the project.
+
+          Can be entered with `nix develop .#dev`.
+        "%
+      | nix.derivation.NickelDerivation
+      = build,
+    build
+      | doc m%"
+          Build shell.
+
+          Only contains the required dependencies to build the project.
+
+          Can be entered with `nix develop .#build`.
+        "%
+      | nix.derivation.NickelDerivation,
+    "default"
+      | doc m%"
+          Default shell.
+
+          This is the shell that gets entered by `nix develop` without any argument.
+
+          Defaults to the `dev` shell.
+        "%
+      | nix.derivation.NickelDerivation
+      = dev,
   },
 
   FlakeOutputs = {
@@ -24,9 +50,18 @@ let filegen = import "files.ncl" in
   OrganistExpression =
     {
       shells
-        | OrganistShells
-        | optional,
-      flake | FlakeOutputs = {},
+        | doc m%"
+            The shells that will be entered by `nix develop`.
+          "%
+        | OrganistShells,
+      flake
+        | doc m%"
+            The raw flake outputs that will be passed to Nix.
+
+            These should follow the Nix flake outputs schema.
+          "%
+        | FlakeOutputs
+        = {},
     }
     & filegen.Schema
 }
