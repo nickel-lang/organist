@@ -44,3 +44,7 @@ More information on [doc/dependency-management.md](doc/dependency-management.md)
 Development projects tend to require a lot of boilerplaty files to configure
 all the tools involved.
 Organist can take care of these through the [`files` option](doc/filegen.md)
+
+## Managing services
+
+Organist also allows you to declare a set of services that need to be running when developing your project, through the [`services` option](doc/services.md)
