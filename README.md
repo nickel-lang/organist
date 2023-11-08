@@ -8,8 +8,6 @@ Organist aims at being your main entrypoint for managaing all these different to
 1. A unified configuration framework for all of these
 2. A powerful and ergonomic language to allow you to easily abstract over these configurations, with discoverability and early error reporting
 
-Organist currently only supports managing your project dependencies (with [Nix](https://github.com/NixOS/nix)), but more should come soon (CI, development services, etc..).
-
 ## Getting started
 
 To start using Organist, you need `Nix` to be installed and configured.
