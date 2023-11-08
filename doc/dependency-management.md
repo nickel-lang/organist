@@ -65,3 +65,49 @@ shells.build.env.LD_PRELOAD = nix-s%"%{inputs.nixpkgs.jemalloc}/lib/libjemalloc.
 ```
 
 [symbolic strings]: https://nickel-lang.org/user-manual/syntax#symbolic-strings
+
+## Exposed options
+
+## `flake`
+
+- `flake | FlakeOutputs`
+
+The raw flake outputs that will be passed to Nix.
+
+These should follow the Nix flake outputs schema.
+
+## `shells`
+
+- `shells | OrganistShells`
+
+The shells that will be entered by `nix develop`.
+
+### `build`
+
+- `build | nix.derivation.NickelDerivation`
+
+Build shell.
+
+Only contains the required dependencies to build the project.
+
+Can be entered with `nix develop .#build`.
+
+### `default`
+
+- `default | nix.derivation.NickelDerivation`
+
+Default shell.
+
+This is the shell that gets entered by `nix develop` without any argument.
+
+Defaults to the `dev` shell.
+
+### `dev`
+
+- `dev | nix.derivation.NickelDerivation`
+
+Development shell.
+
+Contains everything needed to build and work on the project.
+
+Can be entered with `nix develop .#dev`.
