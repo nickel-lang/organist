@@ -2,4 +2,5 @@
 
 set -euo pipefail
 
-hello
+gcc -lhello main.c -o hello
+./hello

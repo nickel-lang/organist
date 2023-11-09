@@ -2,26 +2,29 @@ let inputs = import "./nickel.lock.ncl" in
 let organist = inputs.organist in
 
 {
-  packages."default" = packages.hello,
-  packages.hello =
+  flake.packages."default" = flake.packages.hello,
+  flake.packages.hello =
     organist.nix.builders.NixpkgsPkg
     & {
       name = "hello",
       version = "0.1",
-      nix_drv = {
-        buildInputs.gcc = organist.import_nix "nixpkgs#gcc",
-        buildInputs.coreutils = organist.import_nix "nixpkgs#coreutils",
-        buildInputs.bash = organist.import_nix "nixpkgs#bash",
-        buildCommand =
-          nix-s%"
-          gcc %{organist.nix.builtins.import_file "hello.c"} -o hello
-          mkdir -p $out/bin
-          cp hello $out/bin/hello
-        "%
-            | organist.nix.derivation.NixString,
+      structured_env.buildInputs = {
+        gcc = organist.import_nix "nixpkgs#gcc",
+        coreutils = organist.import_nix "nixpkgs#coreutils",
+        bash = organist.import_nix "nixpkgs#bash",
       },
+      env.src = organist.nix.builtins.import_file ".",
+      env.buildCommand =
+        nix-s%"
+          cp $src/* .
+          mkdir -p $out/{include,lib}
+          gcc -shared hello.c -o libhello.so
+          cp *.so $out/lib/
+          cp hello.h $out/include/hello.h
+        "%
+          | organist.nix.derivation.NixString,
     },
 
   shells = organist.shells.Bash,
-  shells.build.packages.hello = packages.hello,
+  shells.build.packages.hello = flake.packages.hello,
 } | organist.OrganistExpression
