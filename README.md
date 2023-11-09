@@ -53,11 +53,11 @@ Organist also allows you to declare a set of services that need to be running wh
 
 - [Docker](https://docs.docker.com/desktop/).
     Containers can be used for providing both a coherent development environment and an arbitrary set of services (via [docker-compose](https://docs.docker.com/compose/) for instance).
-    They provide a very strong isolation and are very powerful.
+    They provide a very strong isolation and are fairly easy to set up.
     They tend to be quite rigid however, both when defining the environment (maintaining complex environments in a `Dockerfile` can be challenging) and when running it.
 - [Nix](https://github.com/nixos/nix), and in particular `nix-shell` and `nix develop`.
-    Nix is one of the main building blocks of Organist.
-    The tool itself acts at a lower level (it is strictly speaking a package manager), although a lot can be encoded in it.
+    This is one of the main building blocks of Organist.
+    Nix itself acts at a lower level (it is strictly speaking a package manager), although a lot can be encoded in it.
 - [Devenv](https://devenv.sh).
     This is arguably the main inspiration for Organist, with a fairly similar interface and many common principles.
     The main divergence between the tools is in the surface language (Nickel for Organist, Nix+YAML for devenv).
@@ -66,6 +66,6 @@ Organist also allows you to declare a set of services that need to be running wh
     Its main focus however, is in facilitating the publishing and sharing of packages, which is orthogonal to Organist's goals.
     In fact, it would probably be possible to use Organist with Flox and get the best of both worlds.
     This is left as an exercise to the reader.
-- [Devbox](https://www.jetpack.io/devbox/) is another Nix-based development environment manage.
+- [Devbox](https://www.jetpack.io/devbox/) is another Nix-based development environment manager.
     Like Organist, it builds beyond the “package management” aspect (to provide some service runner capability and integrate with jetpack.io amongst other things), and like Organist it replaces the Nix language by something else (JSON).
     It chooses however to expose a more constrained (and not extensible) interface in a more constrained language.
