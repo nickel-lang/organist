@@ -95,7 +95,7 @@ in
           exit 1
         "%,
         env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
-        structured_env.buildInputs = packages,
+        structured_env.nativeBuildInputs = packages,
       }
         | NickelPkg,
 
