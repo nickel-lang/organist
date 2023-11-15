@@ -60,7 +60,9 @@ Organist also allows you to declare a set of services that need to be running wh
     Nix itself acts at a lower level (it is strictly speaking a package manager), although a lot can be encoded in it.
 - [Devenv](https://devenv.sh).
     This is arguably the main inspiration for Organist, with a fairly similar interface and many common principles.
-    The main divergence between the tools is in the surface language (Nickel for Organist, Nix+YAML for devenv).
+    Compared to Devenv, Organist both abstracts further away from Nix (by using another language amongst other things) and tries to be more transparent for Nix users (by reusing the Nix command-line and exposing Flake-style outputs).
+    The goal is to enable new approaches and patterns thanks to the possibilities offered by Nickel, without sacrificing on compatibility.
+    It also brings a few novelties, like a separation between the build and development environments.
 - [Flox](https://flox.dev).
     The tool is also leveraging Nix and improving its ability to manage development environments.
     Its main focus however, is in facilitating the publishing and sharing of packages, which is orthogonal to Organist's goals.
