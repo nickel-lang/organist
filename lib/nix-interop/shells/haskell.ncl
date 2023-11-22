@@ -36,7 +36,7 @@ Bash
           "%
     | String
     | default
-    = "94",
+    = "default",
   build.packages =
     let stack-wrapped =
       {
@@ -75,6 +75,9 @@ Bash
   dev.ghcVersion | force = build.ghcVersion,
   dev.packages =
     let ghcPackageSet =
+      if dev.ghcVersion == "default" then
+        "haskellPackages"
+      else
         "haskell.packages.ghc%{dev.ghcVersion}"
     in
     {
