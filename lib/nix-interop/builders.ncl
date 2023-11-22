@@ -1,6 +1,6 @@
 let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
 
-let lib = import "builtins.ncl" in
+let nix_builtins = import "builtins.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then
@@ -39,7 +39,7 @@ in
           cmd = nix-s%"%{inputs.bash}/bin/bash"%,
           args = [ "-c",
             nix-s%"
-              %{inputs.gcc}/bin/gcc %{nix.lib.import_file "hello.c"} -o hello
+              %{inputs.gcc}/bin/gcc %{nix.import_file "hello.c"} -o hello
               %{inputs.coreutils}/bin/mkdir -p $out/bin
               %{inputs.coreutils}/bin/cp hello $out/bin/hello
              "%
@@ -60,7 +60,7 @@ in
         name,
         version,
         build_command = {
-          cmd = nix-s%"%{lib.import_nix "nixpkgs#bash"}/bin/bash"%,
+          cmd = nix-s%"%{nix_builtins.import_nix "nixpkgs#bash"}/bin/bash"%,
           args = ["-c", "set -euo pipefail; source \"${NIX_ATTRS_SH_FILE:-.attrs.sh}\"; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
@@ -68,7 +68,7 @@ in
           | doc "Environment variables that will be set in the derivation"
           | { _ : NixEnvironmentVariable }
           = {
-            stdenv | default = lib.import_nix "nixpkgs#stdenv",
+            stdenv | default = nix_builtins.import_nix "nixpkgs#stdenv",
           },
         nix_drv =
           let env' = env in
@@ -132,7 +132,7 @@ in
             if content.text == null then
               null
             else
-              lib.to_file name content.text,
+              nix_builtins.to_file name content.text,
         runtime_inputs
           | doc m%"
             Packages which will be added to the `PATH` of the script when
@@ -156,16 +156,16 @@ in
           "%
           | NixString
           | default
-          = lib.import_nix "nixpkgs#runtimeShell",
+          = nix_builtins.import_nix "nixpkgs#runtimeShell",
 
-        env.buildInputs.coreutils = lib.import_nix "nixpkgs#coreutils",
+        env.buildInputs.coreutils = nix_builtins.import_nix "nixpkgs#coreutils",
         env.buildCommand = nix-s%"
           mkdir -p "${outputs[out]}/bin"
           target="${outputs[out]}/bin/${name}"
           (cat <<<"$scriptHeader"; cat "%{content.file}") > "$target"
           chmod +x "$target"
-          %{lib.import_nix "nixpkgs#stdenv.shellDryRun"} "$target"
-          "%{lib.import_nix "nixpkgs#shellcheck"}/bin/shellcheck" "$target"
+          %{nix_builtins.import_nix "nixpkgs#stdenv.shellDryRun"} "$target"
+          "%{nix_builtins.import_nix "nixpkgs#shellcheck"}/bin/shellcheck" "$target"
         "%,
         env.scriptHeader =
           let path_line =
