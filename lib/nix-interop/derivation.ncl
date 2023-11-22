@@ -344,4 +344,44 @@ in
       name | String,
       text | NixString,
     },
+  CallNix
+    | doc m%%"
+      Call a raw Nix expression as a function.
+
+      This will be interpreted as
+
+      ```nix
+      ${function} ${importFromNickel args}
+      ```
+
+      on the Nix side.
+
+      ## Example
+
+      ```nickel
+      organist.nix.derivation.CallNix
+      & {
+        function = m%"
+          { python }: python.withPackages (p: [p.pyyaml])
+        "%,
+        args = {
+          python = organist.import_nix "nixpkgs#python3"
+        },
+      ```
+    "%%
+    = {
+      "%{type_field}" | force = "callNix",
+      function
+        | doc m%"
+          Plain Nix expression that will be passed verbatim to the Nix evaluator.
+        "%
+        | String,
+      args
+        | doc m%"
+          Arguments that will be passed to the Nix expression.
+
+          Can be an arbitrary serializable value.
+        "%
+        | Dyn,
+    },
 }
