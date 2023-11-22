@@ -1,4 +1,4 @@
-let contracts = import "contracts.ncl" in
+let contracts = import "derivation.ncl" in
 {
   import_file
     | String -> contracts.NixPath

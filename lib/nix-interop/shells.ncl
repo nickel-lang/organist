@@ -1,5 +1,5 @@
 let builders = import "builders.ncl" in
-let contracts = import "contracts.ncl" in
+let contracts = import "derivation.ncl" in
 let lib = import "builtins.ncl" in
 
 let concat_strings_sep = fun sep values =>
