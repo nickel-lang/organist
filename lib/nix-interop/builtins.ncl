@@ -1,7 +1,7 @@
-let contracts = import "contracts.ncl" in
+let derivations = import "derivation.ncl" in
 {
   import_file
-    | String -> contracts.NixPath
+    | String -> derivations.NixPath
     | doc m%%"
           Take a path as a string and produce a Nix path, which will be
           interpreted as a path on the Nix side and added to the store.
@@ -29,7 +29,7 @@ let contracts = import "contracts.ncl" in
       cmd = nix-s%"%{import_nix "nixpkgs#hello"}/bin/hello > $out"%
       ```
     "%%
-    | contracts.NixInputSugar -> contracts.NixInput
+    | derivations.NixInputSugar -> derivations.NixInput
     = fun x => x,
   placeholder
     | doc m%"
@@ -40,7 +40,7 @@ let contracts = import "contracts.ncl" in
       [placeholder](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-placeholder)
       builtin.
     "%
-    | String -> contracts.NixPlaceholder
+    | String -> derivations.NixPlaceholder
     = fun _output => { output = _output },
   to_file
     | doc m%"
@@ -51,6 +51,6 @@ let contracts = import "contracts.ncl" in
       [toFile](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-toFile)
       builtin.
     "%
-    | String -> contracts.NixString -> contracts.NixToFile
+    | String -> derivations.NixString -> derivations.NixToFile
     = fun _name _text => { name = _name, text = _text },
 }
