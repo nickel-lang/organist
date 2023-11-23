@@ -118,6 +118,12 @@
           then builtins.placeholder value.output
           else if organistType == "nixToFile"
           then writeText value.name (importFromNickel_ value.text)
+          else if organistType == "callNix"
+          then let
+            fileExpr = builtins.toFile "nickel-generated-expr" (importFromNickel_ value.function);
+            importedArgs = importFromNickel_ value.args;
+          in
+            import fileExpr importedArgs
           else builtins.mapAttrs (_: importFromNickel_) value
       )
     else if (type == "list")
