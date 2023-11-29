@@ -26,6 +26,56 @@ ormoluFromHls = fun hls =>
     args = hls,
   }
 in
+let ghcPackageSet = fun ghcVersion =>
+  if ghcVersion == "default" then
+    "haskellPackages"
+  else
+    "haskell.packages.ghc%{ghcVersion}"
+in
+let StackProject = {
+  name | String | default = "haskell-stack-shell",
+  # ghc
+  #   | derivation.Derivation
+  #   | doc m%"
+  #     The GHC derivation to use for building the project.
+  #   "%,
+  system_dependencies
+    | doc m%"
+      The system dependencies that are required for building the Haskell
+      codebase.
+    "%
+    | { _ : derivation.Derivation }
+    = {
+      zlib = nix_builtins.import_nix "nixpkgs#zlib"
+    },
+  nixpkgs_path
+    | doc m%"
+      The path to the Nixpkgs repository to use for building the project
+    "%,
+  ..
+}
+in
+let instantiate_stack_project | StackProject -> derivation.Derivation = fun project =>
+    let project_json_file =
+      derivation.NixToFile
+      & {
+        name = "stack-project.json",
+        text = nix_builtins.builtin "toJSON" (std.record.remove "system_dependencies" project),
+      }
+    in
+    derivation.NixToFile
+    & {
+      name = "stack-project.nix",
+      text = nix-s%"
+        let pkgs = import "%{project.nixpkgs_path}" {}; in
+        { ghc }:
+        pkgs.haskell.lib.buildStackProject
+        ({
+          inherit ghc;
+        } // builtins.fromJSON (builtins.unsafeDiscardStringContext (builtins.readFile %{project_json_file})))
+      "%,
+    }
+  in
 
 Bash
 & {
@@ -37,6 +87,19 @@ Bash
     | String
     | default
     = "default",
+  build.stack_shell.stack_shell
+    | doc m%"
+      The derivation used to provide the environment in which to run
+      Stack.
+
+      See <https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file>
+    "%
+    | StackProject
+    = {
+      system_dependencies,
+      nativeBuildInputs = std.record.values system_dependencies,
+      nixpkgs_path = nix_builtins.import_nix "nixpkgs#path",
+    },
   build.packages =
     let stack-wrapped =
       {
@@ -58,6 +121,7 @@ Bash
                   %{nix_builtins.import_nix "nixpkgs#stack"}/bin/stack \
                     --nix \
                     --no-nix-pure \
+                    --nix-shell-file="%{instantiate_stack_project build.stack_shell.stack_shell}" \
                     --nix-path="nixpkgs=%{nix_builtins.import_nix "nixpkgs#path"}" \
                     "$@"
                 "%,
@@ -73,15 +137,8 @@ Bash
       git = nix_builtins.import_nix "nixpkgs#git",
     },
   dev.ghcVersion | force = build.ghcVersion,
-  dev.packages =
-    let ghcPackageSet =
-      if dev.ghcVersion == "default" then
-        "haskellPackages"
-      else
-        "haskell.packages.ghc%{dev.ghcVersion}"
-    in
-    {
-      ormolu = ormoluFromHls haskell-language-server,
-      haskell-language-server = nix_builtins.import_nix "nixpkgs#%{ghcPackageSet}.haskell-language-server",
-    },
+  dev.packages = {
+    ormolu = ormoluFromHls haskell-language-server,
+    haskell-language-server = nix_builtins.import_nix "nixpkgs#%{ghcPackageSet dev.ghcVersion}.haskell-language-server",
+  },
 }

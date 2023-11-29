@@ -32,6 +32,11 @@ std.record.map
   },
   HaskellStack.tests = {
     stack' = "",
+    stack = m%"
+      stack new hello --bare --resolver ghc-9.4.7
+      stack build
+      stack run hello
+    "%
   },
 }
   | {
