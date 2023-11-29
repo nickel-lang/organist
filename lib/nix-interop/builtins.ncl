@@ -31,6 +31,12 @@ let derivations = import "derivation.ncl" in
     "%%
     | derivations.NixInputSugar -> derivations.NixInput
     = fun x => x,
+  builtin
+    | doc m%"
+      Apply an arbitrary Nix builtin to the given arguments.
+    "%
+    | String -> Dyn -> derivations.NixBuiltinCall
+    = fun _name _arg => { name = _name, arg = _arg },
   placeholder
     | doc m%"
       Return a placeholder string for the specified output that will be
@@ -40,8 +46,8 @@ let derivations = import "derivation.ncl" in
       [placeholder](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-placeholder)
       builtin.
     "%
-    | String -> derivations.NixPlaceholder
-    = fun _output => { output = _output },
+    | String -> derivations.NixBuiltinCall
+    = fun _output => { name = "placeholder", args = _output },
   to_file
     | doc m%"
       Store the string s in a file in the Nix store and return its path.

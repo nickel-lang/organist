@@ -6,10 +6,10 @@ let predicate | doc "Various predicates used to define contracts"
       std.is_record x
       && std.record.has_field type_field x
       && x."%{type_field}" == "nixPath",
-    is_nix_placeholder = fun x =>
+    is_nix_builtin_call = fun x =>
       std.is_record x
       && std.record.has_field type_field x
-      && x."%{type_field}" == "nixPlaceholder",
+      && x."%{type_field}" == "nixBuiltinCall",
     is_nix_to_file = fun x =>
       std.is_record x
       && std.record.has_field type_field x
@@ -29,12 +29,17 @@ let predicate | doc "Various predicates used to define contracts"
     is_derivation = fun x =>
       is_nickel_derivation x
       || is_nix_input x,
+    is_nix_call = fun x =>
+      std.is_record x
+      && std.record.has_field type_field x
+      && x."%{type_field}" == "callNix",
     is_string_fragment = fun x =>
       is_derivation x
       || std.is_string x
       || is_nix_path x
-      || is_nix_placeholder x
+      || is_nix_builtin_call x
       || is_nix_to_file x
+      || is_nix_call x
   }
   in
 
@@ -301,11 +306,12 @@ in
       path | String,
     },
 
-  NixPlaceholder
-    | doc "A path to the given output resolved later in the Nix store"
+  NixBuiltinCall
+    | doc "An application of a Nix builtin function"
     = {
-      "%{type_field}" | force = "nixPlaceholder",
-      output | String,
+      "%{type_field}" | force = "nixBuiltinCall",
+      name | String,
+      arg | Dyn,
     },
 
   NixEnvironmentVariable
