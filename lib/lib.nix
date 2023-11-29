@@ -114,8 +114,12 @@
               possibleAttrPaths;
           in
             lib.getAttrFromPath chosenAttrPath flakeInputs
-          else if organistType == "nixPlaceholder"
-          then builtins.placeholder value.output
+          else if organistType == "nixBuiltinCall"
+          then let
+            builtin_name = value.name;
+            builtin_arg = value.arg;
+          in
+            builtins.${builtin_name} (importFromNickel_ builtin_arg)
           else if organistType == "nixToFile"
           then writeText value.name (importFromNickel_ value.text)
           else if organistType == "callNix"
