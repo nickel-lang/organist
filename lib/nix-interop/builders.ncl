@@ -70,7 +70,7 @@ in
           = {
             stdenv | default = nix_builtins.import_nix "nixpkgs#stdenv",
           },
-        nix_drv =
+        nix_drv.value =
           let env' = env in
           env' & structured_env & { env = env' },
       }

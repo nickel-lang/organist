@@ -1,5 +1,7 @@
 let type_field = "$__organist_type" in
 
+let hash_consing = import "../hash-consing.ncl" in
+
 let predicate | doc "Various predicates used to define contracts"
   = {
     is_nix_path = fun x =>
@@ -203,12 +205,12 @@ in
       "%{type_field}" | force = "nickelDerivation",
       nix_drv
         | doc "The raw derivation sent to Nix"
-        | NixDerivation
+        | { value_hash : String, value : NixDerivation }
         =
           let _name = name in
           let _system = system in
           let _version = version in
-          {
+          hash_consing.add_hash {
             name = _name,
             system = _system,
             version = _version,
