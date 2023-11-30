@@ -73,13 +73,18 @@
     program = lib.getExe (buildLockFile contents);
   };
 
-  # Import a Nickel value produced by the Organist DSL
-  importFromNickel = flakeInputs: system: baseDir: importFromNickelWithHashConsing flakeInputs system baseDir {};
+  importFromNickel = flakes: system: baseDir: value: let
+    real_value = value.value;
+    valueCache = value.store;
+    importedValueCache = importFromNickelWithCache importedValueCache flakes system baseDir valueCache;
+  in
+    importFromNickelWithCache importedValueCache flakes system baseDir real_value;
 
-  importFromNickelWithHashConsing = flakeInputs: system: baseDir: valueCache: value: let
+  # Import a Nickel value produced by the Organist DSL
+  importFromNickelWithCache = valueCache: flakeInputs: system: baseDir: value: let
     type = builtins.typeOf value;
     isNickelDerivation = type: type == "nickelDerivation";
-    importFromNickel_ = importFromNickelWithHashConsing flakeInputs system baseDir;
+    importFromNickel_ = importFromNickelWithCache valueCache flakeInputs system baseDir;
   in
     if (type == "set")
     then
@@ -87,45 +92,22 @@
         let
           organistType = value."${typeField}" or "";
         in
-          if value ? value_hash
-          then
-            assert (valueCache ? ${value.value_hash});
-            {
-              inherit valueCache;
-              value = valueCache.${value.value_hash};
-            }
-          else if isNickelDerivation organistType
+        if value ? value_hash
+        then
+          assert valueCache ? ${value.value_hash};
+          valueCache.${value.value_hash}
+        else
+
+          if isNickelDerivation organistType
           then let
-            drvArgsWithCache = importFromNickel_ valueCache value.nix_drv;
-          in let
-            prepared = prepareDerivation system drvArgsWithCache.value;
-          in {
-            valueCache = drvArgsWithCache.valueCache;
-            value = builtins.trace (builtins.typeOf prepared) builtins.derivation prepared;
-          }
-          else if organistType == "nixString"
-          then let
-            importedElements =
-              builtins.foldl'
-              (acc: element: let
-                valWithCache = importFromNickel_ acc.valueCache element;
-              in {
-                valueCache = valWithCache.valueCache;
-                value = acc.value + valWithCache.value;
-              })
-              {
-                valueCache = valueCache;
-                value = "";
-              }
-              value.fragments;
+            prepared = prepareDerivation system (importFromNickel_ value.nix_drv);
           in
-            importedElements
-          # then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
+            assert prepared ? name;
+            derivation prepared
+          else if organistType == "nixString"
+          then builtins.concatStringsSep "" (builtins.map importFromNickel_ value.fragments)
           else if organistType == "nixPath"
-          then {
-            inherit valueCache;
-            value = baseDir + "/${value.path}";
-          }
+          then baseDir + "/${value.path}"
           else if organistType == "nixInput"
           then let
             attr_path = value.attr_path;
@@ -140,52 +122,27 @@
               (path: lib.hasAttrByPath path flakeInputs)
               notFound
               possibleAttrPaths;
-          in {
-            inherit valueCache;
-            value = lib.getAttrFromPath chosenAttrPath flakeInputs;
-          }
+          in
+            lib.getAttrFromPath chosenAttrPath flakeInputs
           else if organistType == "nixBuiltinCall"
           then let
             builtin_name = value.name;
             builtin_arg = value.arg;
           in
-            let argWithCache = importFromNickel_ valueCache builtin_arg; in
-            {
-              valueCache = argWithCache.valueCache;
-              value = builtins.${builtin_name} argWithCache.value;
-            }
+            builtins.${builtin_name} (importFromNickel_ builtin_arg)
           else if organistType == "nixToFile"
-          then let textWithCache = importFromNickel_ valueCache value.text; in {
-            valueCache = textWithCache.valueCache;
-            value = writeText value.name textWithCache.value;
-          }
+          then writeText value.name (importFromNickel_ value.text)
           else if organistType == "callNix"
           then let
-            functionWithCache = importFromNickel_ valueCache value.function;
-            argsWithCache = importFromNickel_ functionWithCache.valueCache value.args;
-            fileExpr = builtins.toFile "nickel-generated-expr" functionWithCache.value;
+            fileExpr = builtins.toFile "nickel-generated-expr" (importFromNickel_ value.function);
+            importedArgs = importFromNickel_ value.args;
           in
-          {
-            valueCache = argsWithCache.valueCache;
-            value = import fileExpr argsWithCache.value;
-          }
-          else
-          lib.foldlAttrs
-            (acc: key: val: let
-              valWithCache = importFromNickel_ acc.valueCache val;
-            in {
-              valueCache = valWithCache.valueCache;
-              value = acc.value // {${key} = valWithCache.value;};
-            })
-            {
-              valueCache = valueCache;
-              value = {};
-            }
-            value
+            import fileExpr importedArgs
+          else builtins.mapAttrs (_: importFromNickel_) value
       )
-    # else if (type == "list")
-    # then builtins.map importFromNickel_ value
-    else { valueCache = valueCache; value = value; };
+    else if (type == "list")
+    then builtins.map importFromNickel_ value
+    else value;
 
   # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
@@ -215,7 +172,7 @@
       let nickel_expr | (organist.OrganistExpression & {..}) =
         import "${src}/${nickelFile}" in
 
-      organist.lib.hash_consing.hashCons (nickel_expr & params)
+      (nickel_expr & params) |> organist.lib.hash_consing.hashCons
     '';
   in
     runCommand "nickel-res.json" {
