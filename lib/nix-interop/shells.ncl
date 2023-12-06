@@ -10,19 +10,7 @@ in
 
 {
   Bash = import "./shells/bash.ncl",
-
-  Rust =
-    Bash
-    & {
-      build.packages = {
-        cargo = nix_builtins.import_nix "nixpkgs#cargo",
-        rustc = nix_builtins.import_nix "nixpkgs#rustc",
-      },
-      dev.packages = {
-        rustfmt = nix_builtins.import_nix "nixpkgs#rustfmt",
-        rust-analyzer = nix_builtins.import_nix "nixpkgs#rust-analyzer",
-      },
-    },
+  Rust = import "./shells/rust.ncl",
 
   Go =
     Bash
