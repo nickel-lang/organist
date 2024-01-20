@@ -24,7 +24,7 @@ let RustShell = {
       rust-src | default = false,
     },
 
-  packages.rust-toolchain =
+  packages.rustc =
     # Maybe we should default to "complete" instead of "latest"? Tier 2 targets only
     # have "latest", though...
     let toolchain = if channel == 'nightly then "latest" else std.string.from_enum channel in
