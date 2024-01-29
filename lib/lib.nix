@@ -106,7 +106,7 @@
               ([value.input "packages" system] ++ attr_path)
               ([value.input "legacyPackages" system] ++ attr_path)
             ];
-            notFound = throw "Missing input \"${value.input}.${lib.strings.concatStringsSep "." attr_path}\"";
+            notFound = throw "Missing input \"${value.input}#${lib.strings.concatStringsSep "." attr_path}\"";
             chosenAttrPath =
               lib.findFirst
               (path: lib.hasAttrByPath path flakeInputs)
