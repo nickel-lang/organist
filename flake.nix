@@ -2,8 +2,6 @@
   description = "Nickel shim for Nix";
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nickel_src.url = "github:tweag/nickel";
-  inputs.nickel_src.flake = false;
   inputs.flake-compat.url = "github:edolstra/flake-compat";
   inputs.flake-compat.flake = false;
 
@@ -20,25 +18,8 @@
     self,
     nixpkgs,
     flake-utils,
-    nickel_src,
     flake-compat,
-  } @ inputs_: let
-    inputs =
-      inputs_
-      # Emulate a `nickel` flake input.
-      # We don't want to directly depend on the Nickel flake because it's too
-      # slow (https://github.com/tweag/nickel/issues/1701), and the Nixpkgs
-      # version is the latest release which is too old, so we vendor the
-      # Nickel derivation instead.
-      // {
-        nickel = flake-utils.lib.eachDefaultSystem (system: let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in rec {
-          packages.nickel-lang-cli = pkgs.callPackage ./nix/nickel.nix {src = nickel_src;};
-          packages.lsp-nls = pkgs.callPackage ./nix/nls.nix {nickel = packages.nickel-lang-cli;};
-          packages.default = packages.nickel-lang-cli;
-        });
-      };
+  } @ inputs: let
     # Generate typical flake outputs from .ncl files in path for provided systems (default from flake-utils):
     #
     # apps.${system}.regenerate-lockfile generated from optional lockFileContents argument,
@@ -99,7 +80,7 @@
       system: {
         lib = nixpkgs.legacyPackages.${system}.callPackage ./lib/lib.nix {
           organistSrc = self;
-          nickel = inputs.nickel.packages."${system}".nickel-lang-cli;
+          nickel = inputs.nixpkgs.legacyPackages."${system}".nickel;
         };
       }
     );

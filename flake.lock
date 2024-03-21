@@ -34,22 +34,6 @@
         "type": "github"
       }
     },
-    "nickel_src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1698331902,
-        "narHash": "sha256-BEqUDYIy9YCgdz0WPg6BTf88hRzW/hq9K7iqogQBpbs=",
-        "owner": "tweag",
-        "repo": "nickel",
-        "rev": "1921c316ad81bca8100c3a0c6ae2e3da974cdd51",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tweag",
-        "repo": "nickel",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1710806803,
@@ -69,7 +53,6 @@
       "inputs": {
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
-        "nickel_src": "nickel_src",
         "nixpkgs": "nixpkgs"
       }
     },

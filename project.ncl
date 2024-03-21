@@ -7,7 +7,7 @@ let import_nix = organist.nix.import_nix in
     organist.shells.Bash
     & {
       build.packages = {
-        nickel-lang-cli = import_nix "nickel#nickel-lang-cli",
+        nickel-lang-cli = import_nix "nixpkgs#nickel",
         parallel = import_nix "nixpkgs#parallel",
         gnused = import_nix "nixpkgs#gnused",
       },
@@ -18,7 +18,7 @@ let import_nix = organist.nix.import_nix in
         name = "run-test.sh",
         content.file = organist.nix.builtins.import_file "run-test.sh",
         runtime_inputs = {
-          nickel = import_nix "nickel#nickel-lang-cli",
+          nickel = import_nix "nixpkgs#nickel",
           parallel = import_nix "nixpkgs#parallel",
           gnused = import_nix "nixpkgs#gnused",
         },
@@ -31,7 +31,7 @@ let import_nix = organist.nix.import_nix in
 
   flake.packages = {
     # Re-exported to make it easy for downstream to depend on them
-    nickel = import_nix "nickel#default",
+    nickel = import_nix "nixpkgs#nickel",
   },
 
   flake.checks
@@ -49,7 +49,7 @@ let import_nix = organist.nix.import_nix in
       nickel-format = {
         name = "check-nickel-format",
         version = "0.0",
-        env.buildInputs.nickel = import_nix "nickel#nickel-lang-cli",
+        env.buildInputs.nickel = import_nix "nixpkgs#nickel",
         env.buildCommand = nix-s%"
           cd %{import_nix "self"}
           failed=""
