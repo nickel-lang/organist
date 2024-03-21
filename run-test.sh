@@ -23,7 +23,10 @@ pushd_temp () {
 }
 
 prepare_shell() {
-  NIXPKGS_PATH="$(nix flake metadata --json --inputs-from "path:$PROJECT_ROOT" nixpkgs | nix eval --impure --raw --expr '(builtins.fromJSON (builtins.readFile "/dev/stdin")).path')"
+  # Use a temporary file to pass data to `nix eval` because of https://github.com/NixOS/nix/issues/9330
+  nix flake metadata --json --inputs-from "path:$PROJECT_ROOT" nixpkgs > "${WORKDIR}/meta.json"
+  # Note that we cannot pass neither path nor JSON itself using --arg* because of https://github.com/NixOS/nix/issues/2678
+  NIXPKGS_PATH="$(nix eval --impure --raw --expr '(builtins.fromJSON (builtins.readFile "'"${WORKDIR}/meta.json"'")).path')"
   # We test against the local version of `organist` not the one in main (hence the --override-input).
   nix flake update \
     --override-input organist "path:$PROJECT_ROOT" \
