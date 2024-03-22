@@ -7,7 +7,9 @@ organist.nix.builders.NixpkgsPkg
   version = "0.1",
   env.buildCommand = nix-s%"
     [[ $(cat %{file1}) == "important data" ]]
-    [[ $(cat %{file2}) == "see /nix/store/wr3qac28s69nkm4x8gg9rrs8518kiwa0-file1" ]]
+    # Note that this line changes every time we update nixpkgs.
+    # Keep it pointing to x86_64-linux version to keep CI happy.
+    [[ $(cat %{file2}) == "see /nix/store/iqhv7kvml0bldcv6vv39kky17s8x6apk-file1" ]]
     echo OK > $out
   "%,
 }

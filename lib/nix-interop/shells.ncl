@@ -71,11 +71,11 @@ in
       dev.packages.metals = nix_builtins.import_nix "nixpkgs#metals",
     },
 
-  Python310 =
+  Python311 =
     Bash
     & {
-      build.packages.python = nix_builtins.import_nix "nixpkgs#python310",
-      dev.packages.python-lsp = nix_builtins.import_nix "nixpkgs#python310Packages.python-lsp-server",
+      build.packages.python = nix_builtins.import_nix "nixpkgs#python311",
+      dev.packages.python-lsp = nix_builtins.import_nix "nixpkgs#python311Packages.python-lsp-server",
     },
 
   Erlang =
