@@ -25,7 +25,7 @@ std.record.map
     nodejs = "node --version",
     ts-lsp = "typescript-language-server --version",
   },
-  Python310.tests.python-lsp = "pylsp --version",
+  Python311.tests.python-lsp = "pylsp --version",
   Erlang.tests = {
     erlang = "erl -version",
     erlang-lsp = "erlang_ls --version",
