@@ -14,20 +14,20 @@ To start using Organist, you need `Nix` to be installed and configured.
 If it isn't already the case, you can get it with:
 
 ```console
-$ curl -L https://nixos.org/nix/install | bash
+curl -L https://nixos.org/nix/install | bash
 # We also need a couple of experimental Nix features
-$ mkdir -p ~/.config/nix
-$ echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+mkdir -p ~/.config/nix
+echo 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 ```
 
 Then bootstrap a project with:
 
 ```console
-$ nix flake init -t github:nickel-lang/organist
+nix flake init -t github:nickel-lang/organist
 # Edit the project file to fit your needs
-$ $EDITOR project.ncl
+$EDITOR project.ncl
 # Enter the environment
-$ nix develop
+nix develop
 ```
 
 It is also possible to use Organist without flakes, see [doc/bootstrap-no-flake.md](doc/bootstrap-no-flake.md)
