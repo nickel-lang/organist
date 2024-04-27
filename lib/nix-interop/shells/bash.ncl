@@ -8,5 +8,6 @@ let nix_builtins = import "../builtins.ncl" in
         bash = nix_builtins.import_nix "nixpkgs#bash",
       },
     },
-  dev.packages.nickel = nix_builtins.import_nix "organist#nickel",
+  dev.packages.nickel | default = nix_builtins.import_nix "organist#nickel",
+  dev.packages.nls | default = nix_builtins.import_nix "organist#nls",
 }
