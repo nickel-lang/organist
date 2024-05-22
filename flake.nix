@@ -35,13 +35,14 @@
     }:
       flake-utils.lib.eachSystem systems (system: let
         lib = self.lib.${system};
-        pkgs = nixpkgs.legacyPackages.${system};
         nickelOutputs = lib.importNcl {
           inherit baseDir flakeInputs lockFileContents;
         };
       in
         # Can't do just `{inherit nickelOutputs;} // nickelOutputs.flake` because of infinite recursion over self
-        pkgs.lib.optionalAttrs (builtins.readDir baseDir ? "project.ncl") {
+        if (! builtins.readDir baseDir ? "project.ncl")
+        then {}
+        else {
           inherit nickelOutputs;
           packages = nickelOutputs.packages or {} // nickelOutputs.flake.packages or {};
           checks = nickelOutputs.flake.checks or {};
