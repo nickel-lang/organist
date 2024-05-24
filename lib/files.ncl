@@ -46,7 +46,6 @@ let regenerate_files | Files -> nix.derivation.Derivation
   = fun files_to_generate =>
     let regnerate_one | String -> File -> nix.derivation.NixString
       = fun key file_descr =>
-        let file_content = file_descr.content in
         let target = file_descr.target in
         let copy_command =
           match {
@@ -54,11 +53,6 @@ let regenerate_files | Files -> nix.derivation.Derivation
             'Copy => "cp",
           }
             file_descr.materialisation_method
-        in
-        let file_in_store =
-          nix.builtins.to_file
-            (nix.utils.escape_drv_name key)
-            file_content
         in
         nix-s%"
             rm -f %{target}
@@ -68,7 +62,7 @@ let regenerate_files | Files -> nix.derivation.Derivation
             # XXX: If `source.file` is set explicitely to a relative path
             # and `materialisation_method` is `'Symlink`, this will link to the
             # original file, not one in the store. Not sure that's what we want.
-            %{copy_command} %{file_in_store} %{target}
+            %{copy_command} %{file_descr.file} %{target}
           "%
       in
     {

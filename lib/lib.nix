@@ -169,23 +169,19 @@
       passAsFile = ["expectedLockfileContents"];
     } (
       if needNewLockfile
-      then
-        lib.warn ''
-          Lockfile contents are outdated. Please run "nix run .#regenerate-lockfile" to update them.
-        ''
-        ''
-          cp -r "${sources}" sources
-          if [ -f sources/nickel.lock.ncl ]; then
-            chmod +w sources sources/nickel.lock.ncl
-          else
-            chmod +w sources
-          fi
-          cp $expectedLockfileContentsPath sources/nickel.lock.ncl
-          cat > eval.ncl <<EOF
-          ${nickelWithImports "sources"}
-          EOF
-          ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
-        ''
+      then ''
+        cp -r "${sources}" sources
+        if [ -f sources/nickel.lock.ncl ]; then
+          chmod +w sources sources/nickel.lock.ncl
+        else
+          chmod +w sources
+        fi
+        cp $expectedLockfileContentsPath sources/nickel.lock.ncl
+        cat > eval.ncl <<EOF
+        ${nickelWithImports "sources"}
+        EOF
+        ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
+      ''
       else ''
         cat > eval.ncl <<EOF
         ${nickelWithImports sources}
@@ -212,9 +208,14 @@
     nickelResult = callNickel {
       inherit nickelFile baseDir flakeInputs lockFileContents;
     };
+    enrichedFlakeInputs =
+      flakeInputs
+      // {
+        "%%organist_internal".nickelLock = builtins.toFile "nickel.lock.ncl" (buildLockFileContents lockFileContents);
+      };
   in
     {rawNickel = nickelResult;}
-    // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
+    // (importFromNickel enrichedFlakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
 in {
   inherit
