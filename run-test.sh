@@ -62,16 +62,15 @@ test_one_template () (
   fi
 
   echo "Running without nickel.lock.ncl" 1>&2
-  rm nickel.lock.ncl
+  rm -f nickel.lock.ncl
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
 
   echo "Run with proper nickel.lock.ncl" 1>&2
-  nix run .\#regenerate-lockfile
-  PROPER_LOCKFILE_CONTENTS="$(cat nickel.lock.ncl)"
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
 
   echo "Testing without flakes" 1>&2
   # restore lockfile
+  rm -f nickel.lock.ncl
   cat > nickel.lock.ncl <<<"$STORED_LOCKFILE_CONTENTS"
   # pretend it's not flake anymore
   rm flake.*
@@ -89,7 +88,7 @@ EOF
   nix develop --impure -f shell.nix -I nixpkgs="$NIXPKGS_PATH" --command bash <<<"$TEST_SCRIPT"
 
   echo "Running without nickel.lock.ncl" 1>&2
-  rm nickel.lock.ncl
+  rm -f nickel.lock.ncl
   nix develop --impure -f shell.nix -I nixpkgs="$NIXPKGS_PATH" --command bash <<<"$TEST_SCRIPT"
 
   echo "Run with proper nickel.lock.ncl" 1>&2
