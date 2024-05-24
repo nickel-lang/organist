@@ -29,7 +29,10 @@ This has two main advantages:
 
 ## Usage
 
-To re-generate the files run:
+The files specified in `files.*` are regenerated automatically when entering
+the devshell (unless `filegen_hook` is set to false).
+
+They can also be regenerated manually with:
 
 ```bash
 nix run .#regenerate-files
