@@ -39,7 +39,25 @@ let nix = import "./nix-interop/nix.ncl" in
         Set of files that should be generated in the project's directory.
       "%
       = {},
+    filegen_hook.enable
+      | Bool
+      | doc m%"
+        Enable a hook that will automatically regenerate the files managed by
+        Nickel when entering the shell.
+      "%
+      | default
+      = true,
     flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+
+    shells.build.hooks =
+      if filegen_hook.enable then
+        {
+          filegen_hook = nix-s%"
+            %{regenerate_files files}/bin/regenerate-files
+          "%
+        }
+      else
+        {},
   },
 
   regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generate =>
@@ -61,8 +79,8 @@ let nix = import "./nix-interop/nix.ncl" in
           nix-s%"
             rm -f %{target}
             echo "Regenerating %{target}"
-	    target_dir=$(dirname %{target})
-	    test "${target_dir}" != "." && mkdir -p "${target_dir}"
+            target_dir=$(dirname %{target})
+            test "${target_dir}" != "." && mkdir -p "${target_dir}"
             %{copy_command} %{file_in_store} %{target}
           "%
         in
