@@ -120,7 +120,6 @@ test_example () (
   cp -r "$examplePath" ./example
   pushd ./example
   prepare_shell
-  nix run .\#regenerate-files --print-build-logs
   nix develop --print-build-logs --command bash test.sh
   popd
   popd
