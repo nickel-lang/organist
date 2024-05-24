@@ -1,5 +1,6 @@
 let nix = import "./nix-interop/nix.ncl" in
 let filegen = import "files.ncl" in
+let lockfile = import "lockfile.ncl" in
 {
   OrganistShells = {
     dev
@@ -70,4 +71,5 @@ let filegen = import "files.ncl" in
         },
     }
     & filegen
+    & lockfile
 }
