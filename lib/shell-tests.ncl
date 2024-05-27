@@ -14,7 +14,8 @@ let test_command_for = fun package =>
     'python-lsp => "pylsp --version",
     'erlang => "erl -version",
     'erlang-lsp => "erlang_ls --version",
-    'stack' => "",
+    'stack => "",
+    'ocaml-lsp => "ocamllsp --version",
     _ => "%{package} --version",
   }
 in

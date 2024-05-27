@@ -86,4 +86,19 @@ in
     },
 
   HaskellStack = import "./shells/haskell.ncl",
+
+  OCaml =
+    Bash
+    & {
+      build.packages.ocaml = nix_builtins.import_nix "nixpkgs#ocamlPackages.ocaml",
+      build.packages.dune = nix_builtins.import_nix "nixpkgs#dune_3",
+      build.packages.opam = nix_builtins.import_nix "nixpkgs#opam",
+      dev.packages.ocaml-lsp = nix_builtins.import_nix "nixpkgs#ocamlPackages.ocaml-lsp",
+
+      dev.hooks.enter_opam_env = m%"
+        echo "==> Reloading the OPAM environment."
+        echo "==> Set 'shells.dev.hooks.enter_opam_env' to false to disable."
+        eval $(opam env)
+      "%,
+    },
 }
