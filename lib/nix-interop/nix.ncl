@@ -31,5 +31,12 @@
     "%
     = import "utils.ncl",
 
-  import_nix = builtins.import_nix,
+  packages
+    | doc m%"
+      Import packages from Nixpkgs and other Nix sources.
+    "%
+    = import "packages.ncl",
+
+  import_nix = packages.import_nix,
+  NixpkgsDerivations = packages.NixpkgsDerivations,
 }

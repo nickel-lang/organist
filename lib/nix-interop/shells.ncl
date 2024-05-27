@@ -1,5 +1,6 @@
 let builders = import "builders.ncl" in
 let nix_builtins = import "builtins.ncl" in
+let packages = import "packages.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then
@@ -15,74 +16,74 @@ in
   Go =
     Bash
     & {
-      build.packages.go = nix_builtins.import_nix "nixpkgs#go",
-      dev.packages.gopls = nix_builtins.import_nix "nixpkgs#gopls",
+      build.packages = { go },
+      dev.packages = { gopls },
     },
 
   Clojure =
     Bash
     & {
-      build.packages.clojure = nix_builtins.import_nix "nixpkgs#clojure",
-      dev.packages.clojure-lsp = nix_builtins.import_nix "nixpkgs#clojure-lsp",
+      build.packages = { clojure },
+      dev.packages = { clojure-lsp },
     },
 
   C =
     Bash
     & {
-      build.packages.clang = nix_builtins.import_nix "nixpkgs#clang",
-      dev.packages.clang-tools = nix_builtins.import_nix "nixpkgs#clang-tools",
+      build.packages = { clang },
+      dev.packages = { clang-tools },
     },
 
   # intelephense is currently broken in nixpkgs
   Php =
     Bash
     & {
-      build.packages.php = nix_builtins.import_nix "nixpkgs#php",
+      build.packages = { php },
       # Not included because unfree
-      # dev.packages.intelephense = nix_builtins.import_nix "nixpkgs#nodePackages.intelephense",
+      # dev.packages.intelephense = packages.import_nix "nixpkgs#nodePackages.intelephense",
     },
 
   Zig =
     Bash
     & {
-      build.packages.zig = nix_builtins.import_nix "nixpkgs#zig",
-      dev.packages.zls = nix_builtins.import_nix "nixpkgs#zls",
+      build.packages = { zig },
+      dev.packages = { zls },
     },
 
   Javascript =
     Bash
     & {
-      build.packages.nodejs = nix_builtins.import_nix "nixpkgs#nodejs",
-      dev.packages.ts-lsp = nix_builtins.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
+      build.packages = { nodejs },
+      dev.packages.ts-lsp = packages.import_nix "nixpkgs#nodePackages_latest.typescript-language-server",
     },
 
   Racket =
     Bash
     & {
       build.packages = {
-        racket = nix_builtins.import_nix "nixpkgs#racket",
+        racket,
       },
     },
 
   Scala =
     Bash
     & {
-      build.packages.scala = nix_builtins.import_nix "nixpkgs#scala",
-      dev.packages.metals = nix_builtins.import_nix "nixpkgs#metals",
+      build.packages = { scala },
+      dev.packages = { metals },
     },
 
   Python311 =
     Bash
     & {
-      build.packages.python = nix_builtins.import_nix "nixpkgs#python311",
-      dev.packages.python-lsp = nix_builtins.import_nix "nixpkgs#python311Packages.python-lsp-server",
+      build.packages.python = packages.import_nix "nixpkgs#python311",
+      dev.packages.python-lsp = packages.import_nix "nixpkgs#python311Packages.python-lsp-server",
     },
 
   Erlang =
     Bash
     & {
-      build.packages.erlang = nix_builtins.import_nix "nixpkgs#erlang",
-      dev.packages.erlang-lsp = nix_builtins.import_nix "nixpkgs#erlang-ls",
+      build.packages = { erlang },
+      dev.packages.erlang-lsp = packages.import_nix "nixpkgs#erlang-ls",
     },
 
   HaskellStack = import "./shells/haskell.ncl",
@@ -90,10 +91,10 @@ in
   OCaml =
     Bash
     & {
-      build.packages.ocaml = nix_builtins.import_nix "nixpkgs#ocamlPackages.ocaml",
-      build.packages.dune = nix_builtins.import_nix "nixpkgs#dune_3",
-      build.packages.opam = nix_builtins.import_nix "nixpkgs#opam",
-      dev.packages.ocaml-lsp = nix_builtins.import_nix "nixpkgs#ocamlPackages.ocaml-lsp",
+      build.packages = { ocaml },
+      build.packages.dune = packages.import_nix "nixpkgs#dune_3",
+      build.packages = { opam },
+      dev.packages.ocaml-lsp = packages.import_nix "nixpkgs#ocamlPackages.ocaml-lsp",
 
       dev.hooks.enter_opam_env = m%"
         echo "==> Reloading the OPAM environment."

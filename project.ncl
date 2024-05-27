@@ -12,9 +12,9 @@ organist.OrganistExpression
         organist.shells.Bash
         & {
           build.packages = {
-            nickel = import_nix "nixpkgs#nickel",
-            parallel = import_nix "nixpkgs#parallel",
-            gnused = import_nix "nixpkgs#gnused",
+            nickel,
+            parallel,
+            gnused,
           },
         },
 
@@ -24,9 +24,9 @@ organist.OrganistExpression
             name = "run-test.sh",
             content.file = organist.nix.builtins.import_file "run-test.sh",
             runtime_inputs = {
-              nickel = import_nix "nixpkgs#nickel",
-              parallel = import_nix "nixpkgs#parallel",
-              gnused = import_nix "nixpkgs#gnused",
+              nickel,
+              parallel,
+              gnused,
             },
           }
           in
@@ -34,11 +34,12 @@ organist.OrganistExpression
           program | organist.nix.nix_string.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
         },
 
-      packages = {
-        # Re-exported to make it easy for downstream to depend on them
-        nickel = import_nix "nixpkgs#nickel",
-        nls = import_nix "nixpkgs#nls",
-      },
+      packages | organist.nix.NixpkgsDerivations
+        = {
+          # Re-exported to make it easy for downstream to depend on them
+          nickel,
+          nls,
+        },
 
       checks
         | { _ | organist.nix.builders.NixpkgsPkg }
@@ -75,13 +76,14 @@ organist.OrganistExpression
           lsp = {
             name = "organist-lsp-integration",
             version = "0.0",
-            env.buildInputs = {
-              nls = import_nix "nixpkgs#nls",
-              python3 = import_nix "nixpkgs#python3",
-              pygls = import_nix "nixpkgs#python3Packages.pygls",
-              pytest = import_nix "nixpkgs#python3Packages.pytest",
-              pytest-asyncio = import_nix "nixpkgs#python3Packages.pytest-asyncio",
-            },
+            env.buildInputs | organist.nix.NixpkgsDerivations
+              = {
+                nls,
+                python3,
+                pygls = import_nix "nixpkgs#python3Packages.pygls",
+                pytest = import_nix "nixpkgs#python3Packages.pytest",
+                pytest-asyncio = import_nix "nixpkgs#python3Packages.pytest-asyncio",
+              },
             env = {
               src = import_nix "self",
               phases = ["unpackPhase", "testPhase", "installPhase"],
