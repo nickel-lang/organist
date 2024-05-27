@@ -29,7 +29,7 @@ let RustShell = {
     # have "latest", though...
     let toolchain = if channel == 'nightly then "latest" else std.string.from_enum channel in
     let targetNames = std.record.filter (fun n v => v) extraTargets |> std.record.fields in
-    let targets = std.array.map (fun x => nix_builtins.import_nix "fenix#targets.%{x}.%{toolchain}.rust-std") targetNames in
+    let targets = std.array.map (fun x => packages.import_nix "fenix#targets.%{x}.%{toolchain}.rust-std") targetNames in
     let componentNames =
       std.record.filter (fun name value => value) components
       |> std.record.fields
@@ -38,10 +38,10 @@ let RustShell = {
     & {
       function = "{ withComponents, components }: withComponents components",
       args = {
-        withComponents = nix_builtins.import_nix "fenix#combine",
+        withComponents = packages.import_nix "fenix#combine",
         components =
           componentNames
-          |> std.array.map (fun x => nix_builtins.import_nix "fenix#%{toolchain}.%{x}")
+          |> std.array.map (fun x => packages.import_nix "fenix#%{toolchain}.%{x}")
           |> std.array.concat targets,
       },
     },

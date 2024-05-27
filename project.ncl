@@ -6,22 +6,19 @@ let import_nix = organist.nix.import_nix in
   shells =
     organist.shells.Bash
     & {
-      build.packages = {
-        nickel = import_nix "nixpkgs#nickel",
-        parallel = import_nix "nixpkgs#parallel",
-        gnused = import_nix "nixpkgs#gnused",
-      },
+      build.packages =
+          {
+            nickel = import_nix "nixpkgs#nickel",
+            parallel,
+            gnused
+          },
     },
 
   flake.apps.run-test =
     let testScript | organist.nix.builders.ShellApplication = {
         name = "run-test.sh",
         content.file = organist.nix.builtins.import_file "run-test.sh",
-        runtime_inputs = {
-          nickel = import_nix "nixpkgs#nickel",
-          parallel = import_nix "nixpkgs#parallel",
-          gnused = import_nix "nixpkgs#gnused",
-        },
+        runtime_inputs = { nickel, parallel, gnused },
       }
       in
     {
@@ -29,11 +26,8 @@ let import_nix = organist.nix.import_nix in
       program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
     },
 
-  flake.packages = {
-    # Re-exported to make it easy for downstream to depend on them
-    nickel = import_nix "nixpkgs#nickel",
-    nls = import_nix "nixpkgs#nls",
-  },
+  # Re-exported to make it easy for downstream to depend on them
+  flake.packages = { nickel, nls } | organist.nix.NixpkgsDerivations,
 
   flake.checks
     | { _ | organist.nix.builders.NixpkgsPkg }

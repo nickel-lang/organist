@@ -8,8 +8,6 @@ let organist = inputs.organist in
     packages = {},
   },
 
-  shells.dev = {
-    packages.hello = organist.import_nix "nixpkgs#hello",
-  },
+  shells.dev.packages = { hello },
 }
   | organist.OrganistExpression

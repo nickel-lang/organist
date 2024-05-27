@@ -1,6 +1,8 @@
 let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
 
 let nix_builtins = import "builtins.ncl" in
+let utils = import "utils.ncl" in
+let nix_packages = import "packages.ncl" in
 
 let concat_strings_sep = fun sep values =>
   if std.array.length values == 0 then
@@ -60,7 +62,7 @@ in
         name,
         version,
         build_command = {
-          cmd = nix-s%"%{nix_builtins.import_nix "nixpkgs#bash"}/bin/bash"%,
+          cmd = nix-s%"%{nix_packages.import_nix "nixpkgs#bash"}/bin/bash"%,
           args = ["-c", "set -euo pipefail; source \"${NIX_ATTRS_SH_FILE:-.attrs.sh}\"; source $stdenv/setup; genericBuild"],
         },
         structured_env = {},
@@ -68,7 +70,7 @@ in
           | doc "Environment variables that will be set in the derivation"
           | { _ : NixEnvironmentVariable }
           = {
-            stdenv | default = nix_builtins.import_nix "nixpkgs#stdenv",
+            stdenv | default = nix_packages.import_nix "nixpkgs#stdenv",
           },
         nix_drv =
           let env' = env in
@@ -88,7 +90,9 @@ in
 
         name | default = "shell",
         version | default = "dev",
-        packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
+        packages
+          | nix_packages.NixpkgsDerivations
+          | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
 
         env.buildCommand = nix-s%"
           echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
@@ -143,11 +147,11 @@ in
             ```nickel
             {
               jq = import_nix "nixpkgs#jq",
-              nickel = import_nix "nixpkgs#awk",
+              awk = import_nix "nixpkgs#awk",
             }
             ```
           "%
-          | { _ : Derivation }
+          | nix_packages.NixpkgsDerivations
           = {},
         shell_binary
           | doc m%"
@@ -156,16 +160,16 @@ in
           "%
           | NixString
           | default
-          = nix_builtins.import_nix "nixpkgs#runtimeShell",
+          = nix_packages.import_nix "nixpkgs#runtimeShell",
 
-        env.buildInputs.coreutils = nix_builtins.import_nix "nixpkgs#coreutils",
+        env.buildInputs.coreutils = nix_packages.import_nix "nixpkgs#coreutils",
         env.buildCommand = nix-s%"
           mkdir -p "${outputs[out]}/bin"
           target="${outputs[out]}/bin/${name}"
           (cat <<<"$scriptHeader"; cat "%{content.file}") > "$target"
           chmod +x "$target"
-          %{nix_builtins.import_nix "nixpkgs#stdenv.shellDryRun"} "$target"
-          "%{nix_builtins.import_nix "nixpkgs#shellcheck"}/bin/shellcheck" "$target"
+          %{nix_packages.import_nix "nixpkgs#stdenv.shellDryRun"} "$target"
+          "%{nix_packages.import_nix "nixpkgs#shellcheck"}/bin/shellcheck" "$target"
         "%,
         env.scriptHeader =
           let path_line =

@@ -8,11 +8,7 @@ let organist = inputs.organist in
     & {
       name = "hello",
       version = "0.1",
-      structured_env.buildInputs = {
-        gcc = organist.import_nix "nixpkgs#gcc",
-        coreutils = organist.import_nix "nixpkgs#coreutils",
-        bash = organist.import_nix "nixpkgs#bash",
-      },
+      structured_env.buildInputs = { gcc, coreutils, bash } | organist.nix.builtins.NixpkgsDerivations,
       env.src = organist.nix.builtins.import_file ".",
       env.buildCommand =
         nix-s%"

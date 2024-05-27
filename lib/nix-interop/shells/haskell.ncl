@@ -1,6 +1,6 @@
 let builders = import "../builders.ncl" in
 let derivation = import "../derivation.ncl" in
-let nix_builtins = import "../builtins.ncl" in
+let packages = import "../packages.ncl" in
 let Bash = import "./bash.ncl" in
 
 let
@@ -43,22 +43,22 @@ Bash
         name = "stack-wrapped",
         version = "1.0",
         build_command = {
-          cmd = nix-s%"%{nix_builtins.import_nix "nixpkgs#bash"}/bin/bash"%,
+          cmd = nix-s%"%{packages.import_nix "nixpkgs#bash"}/bin/bash"%,
           args = [
             "-c",
             nix-s%"
                   source .attrs.sh
-                  export PATH='%{nix_builtins.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
+                  export PATH='%{packages.import_nix "nixpkgs#coreutils"}/bin'":$PATH"
                   mkdir -p ${outputs[out]}/bin
                   echo "$0" > ${outputs[out]}/bin/stack
                   chmod a+x ${outputs[out]}/bin/*
                 "%,
             nix-s%"
-                  #!%{nix_builtins.import_nix "nixpkgs#bash"}/bin/bash
-                  %{nix_builtins.import_nix "nixpkgs#stack"}/bin/stack \
+                  #!%{packages.import_nix "nixpkgs#bash"}/bin/bash
+                  %{packages.import_nix "nixpkgs#stack"}/bin/stack \
                     --nix \
                     --no-nix-pure \
-                    --nix-path="nixpkgs=%{nix_builtins.import_nix "nixpkgs#path"}" \
+                    --nix-path="nixpkgs=%{packages.import_nix "nixpkgs#path"}" \
                     "$@"
                 "%,
           ],
@@ -67,10 +67,10 @@ Bash
         | builders.NickelPkg
     in
     {
-      stack = stack-wrapped,
-      stack' = nix_builtins.import_nix "nixpkgs#stack",
-      nix = nix_builtins.import_nix "nixpkgs#nix",
-      git = nix_builtins.import_nix "nixpkgs#git",
+      stack,
+      nix,
+      git,
+      stack' = stack-wrapped,
     },
   dev.ghcVersion | force = build.ghcVersion,
   dev.packages =
@@ -82,6 +82,6 @@ Bash
     in
     {
       ormolu = ormoluFromHls haskell-language-server,
-      haskell-language-server = nix_builtins.import_nix "nixpkgs#%{ghcPackageSet}.haskell-language-server",
+      haskell-language-server = packages.import_nix "nixpkgs#%{ghcPackageSet}.haskell-language-server",
     },
 }

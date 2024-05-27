@@ -12,11 +12,7 @@ let redis_listen_port = 64442 in
   },
 
   shells.dev = {
-    packages = {
-      postgresql = organist.import_nix "nixpkgs#postgresql",
-      redis = organist.import_nix "nixpkgs#redis",
-      honcho = organist.import_nix "nixpkgs#honcho",
-    },
+    packages = { postgresql, redis, honche },
     env.POSTGRES_PORT = "%{std.to_string postgres_listen_port}",
     env.REDIS_URI = "redis://localhost:%{std.to_string redis_listen_port}",
   },
