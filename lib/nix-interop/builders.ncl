@@ -76,29 +76,6 @@ in
       }
         | NickelPkg,
 
-  Shell
-    | doc m%"
-      A derivation that is to be used as a shell, e.g. with `nix develop`.
-      Analogous to `mkShell`.
-    "%
-    =
-      NixpkgsPkg
-      & {
-        hooks | doc "Bash scripts to run when entering the shell" = {},
-
-        name | default = "shell",
-        version | default = "dev",
-        packages | doc "Packages to be added to the shell, setting PATH, LD_LIBRARY_PATH and other variables as needed" = {},
-
-        env.buildCommand = nix-s%"
-          echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
-          exit 1
-        "%,
-        env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
-        structured_env.nativeBuildInputs = packages,
-      }
-        | NickelPkg,
-
   ShellApplication
     | doc m%"
       A derivation that writes contents of `content.file` to `bin/$name` in the output and makes it executable.

@@ -1,8 +1,9 @@
 let builders = import "../builders.ncl" in
+let base = import "./base.ncl" in
 let nix_builtins = import "../builtins.ncl" in
 {
   build =
-    builders.Shell
+    base
     & {
       packages = {
         bash = nix_builtins.import_nix "nixpkgs#bash",

@@ -63,7 +63,7 @@ let nix = import "./nix-interop/nix.ncl" in
     shells.build.hooks =
       if filegen_hook.enable then
         {
-          filegen_hook = nix-s%"
+          filegen_hook.content = nix-s%"
             %{regenerate_files files}/bin/regenerate-files
           "%
         }

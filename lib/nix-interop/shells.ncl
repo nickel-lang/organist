@@ -1,4 +1,3 @@
-let builders = import "builders.ncl" in
 let nix_builtins = import "builtins.ncl" in
 
 let concat_strings_sep = fun sep values =>
@@ -9,6 +8,7 @@ let concat_strings_sep = fun sep values =>
 in
 
 {
+  Base = import "./shells/base.ncl",
   Bash = import "./shells/bash.ncl",
   Rust = import "./shells/rust.ncl",
 
@@ -95,9 +95,9 @@ in
       build.packages.opam = nix_builtins.import_nix "nixpkgs#opam",
       dev.packages.ocaml-lsp = nix_builtins.import_nix "nixpkgs#ocamlPackages.ocaml-lsp",
 
-      dev.hooks.enter_opam_env = m%"
+      dev.hooks.enter_opam_env.content = m%"
         echo "==> Reloading the OPAM environment."
-        echo "==> Set 'shells.dev.hooks.enter_opam_env' to false to disable."
+        echo "==> Set 'shells.dev.hooks.enter_opam_env' to `""` to disable."
         eval $(opam env)
       "%,
     },
