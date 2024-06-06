@@ -11,8 +11,6 @@
   # Export a Nix value to be consumed by Nickel
   typeField = "$__organist_type";
 
-  isInStore = lib.hasPrefix builtins.storeDir;
-
   # Take a symbolic derivation (a datastructure representing a derivation), as
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
@@ -87,7 +85,11 @@
         let
           organistType = value."${typeField}" or "";
         in
-          if isNickelDerivation organistType
+          if organistType == "module"
+          then
+            assert value ? config;
+              importFromNickel_ value.config
+          else if isNickelDerivation organistType
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
