@@ -1,36 +1,80 @@
 let nix = import "./nix-interop/nix.ncl" in
-{
-  File = {
-    target
-      | doc m%"
+let File = {
+  target
+    | doc m%"
         The file to write to.
         If null, defaults to the attribute name of the file.
       "%
-      | String
-      | optional,
-    content
-      | doc m%"
+    | String
+    | optional,
+  content
+    | doc m%"
         The content of the file.
       "%
-      | nix.derivation.NixString,
-    materialisation_method
-      : [| 'Symlink, 'Copy |]
-      | doc m%"
+    | nix.derivation.NixString,
+  materialisation_method
+    : [| 'Symlink, 'Copy |]
+    | doc m%"
         How the file should be materialized on-disk.
 
         Symlinking makes it easier to track where the files are coming from,
         but their target only exists after a first call to Organist, which
         might be undesirable.
       "%
-      | default
-      = 'Copy,
-    ..
-  },
-  Files = { _ : File },
-  NormaliseTargets = fun label files =>
-    files
-    |> std.record.map (fun name file_descr => file_descr & { target | default = name }),
-
+    | default
+    = 'Copy,
+  ..
+}
+in
+let Files = { _ : File }
+in
+let NormaliseTargets = fun label files =>
+  files
+  |> std.record.map (fun name file_descr => file_descr & { target | default = name })
+in
+let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generate =>
+    let regnerate_one | String -> File -> nix.derivation.NixString = fun key file_descr =>
+        let file_content = file_descr.content in
+        let target = file_descr.target in
+        let copy_command =
+          match {
+            'Symlink => "ln -s",
+            'Copy => "cp",
+          }
+            file_descr.materialisation_method
+        in
+        let file_in_store =
+          nix.builtins.to_file
+            (nix.utils.escape_drv_name key)
+            file_content
+        in
+        nix-s%"
+            rm -f %{target}
+            echo "Regenerating %{target}"
+	    target_dir=$(dirname %{target})
+	    test "${target_dir}" != "." && mkdir -p "${target_dir}"
+            %{copy_command} %{file_in_store} %{target}
+          "%
+      in
+    {
+      name = "regenerate-files",
+      content.text =
+        files_to_generate
+        |> std.record.to_array
+        |> std.array.map (fun { field, value } => regnerate_one field value)
+        |> std.array.fold_left
+          (
+            fun acc elt =>
+              nix-s%"
+                  %{acc}
+                  %{elt}
+                "%
+          )
+          "",
+    }
+      | nix.builders.ShellApplication
+  in
+{
   Schema = {
     files
       | Files
@@ -39,48 +83,10 @@ let nix = import "./nix-interop/nix.ncl" in
         Set of files that should be generated in the project's directory.
       "%
       = {},
-    flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+    flake.apps, # Forward declaration. Not great but would need some refactor to fix
   },
-
-  regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generate =>
-      let regnerate_one | String -> File -> nix.derivation.NixString = fun key file_descr =>
-          let file_content = file_descr.content in
-          let target = file_descr.target in
-          let copy_command =
-            match {
-              'Symlink => "ln -s",
-              'Copy => "cp",
-            }
-              file_descr.materialisation_method
-          in
-          let file_in_store =
-            nix.builtins.to_file
-              (nix.utils.escape_drv_name key)
-              file_content
-          in
-          nix-s%"
-            rm -f %{target}
-            echo "Regenerating %{target}"
-	    target_dir=$(dirname %{target})
-	    test "${target_dir}" != "." && mkdir -p "${target_dir}"
-            %{copy_command} %{file_in_store} %{target}
-          "%
-        in
-      {
-        name = "regenerate-files",
-        content.text =
-          files_to_generate
-          |> std.record.to_array
-          |> std.array.map (fun { field, value } => regnerate_one field value)
-          |> std.array.fold_left
-            (
-              fun acc elt =>
-                nix-s%"
-                  %{acc}
-                  %{elt}
-                "%
-            )
-            "",
-      }
-        | nix.builders.ShellApplication,
+  config | Schema = {
+      files,
+      flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+    },
 }
