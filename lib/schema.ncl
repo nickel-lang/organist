@@ -47,7 +47,7 @@ let filegen = import "files.ncl" in
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  OrganistExpression =
+  OrganistExpression.Schema =
     {
       shells
         | doc m%"
