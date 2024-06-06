@@ -47,21 +47,23 @@ let filegen = import "files.ncl" in
   #
   # The contract must be: what the Nix side of the code can "parse" without
   # erroring out.
-  OrganistExpression.Schema =
+  OrganistExpression =
     {
-      shells
-        | doc m%"
+      Schema = {
+        shells
+          | doc m%"
             The shells that will be entered by `nix develop`.
           "%
-        | OrganistShells,
-      flake
-        | doc m%"
+          | OrganistShells,
+        flake
+          | doc m%"
             The raw flake outputs that will be passed to Nix.
 
             These should follow the Nix flake outputs schema.
           "%
-        | FlakeOutputs
-        = {},
+          | FlakeOutputs
+          = {},
+      },
     }
-    & filegen.Schema
+    & filegen
 }
