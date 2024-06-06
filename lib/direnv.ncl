@@ -1,4 +1,6 @@
-{
+let files = import "files.ncl" in
+files
+& {
   Schema = {
     direnv = {
       enable
@@ -9,10 +11,13 @@
         | default
         = true,
     },
-    files =
-      if direnv.enable then
-        {
-          ".envrc".content = m%"
+  },
+  config | Schema = {
+      direnv,
+      files =
+        if direnv.enable then
+          {
+            ".envrc".content = m%"
             if ! has nix_direnv_version || ! nix_direnv_version 2.4.0; then
               source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/2.4.0/direnvrc" "sha256-XQzUAvL6pysIJnRJyR7uVpmUSZfc7LSgWQwq/4mBr1U="
             fi
@@ -20,8 +25,8 @@
             source_env_if_exists ".envrc.private"
             use flake
           "%,
-        }
-      else
-        {},
-  },
+          }
+        else
+          {},
+    },
 }
