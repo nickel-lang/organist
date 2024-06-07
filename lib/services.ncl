@@ -36,21 +36,25 @@ let generate_procfile | ProcfileSchema -> nix.derivation.NixString = fun schema 
       | { _ : nix.derivation.NixString }
       | default
       = {},
-    flake.apps =
-      if services != {} then
-        let procfile = nix.builtins.to_file "Procfile" (generate_procfile services) in
-        {
-          start-services.type = "app",
-          start-services.program | nix.derivation.NixString =
-              let run =
-                nix.builders.ShellApplication
-                & {
-                  name = "start-services",
-                  content.text = nix-s%"exec %{nix.import_nix "nixpkgs#honcho"}/bin/honcho -f %{procfile} "$@""%
-                }
-              in nix-s%"%{run}/bin/start-services"%
-        }
-      else
-        {},
-  }
+    flake.apps,
+  },
+  config | Schema = {
+      services,
+      flake.apps =
+        if services != {} then
+          let procfile = nix.builtins.to_file "Procfile" (generate_procfile services) in
+          {
+            start-services.type = "app",
+            start-services.program | nix.derivation.NixString =
+                let run =
+                  nix.builders.ShellApplication
+                  & {
+                    name = "start-services",
+                    content.text = nix-s%"exec %{nix.import_nix "nixpkgs#honcho"}/bin/honcho -f %{procfile} "$@""%
+                  }
+                in nix-s%"%{run}/bin/start-services"%
+          }
+        else
+          {},
+    },
 }
