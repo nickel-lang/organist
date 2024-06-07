@@ -10,17 +10,21 @@ After running `nix flake init`, you should end-up with a `project.ncl` looking l
 let inputs = import "./nickel.lock.ncl" in
 let organist = inputs.organist in
 
-{
-  shells = organist.shells.Bash,
+organist.contracts.OrganistExpression
+& {
+  Schema,
+  config | Schema = {
+    shells = organist.shells.Bash,
 
-  shells.build = {
-    packages = {},
-  },
+    shells.build = {
+      packages = {},
+    },
 
-  shells.dev = {
-    packages.hello = organist.lib.import_nix "nixpkgs#hello",
+    shells.dev = {
+      packages.hello = organist.lib.import_nix "nixpkgs#hello",
+    },
   },
-} | organist.contracts.OrganistExpression
+} | organist.modules.T
 ```
 
 This defines two variants of the shell: `build` and `dev`, both of which inherit from `organist.shells.Bash` (more precisely, `build` inherits from `organist.shells.Bash.build` and `dev` inherits from `organist.shells.Bash.dev`).
