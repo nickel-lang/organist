@@ -29,12 +29,17 @@ let predicate | doc "Various predicates used to define contracts"
     is_derivation = fun x =>
       is_nickel_derivation x
       || is_nix_input x,
+    is_nix_call = fun value =>
+      std.is_record value
+      && std.record.has_field type_field value
+      && value."%{type_field}" == "callNix",
     is_string_fragment = fun x =>
       is_derivation x
       || std.is_string x
       || is_nix_path x
       || is_nix_placeholder x
       || is_nix_to_file x
+      || is_nix_call x
   }
   in
 
