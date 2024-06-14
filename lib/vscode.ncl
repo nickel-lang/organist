@@ -13,29 +13,27 @@ let VSCodeSchema = {
 } in
 let BuiltExtensionDetails = {
   name | String,
-  path | Dyn
+  path | nix.derivation.NixString,
 } in
 let buildExtension : String -> ExtensionFromMarketplace -> BuiltExtensionDetails = fun extName efm =>
       { name = extName,
       path = nix.derivation.CallNix & { function = m%"
-          vscode-utils.buildVscodeMarketplaceExtension
-            { mktplcRef =
-              { publisher = "{publisher}";
-                name = "{name}";
-                version = "{version}";
-                sha256="{sha256}";
-              };
-            }
+          {vscode-utils, extension-ref}:
+            vscode-utils.buildVscodeMarketplaceExtension
+            { mktplcRef = extension-ref; }
         "%,
         args = {
-            publisher = efm.publisher,
-            name = efm.name,
-            version = efm.version,
-            sha256 = efm.sha256
+            vscode-utils = nix.import_nix "nixpkgs#vscode-utils",
+            extension-ref = {
+              publisher = efm.publisher,
+              name = efm.name,
+              version = efm.version,
+              sha256 = efm.sha256
+            },
           }
       }} | BuiltExtensionDetails in
 let regenerate-vscode | { _ : ExtensionFromMarketplace} -> nix.derivation.Derivation = fun exts =>
-  { name = "regenerate-vscode-exts",
+  { name = "regenerate-vscode",
     content.text = exts
       |> std.record.to_array
       |> std.array.map (fun {field = extName, value = ext} => buildExtension extName ext)
@@ -43,7 +41,7 @@ let regenerate-vscode | { _ : ExtensionFromMarketplace} -> nix.derivation.Deriva
         ( fun acc elt =>
           nix-s%"
             %{acc}
-            ln -s ".vscode/extensions/%{elt.name}" %{elt.path}
+            ln -sf %{elt.path}/share/vscode/extensions/* ".vscode/extensions/" 
           "%)
           "",
   } | nix.builders.ShellApplication
