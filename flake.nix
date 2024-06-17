@@ -44,17 +44,15 @@
         then {}
         else {
           inherit nickelOutputs;
-          packages = nickelOutputs.packages or {} // nickelOutputs.flake.packages or {};
-          checks = nickelOutputs.flake.checks or {};
+          packages = nickelOutputs.packages or {};
+          checks = nickelOutputs.checks or {};
           # Can't define this app in Nickel, yet
           apps =
             {
               regenerate-lockfile = lib.regenerateLockFileApp lockFileContents;
             }
-            // nickelOutputs.flake.apps or {};
-          # We can't just copy `shells` to `flake.devShells` in the contract
-          # because of a bug in Nickel: https://github.com/tweag/nickel/issues/1630
-          devShells = nickelOutputs.shells or {} // nickelOutputs.flake.devShells or {};
+            // nickelOutputs.apps or {};
+          devShells = nickelOutputs.devShells or {};
         });
 
     computedOutputs = outputsFromNickel ./. (inputs // {organist = self;}) {
