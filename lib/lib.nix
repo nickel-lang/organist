@@ -157,7 +157,7 @@
       in
       let organist = (import "${src}/nickel.lock.ncl").organist in
 
-      let nickel_expr | (organist.OrganistExpression & {..}) =
+      let nickel_expr =
         import "${src}/${nickelFile}" in
 
       nickel_expr & params
@@ -184,13 +184,13 @@
           cat > eval.ncl <<EOF
           ${nickelWithImports "sources"}
           EOF
-          ${nickel}/bin/nickel export eval.ncl > $out
+          ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
         ''
       else ''
         cat > eval.ncl <<EOF
         ${nickelWithImports sources}
         EOF
-        ${nickel}/bin/nickel export eval.ncl > $out
+        ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
       ''
     );
 
