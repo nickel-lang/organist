@@ -135,90 +135,137 @@
   # Call Nickel on a given Nickel expression with the inputs declared in it.
   # See importNcl for details about the flakeInputs parameter.
   callNickel = {
-    nickelFile,
-    flakeInputs,
+    /*
+    : [String]
+
+    The command-line arguments to pass to `nickel export`
+    */
+    nickelArgs,
+    /*
+    : String
+
+    The base path for resolving `organist.nix.import_file`
+    */
     baseDir,
-    lockFileContents,
-  }: let
-    sources = builtins.path {
-      path = baseDir;
-      # TODO: filter .ncl files
-      # filter =
-    };
-
-    lockfilePath = "${sources}/nickel.lock.ncl";
-    expectedLockfileContents = buildLockFileContents lockFileContents;
-    needNewLockfile = !builtins.pathExists lockfilePath || (builtins.readFile lockfilePath) != expectedLockfileContents;
-
-    nickelWithImports = src: ''
-      let params = {
-        system = "${system}",
-      }
-      in
-      let organist = (import "${src}/nickel.lock.ncl").organist in
-
-      let nickel_expr =
-        import "${src}/${nickelFile}" in
-
-      nickel_expr & params
-    '';
-  in
+  }:
     runCommand "nickel-res.json" {
-      # If expectedLockfileContents references current flake in context, propagate it even if we don't need it.
-      inherit expectedLockfileContents;
-      passAsFile = ["expectedLockfileContents"];
-    } (
-      if needNewLockfile
-      then
-        lib.warn ''
-          Lockfile contents are outdated. Please run "nix run .#regenerate-lockfile" to update them.
-        ''
-        ''
-          cp -r "${sources}" sources
-          if [ -f sources/nickel.lock.ncl ]; then
-            chmod +w sources sources/nickel.lock.ncl
-          else
-            chmod +w sources
-          fi
-          cp $expectedLockfileContentsPath sources/nickel.lock.ncl
-          cat > eval.ncl <<EOF
-          ${nickelWithImports "sources"}
-          EOF
-          ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
-        ''
-      else ''
-        cat > eval.ncl <<EOF
-        ${nickelWithImports sources}
-        EOF
-        ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
-      ''
-    );
+      __structuredAttrs = true;
+      inherit nickelArgs;
+    } ''
+      ${nickel}/bin/nickel export --format json ''${nickelArgs[@]} > $out
+    '';
 
-  # Import a Nickel expression as a Nix value. flakeInputs are where the packages
-  # passed to the Nickel expression are taken from. If the Nickel expression
-  # declares an input hello from input "nixpkgs", then flakeInputs must have an
-  # attribute "nixpkgs" with a package "hello".
-  importNcl = {
-    baseDir,
-    nickelFile ? "project.ncl",
+  /*
+  Import a Nickel expression as a Nix value.
+  */
+  importNickel = {
+    /*
+    : [String]
+
+    Raw arguments passed to the `nickel export` command.
+    This must at least contain the path to one Nickel file
+    */
+    nickelArgs,
+    /*
+    The path relative to which to resolve the `nix.import_file` calls.
+
+    Can be left to its default value if `import_file` is not used.
+    */
+    baseDir ? "/non-existent-path-please-set-baseDir",
+    /*
+    The inputs to which `nix.import_nix` calls will be resolved.
+
+    Can be left to its default value if `import_nix` is not used.
+    */
     flakeInputs ? {
       nixpkgs = pkgs;
       organist = import organistSrc;
     },
-    lockFileContents ? {
-      organist = "${organistSrc}/lib/organist.ncl";
-    },
   }: let
-    nickelResult = callNickel {
-      inherit nickelFile baseDir flakeInputs lockFileContents;
-    };
+    nickelResult = callNickel {inherit nickelArgs baseDir;};
   in
     {rawNickel = nickelResult;}
     // (importFromNickel flakeInputs system baseDir (builtins.fromJSON
         (builtins.unsafeDiscardStringContext (builtins.readFile nickelResult))));
+
+  /*
+  Prepare an Organist project for consumption in Nix.
+  */
+  preprocessOrganist = {
+    projectRoot,
+    lockFileContents,
+    nickelFile,
+    flakeInputs,
+  }
+  : let
+    sources = builtins.path {
+      path = projectRoot;
+      # TODO: filter .ncl files?
+      # filter =
+    };
+    expectedLockfileContents = buildLockFileContents lockFileContents;
+
+    paramsFile = pkgs.writers.writeJSON "params.json" {inherit system;};
+
+    # Regenerate the lockfile to force it to match what we pass in through Nix
+    nickel_source_root =
+      runCommand "nickel-res.json" {
+        inherit expectedLockfileContents;
+        passAsFile = ["expectedLockfileContents"];
+      }
+      ''
+        cp -r "${sources}" $out
+        if [ -f $out/nickel.lock.ncl ]; then
+          chmod +w $out $out/nickel.lock.ncl
+        else
+          chmod +w $out
+        fi
+        cp $expectedLockfileContentsPath $out/nickel.lock.ncl
+      '';
+
+    # The original flake inputs, but with an extra internal one containing the path to the lockfile
+    # so that we can add it to the repository afterwards
+    enrichedFlakeInputs =
+      flakeInputs
+      // {
+        "%%organist_internal".nickelLock = "${nickel_source_root}/nickel.lock.ncl";
+      };
+  in {
+    nickelArgs = [paramsFile "${nickel_source_root}/${nickelFile}" "--field" "config.flake"];
+    baseDir = nickel_source_root;
+    flakeInputs = enrichedFlakeInputs;
+  };
+
+  /*
+  Import an Organist project into Nix.
+  */
+  importOrganist = {
+    /*
+    The desired contents of the `nickel.lock.ncl` file.
+    */
+    lockFileContents,
+    /*
+    The inputs of the flake, for resolving the `nix.import_nix` function.
+    */
+    flakeInputs,
+    /*
+    The root of the project
+    */
+    projectRoot,
+    /*
+    Path to the entrypoint, relative to the project root
+    */
+    nickelFile ? "project.ncl",
+  }: let
+    preprocessedExpression = preprocessOrganist {
+      inherit nickelFile lockFileContents projectRoot flakeInputs;
+    };
+  in
+    importNickel preprocessedExpression;
 in {
   inherit
-    importNcl
+    importNickel
+    importOrganist
     buildLockFile
     buildLockFileContents
     regenerateLockFileApp
