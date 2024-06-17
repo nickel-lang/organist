@@ -54,14 +54,16 @@ let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generat
             file_descr.materialisation_method
         in
         nix-s%"
-            rm -f %{target}
-            echo "Regenerating %{target}"
-            target_dir=$(dirname %{target})
-            test "${target_dir}" != "." && mkdir -p "${target_dir}"
-            # XXX: If `source.file` is set explicitely to a relative path
-            # and `materialisation_method` is `'Symlink`, this will link to the
-            # original file, not one in the store. Not sure that's what we want.
-            %{copy_command} %{file_descr.file} %{target}
+            if [[ ! -f "%{target}" ]] || [[ $(cat "%{target}") != $(cat "%{file_descr.file}") ]]; then
+              rm -f %{target}
+              echo "Regenerating %{target}"
+              target_dir=$(dirname %{target})
+              test "${target_dir}" != "." && mkdir -p "${target_dir}"
+              # XXX: If `source.file` is set explicitely to a relative path
+              # and `materialisation_method` is `'Symlink`, this will link to the
+              # original file, not one in the store. Not sure that's what we want.
+              %{copy_command} %{file_descr.file} %{target}
+            fi
           "%
       in
     {
