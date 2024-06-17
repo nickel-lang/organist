@@ -384,4 +384,22 @@ in
         "%
         | Dyn,
     },
+
+  trim_derivation_args
+    | doc m%"
+      Recursively traverse the given structure, and upon encountering a
+      derivation, remove everything but the `nix_drv` field from it.
+    "%
+    | Dyn -> Dyn
+    = fun value =>
+      std.typeof value
+      |> match {
+        'Array => std.array.map trim_derivation_args value,
+        'Record =>
+          if predicate.is_nickel_derivation value then
+            { "%{type_field}" = "nickelDerivation", nix_drv = trim_derivation_args value.nix_drv }
+          else
+            std.record.map_values trim_derivation_args value,
+        _ => value
+      }
 }

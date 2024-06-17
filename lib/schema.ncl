@@ -67,7 +67,7 @@ let lockfile = import "lockfile.ncl" in
       },
       config | Schema = {
           shells,
-          flake.devShells = shells,
+          flake.devShells = nix.derivation.trim_derivation_args shells,
         },
     }
     & filegen
