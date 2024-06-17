@@ -3,6 +3,12 @@ let nix = import "./nix-interop/nix.ncl" in
 (import "./flake/shells.ncl")
 & {
   Schema = {
+    flake
+      | doc m%"
+        The raw outputs of the Nix flake.
+
+        Don't set that directly unless you need to.
+      "%,
     apps
       | doc m%"
         Applications that can be executed with `nix run .#app-name`.
