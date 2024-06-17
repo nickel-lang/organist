@@ -5,8 +5,8 @@ organist.OrganistExpression
 & {
   Schema,
   config | Schema = {
-      flake.packages."default" = flake.packages.hello,
-      flake.packages.hello =
+      packages."default" = packages.hello,
+      packages.hello =
         organist.nix.builders.NixpkgsPkg
         & {
           name = "hello",
@@ -29,6 +29,6 @@ organist.OrganistExpression
         },
 
       shells = organist.shells.Bash,
-      shells.build.packages.hello = flake.packages.hello,
+      shells.build.packages.hello = packages.hello,
     },
 } | organist.modules.T

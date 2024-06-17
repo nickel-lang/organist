@@ -17,7 +17,7 @@ organist.OrganistExpression
           },
         },
 
-      flake.apps.run-test =
+      apps.run-test =
         let testScript | organist.nix.builders.ShellApplication = {
             name = "run-test.sh",
             content.file = organist.nix.builtins.import_file "run-test.sh",
@@ -29,17 +29,16 @@ organist.OrganistExpression
           }
           in
         {
-          type = "app",
           program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
         },
 
-      flake.packages = {
+      packages = {
         # Re-exported to make it easy for downstream to depend on them
         nickel = import_nix "nixpkgs#nickel",
         nls = import_nix "nixpkgs#nls",
       },
 
-      flake.checks
+      checks
         | { _ | organist.nix.builders.NixpkgsPkg }
         = {
           alejandra = {
@@ -72,7 +71,7 @@ organist.OrganistExpression
           },
         },
 
-      flake.checks = import "tests/main.ncl",
+      checks = import "tests/main.ncl",
 
       files.".gitignore".materialisation_method = 'Copy,
       files.".gitignore".content = m%"

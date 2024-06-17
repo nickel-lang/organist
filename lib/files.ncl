@@ -85,30 +85,28 @@ let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generat
       | nix.builders.ShellApplication
   in
 {
-  Schema = {
-    files
-      | Files
-      | NormaliseTargets
-      | doc m%"
+  Schema =
+    {
+      files
+        | Files
+        | NormaliseTargets
+        | doc m%"
         Set of files that should be generated in the project's directory.
       "%
-      = {},
-    filegen_hook.enable
-      | Bool
-      | doc m%"
+        = {},
+      filegen_hook.enable
+        | Bool
+        | doc m%"
         Enable a hook that will automatically regenerate the files managed by
         Nickel when entering the shell.
       "%
-      | default
-      = true,
-    flake.apps, # Forward declaration. Not great but would need some refactor to fix
-    shells,
-  },
+        | default
+        = true,
+    } & (import "flake.ncl").Schema,
   config | Schema = {
       files,
       filegen_hook,
-      shells,
-      flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+      apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
 
       shells.build.hooks =
         if filegen_hook.enable then
