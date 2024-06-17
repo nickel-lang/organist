@@ -11,9 +11,10 @@ let generate_procfile | ProcfileSchema -> nix.nix_string.NixString
     |> nix.nix_string.join "\n"
   in
 {
-  Schema = {
-    services
-      | doc m%%%"
+  Schema =
+    {
+      services
+        | doc m%%%"
         Services required for development.
 
         These can be started with `nix run .#start-services start`.
@@ -27,19 +28,18 @@ let generate_procfile | ProcfileSchema -> nix.nix_string.NixString
         }
         ```
       "%%%
-      | { _ : nix.nix_string.NixString }
-      | default
-      = {},
-    flake.apps,
-  },
+        | { _ : nix.nix_string.NixString }
+        | default
+        = {},
+    }
+    & (import "flake.ncl").Schema,
   config | Schema
     = {
       services,
-      flake.apps =
+      apps =
         if services != {} then
           let procfile = nix.builtins.to_file "Procfile" (generate_procfile services) in
           {
-            start-services.type = "app",
             start-services.program | nix.nix_string.NixString
               =
                 let run =
