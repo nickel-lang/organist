@@ -133,7 +133,7 @@
     else value;
 
   # Call Nickel on a given Nickel expression with the inputs declared in it.
-  # See importNcl for details about the flakeInputs parameter.
+  # See importOrganist for details about the flakeInputs parameter.
   callNickel = {
     /*
     : [String]
