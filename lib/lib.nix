@@ -157,6 +157,11 @@
 
   /*
   Import a Nickel expression as a Nix value.
+
+  The result of the Nickel evaluation will be directly mapped to Nix values
+  (through their JSON interface), with the exception of record containing the
+  special `__organist_type` field which have a special treatment as per the
+  `importFromNickel` function above.
   */
   importNickel = {
     /*
