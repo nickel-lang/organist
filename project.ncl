@@ -72,6 +72,27 @@ organist.OrganistExpression
           touch $out
         "%,
           },
+
+          lsp = {
+            name = "organist-lsp-integration",
+            version = "0.0",
+            env.buildInputs = {
+              nls = import_nix "nixpkgs#nls",
+              python3 = import_nix "nixpkgs#python3",
+              pygls = import_nix "nixpkgs#python3Packages.pygls",
+              pytest = import_nix "nixpkgs#python3Packages.pytest",
+              pytest-asyncio = import_nix "nixpkgs#python3Packages.pytest-asyncio",
+            },
+            env = {
+              src = import_nix "self",
+              phases = ["unpackPhase", "testPhase", "installPhase"],
+              testPhase = nix-s%"
+                  cd tests/lsp
+                  pytest | tee $out
+                "%,
+              installPhase = "touch $out",
+            },
+          },
         },
 
       flake.checks = import "tests/main.ncl",
