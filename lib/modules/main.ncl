@@ -3,11 +3,21 @@
   T
     | doc m%"
       The type of a module.
+
+      A module is a record whose contract can be extended through merging.
     "%
     = {
-      config | Schema = {},
+      config
+        | doc m%"
+          The content of the module.
+        "%
+        | Schema
+        = {},
       Schema
         | not_exported
+        | doc m%"
+          The contract that is applied to `config`.
+        "%
         = {},
       "$__organist_type" | force = "module",
     },
