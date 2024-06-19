@@ -19,6 +19,8 @@
       Joins all the given modules into a single one, prefixing all the keys of
       their options with the key of the corresponding module.
 
+      # Example
+
       ```nickel
       submodules {
           mod1 = { Schema.foo | Number, config.foo = 1 },
