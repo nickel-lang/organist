@@ -62,7 +62,6 @@ organist.OrganistExpression & organist.tools.direnv
             position=lsp.Position(line=8, character=28), # `content`
             checks= lambda hover_info: [
                 lsp.MarkedString_Type1(language='nickel', value='nix.derivation.NullOr nix.derivation.NixString') in hover_info.contents,
-                # Test that the contents contain a plain string (the documentation), and that it's non empty
                 next(content for content in hover_info.contents if type(content) == type("")) != "",
             ]
         ),
@@ -71,7 +70,13 @@ organist.OrganistExpression & organist.tools.direnv
             position=lsp.Position(line=10, character=11), # `shells( =)`
             checks= lambda hover_info: [
                 lsp.MarkedString_Type1(language='nickel', value='OrganistShells') in hover_info.contents,
-                # Test that the contents contain a plain string (the documentation), and that it's non empty
+                next(content for content in hover_info.contents if type(content) == type("")) != "",
+            ]
+        ),
+        HoverTest(
+            file=test_uri,
+            position=lsp.Position(line=4, character=14), # `OrganistExpression`
+            checks= lambda hover_info: [
                 next(content for content in hover_info.contents if type(content) == type("")) != "",
             ]
         ),
