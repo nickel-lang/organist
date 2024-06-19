@@ -7,6 +7,7 @@
     = {
       config | Schema = {},
       Schema
+        | { .. }
         | not_exported
         = {},
       "$__organist_type" | force = "module",
@@ -15,7 +16,7 @@
   submodules
     | { _ : T } -> T
     | doc m%"
-      Joins all the given module into a single one, prefixing all the keys of
+      Joins all the given modules into a single one, prefixing all the keys of
       their options with the key of the corresponding module.
 
       ```nickel
