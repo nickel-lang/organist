@@ -38,8 +38,4 @@
         Schema = schemas,
         config | Schema = configs,
       } | T,
-
-  merge2
-    | T -> T -> T
-    = fun m1 m2 => m1 & m2,
 }
