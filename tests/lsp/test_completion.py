@@ -107,3 +107,27 @@ organist.OrganistExpression & organist.tools.direnv
     ## No documentation for direnv yet
     # content_item = [item for item in completion_items if item.label == "direnv"][0]
     # assert content_item.documentation.value != ""
+
+@pytest.mark.asyncio
+async def test_completion_organist_lib(client: LanguageClient):
+    """
+    Make sure that everything directly exported by the library has a documentation, and that the LSP can see it
+    """
+
+    test_file = 'template/projectxx.ncl'
+    test_file_content = """
+let inputs = import "./nickel.lock.ncl" in
+let organist = inputs.organist in
+
+organist.
+    """
+
+    test_uri = open_file(client, test_file, test_file_content)
+    completion_items = await complete(
+        client,
+        test_uri,
+        lsp.Position(line=4, character=9) # End ot the last line
+    )
+    assert completion_items is not []
+    for item in completion_items:
+        assert item.documentation is not None and item.documentation.value != ""

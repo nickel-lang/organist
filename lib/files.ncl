@@ -95,18 +95,42 @@ let regenerate_files | Files -> nix.derivation.Derivation
     files
       | Files
       | NormaliseTargets
-      | doc m%"
+      | doc m%%"
         Set of files that should be generated in the project's directory.
-      "%
+
+        # Examples
+
+        ```nickel
+        {
+          ".gitignore".content = m%"
+              /result
+            "%,
+        }
+        ```
+
+        ```nickel
+        {
+          ".containers.json".content =
+            let listen_port : Number = 3000 in
+            let config | schema = {
+              image = "ghcr.io/nixos/nix:latest",
+              forwardPorts = [listen_port],
+              containerEnv.MY_APP_LISTEN_PORT = std.to_string listen_port,
+            }
+            in
+            std.serialize 'Toml config,
+        }
+        ```
+      "%%
       = {},
-    filegen_hook.enable
-      | Bool
+    filegen_hook
+      | { enable | Bool }
       | doc m%"
-        Enable a hook that will automatically regenerate the files managed by
-        Nickel when entering the shell.
+        A hook that will automatically regenerate the files managed by Nickel
+        when entering the shell.
       "%
       | default
-      = true,
+      = { enable = true },
     flake.apps, # Forward declaration. Not great but would need some refactor to fix
     shells,
   },
