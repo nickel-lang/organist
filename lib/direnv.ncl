@@ -2,15 +2,17 @@ let files = import "files.ncl" in
 files
 & {
   Schema = {
-    direnv = {
-      enable
-        | doc m%"
-          Whether to enable the [direnv](https://github.com/direnv/direnv) integration.
-        "%
-        | Bool
-        | default
-        = false,
-    },
+    direnv
+      | doc m%"
+        [direnv](https://github.com/direnv/direnv) integration.
+      "%
+      = {
+        enable
+          | doc "Whether to enable the integration"
+          | Bool
+          | default
+          = false,
+      },
   },
   config | Schema
     = {
