@@ -1,6 +1,8 @@
 let filegen = import "files.ncl" in
 let lockfile = import "lockfile.ncl" in
 let flake = import "flake.ncl" in
+let services = import "services.ncl" in
+let direnv = import "direnv.ncl" in
 {
   # TODO: have the actual contract for the result of an expression. It's pretty
   # open (could be an integer, a derivation, a record of derivations, etc.) but
@@ -14,4 +16,6 @@ let flake = import "flake.ncl" in
     & flake
     & filegen
     & lockfile
+    & services
+    & direnv
 }

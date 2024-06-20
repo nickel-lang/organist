@@ -9,7 +9,7 @@ files
         "%
         | Bool
         | default
-        = true,
+        = false,
     },
   },
   config | Schema
