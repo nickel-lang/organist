@@ -18,4 +18,5 @@ let direnv = import "direnv.ncl" in
     & lockfile
     & services
     & direnv
+    & (import "just.ncl")
 }
