@@ -7,7 +7,7 @@ from lsprotocol import types as lsp
 @pytest_asyncio.fixture
 async def client():
     # Setup
-    client = testlib.LanguageClient("organist-test-suite", "v1")
+    client = testlib.LanguageClient()
     await client.start_io("nls")
     response = await client.initialize_async(
             lsp.InitializeParams(

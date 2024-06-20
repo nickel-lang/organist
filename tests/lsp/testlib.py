@@ -4,7 +4,16 @@ import os
 from lsprotocol import types as lsp
 
 class LanguageClient(BaseLanguageClient):
-    pass
+
+    def __init__(self):
+        super().__init__("organist-test-suite", "v1")
+        self.diagnostics: Dict[str, List[types.Diagnostic]] = {}
+
+        @self.feature(lsp.TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS)
+        def publish_diagnostics(
+            client: LanguageClient, params: lsp.PublishDiagnosticsParams
+        ):
+            client.diagnostics[params.uri] = params.diagnostics
 
 def open_file(client: LanguageClient, file_path: str, file_content: Optional[str] = None):
     """
