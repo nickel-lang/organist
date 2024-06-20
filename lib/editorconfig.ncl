@@ -70,17 +70,18 @@ let EditorConfigSchema = {
     = {},
 }
 in
-files
-& {
-  Schema = {
-    editorconfig
-      | doc m%"
+{
+  Schema =
+    files.Schema
+    & {
+      editorconfig
+        | doc m%"
         Editor configuration (from https://editorconfig.org/)
       "%
-      | EditorConfigSchema
-      | default
-      = {},
-  },
+        | EditorConfigSchema
+        | default
+        = {},
+    },
   config | Schema
     = {
       editorconfig,

@@ -1,19 +1,20 @@
 let files = import "files.ncl" in
-files
-& {
-  Schema = {
-    direnv
-      | doc m%"
+{
+  Schema =
+    files.Schema
+    & {
+      direnv
+        | doc m%"
         [direnv](https://github.com/direnv/direnv) integration.
       "%
-      = {
-        enable
-          | doc "Whether to enable the integration"
-          | Bool
-          | default
-          = false,
-      },
-  },
+        = {
+          enable
+            | doc "Whether to enable the integration"
+            | Bool
+            | default
+            = false,
+        },
+    },
   config | Schema
     = {
       direnv,
