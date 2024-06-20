@@ -19,4 +19,5 @@ let direnv = import "direnv.ncl" in
     & services
     & direnv
     & (import "just.ncl")
+    & (import "tasks/main.ncl")
 }
