@@ -8,13 +8,11 @@ For instance, if the `project.ncl` contains:
 
 ```nickel
 let redis_listen_port = 64442 in
-{
-  services.redis = nix-s%"%{organist.import_nix "nixpkgs#redis"}/bin/redis-server --port %{std.to_string redis_listen_port}"%,
+organist.OrganistExpression
+& organist.services
+& {
+  config.services.redis = nix-s%"%{organist.import_nix "nixpkgs#redis"}/bin/redis-server --port %{std.to_string redis_listen_port}"%,
 }
-  | (
-    organist.OrganistExpression
-    & organist.services.Schema
-  )
 ```
 
 then running `nix run .#start-services start` will run a local `redis` instance listening on port 64442.

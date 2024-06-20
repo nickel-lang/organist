@@ -11,8 +11,6 @@
   # Export a Nix value to be consumed by Nickel
   typeField = "$__organist_type";
 
-  isInStore = lib.hasPrefix builtins.storeDir;
-
   # Take a symbolic derivation (a datastructure representing a derivation), as
   # produced by Nickel, and transform it into valid arguments to
   # `derivation`
@@ -87,7 +85,11 @@
         let
           organistType = value."${typeField}" or "";
         in
-          if isNickelDerivation organistType
+          if organistType == "module"
+          then
+            assert value ? config;
+              importFromNickel_ value.config
+          else if isNickelDerivation organistType
           then let
             prepared = prepareDerivation system (builtins.mapAttrs (_:
               importFromNickel_)
@@ -155,7 +157,7 @@
       in
       let organist = (import "${src}/nickel.lock.ncl").organist in
 
-      let nickel_expr | (organist.OrganistExpression & {..}) =
+      let nickel_expr =
         import "${src}/${nickelFile}" in
 
       nickel_expr & params
@@ -182,13 +184,13 @@
           cat > eval.ncl <<EOF
           ${nickelWithImports "sources"}
           EOF
-          ${nickel}/bin/nickel export eval.ncl > $out
+          ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
         ''
       else ''
         cat > eval.ncl <<EOF
         ${nickelWithImports sources}
         EOF
-        ${nickel}/bin/nickel export eval.ncl > $out
+        ${nickel}/bin/nickel export eval.ncl --field config.flake > $out
       ''
     );
 

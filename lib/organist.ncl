@@ -1,5 +1,6 @@
 {
   nix = import "./nix-interop/nix.ncl",
+  modules = import "./modules/main.ncl",
   shells = nix.shells,
   schema = import "./schema.ncl",
   OrganistExpression = schema.OrganistExpression,

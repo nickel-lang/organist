@@ -1,3 +1,4 @@
+let files = import "./files.ncl" in
 let IndentSize = fun label value =>
   if value == 'tab then
     value
@@ -68,7 +69,8 @@ let EditorConfigSchema = {
     = {},
 }
 in
-{
+files
+& {
   Schema = {
     editorconfig
       | doc m%"
@@ -77,14 +79,17 @@ in
       | EditorConfigSchema
       | default
       = {},
-    files =
-      if editorconfig.sections != {} then
-        {
-          ".editorconfig" = {
-            content = generate editorconfig.is_root editorconfig.sections,
-          }
-        }
-      else
-        {},
   },
+  config | Schema = {
+      editorconfig,
+      files =
+        if editorconfig.sections != {} then
+          {
+            ".editorconfig" = {
+              content = generate editorconfig.is_root editorconfig.sections,
+            }
+          }
+        else
+          {},
+    },
 }

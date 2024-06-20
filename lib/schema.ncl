@@ -49,19 +49,25 @@ let filegen = import "files.ncl" in
   # erroring out.
   OrganistExpression =
     {
-      shells
-        | doc m%"
+      Schema = {
+        shells
+          | doc m%"
             The shells that will be entered by `nix develop`.
           "%
-        | OrganistShells,
-      flake
-        | doc m%"
+          | OrganistShells,
+        flake
+          | doc m%"
             The raw flake outputs that will be passed to Nix.
 
             These should follow the Nix flake outputs schema.
           "%
-        | FlakeOutputs
-        = {},
+          | FlakeOutputs
+          = {},
+      },
+      config | Schema = {
+          shells,
+          flake.devShells = shells,
+        },
     }
-    & filegen.Schema
+    & filegen
 }
