@@ -26,3 +26,4 @@ let organist = inputs.organist in
   },
 }
   | organist.OrganistExpression
+  & organist.tools.vscode.Schema

@@ -65,5 +65,4 @@ let vscode = import "vscode.ncl" in
         = {},
     }
     & filegen.Schema
-    & vscode.Schema
 }
