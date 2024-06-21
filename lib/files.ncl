@@ -22,8 +22,7 @@ let File = {
         might be undesirable.
       "%
     | default
-    = 'Copy,
-  ..
+    = 'Copy
 }
 in
 let Files = { _ : File }
