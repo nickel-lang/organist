@@ -65,7 +65,7 @@ These variables can also refer to Nix inputs by using the special `nix-s%" "%` [
 For instance, if you want your dev environment to use `jemalloc` as its `malloc` implementation, you can hook it with:
 
 ```nickel
-shells.build.env.LD_PRELOAD = nix-s%"%{inputs.nixpkgs.jemalloc}/lib/libjemalloc.so}"%
+shells.build.env.LD_PRELOAD = nix-s%"%{organist.import_nix "nixpkgs#jemalloc"}/lib/libjemalloc.so}"%
 ```
 
 [symbolic strings]: https://nickel-lang.org/user-manual/syntax#symbolic-strings
