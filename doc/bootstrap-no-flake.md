@@ -9,7 +9,7 @@ let
   organistSrc = builtins.fetchTarball "https://github.com/nickel-lang/organist/archive/main.tar.gz";
   organist = pkgs.callPackage "${organistSrc}/lib/lib.nix" {inherit organistSrc;};
 in
-  (organist.importNcl {baseDir = ./.;}).shells.default
+  (organist.importOrganist {baseDir = ./.;}).shells.default
 ```
 
 And then use `nix develop -f shell.nix` as usual. Note that this will not use nixpkgs and Nickel from Organist's flake.lock.
@@ -22,5 +22,5 @@ let
   organistSrc = builtins.fetchTarball "https://github.com/nickel-lang/organist/archive/main.tar.gz";
   organist = ((import flake-compat) {src = organistSrc;}).defaultNix.lib.${builtins.currentSystem};
 in
-  (organist.importNcl {baseDir = ./.;}).shells.default
+  (organist.importOrganist {baseDir = ./.;}).shells.default
 ```

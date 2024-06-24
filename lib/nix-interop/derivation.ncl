@@ -223,7 +223,7 @@ in
         | optional
         | Version,
       system
-        | doc "The system to build the package on. Defaults to the system used by importNcl."
+        | doc "The system to build the package on. Defaults to the system used by importOrganist."
         | NullOr System
         | default
         = null,

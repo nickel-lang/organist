@@ -27,7 +27,7 @@
     # devShells.${system} and packages.${system} generated from project.ncl
     #
     # (to be extended with more features later)
-    outputsFromNickel = baseDir: flakeInputs: {
+    outputsFromNickel = projectRoot: flakeInputs: {
       systems ? flake-utils.lib.defaultSystems,
       lockFileContents ? {
         organist = "${self}/lib/organist.ncl";
@@ -35,12 +35,12 @@
     }:
       flake-utils.lib.eachSystem systems (system: let
         lib = self.lib.${system};
-        nickelOutputs = lib.importNcl {
-          inherit baseDir flakeInputs lockFileContents;
+        nickelOutputs = lib.importOrganist {
+          inherit projectRoot flakeInputs lockFileContents;
         };
       in
         # Can't do just `{inherit nickelOutputs;} // nickelOutputs.flake` because of infinite recursion over self
-        if (! builtins.readDir baseDir ? "project.ncl")
+        if (! builtins.readDir projectRoot ? "project.ncl")
         then {}
         else {
           inherit nickelOutputs;
