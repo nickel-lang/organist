@@ -4,7 +4,8 @@ let organist = inputs.organist in
 organist.OrganistExpression
 & {
   Schema,
-  config | Schema = {
+  config | Schema
+    = {
       flake.packages."default" = flake.packages.hello,
       flake.packages.hello =
         organist.nix.builders.NixpkgsPkg

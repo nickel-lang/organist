@@ -31,8 +31,10 @@ let NormaliseTargets = fun label files =>
   files
   |> std.record.map (fun name file_descr => file_descr & { target | default = name })
 in
-let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generate =>
-    let regnerate_one | String -> File -> nix.derivation.NixString = fun key file_descr =>
+let regenerate_files | Files -> nix.derivation.Derivation
+  = fun files_to_generate =>
+    let regnerate_one | String -> File -> nix.derivation.NixString
+      = fun key file_descr =>
         let file_content = file_descr.content in
         let target = file_descr.target in
         let copy_command =
@@ -84,7 +86,8 @@ let regenerate_files | Files -> nix.derivation.Derivation = fun files_to_generat
       = {},
     flake.apps, # Forward declaration. Not great but would need some refactor to fix
   },
-  config | Schema = {
+  config | Schema
+    = {
       files,
       flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
     },

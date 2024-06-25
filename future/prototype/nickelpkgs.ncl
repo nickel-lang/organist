@@ -16,11 +16,13 @@ in
 
 {
   get_all_defs | Effect (Array PackageDef) = [ import "pkgs/hello-world.ncl"],
-  defs_with_name | Array PackageDef -> { _ : PackageDef } = fun _pkgs =>
+  defs_with_name | Array PackageDef -> { _ : PackageDef }
+    = fun _pkgs =>
       {
         hello-world = import "pkgs/hello-world.ncl",
       },
-  combine | { _ : PackageDef } -> { _ : Package } = fun pkgs =>
+  combine | { _ : PackageDef } -> { _ : Package }
+    = fun pkgs =>
       # Bind the derivation field to the others. Using merging and not a contract
       # to avoid redoing the computation again and again
       let base = record.map (fun _k pkg => pkgs & drv_builder) in
@@ -39,7 +41,8 @@ in
           base
       in
       res,
-  make | Effect { _ : Derivation } =
+  make | Effect { _ : Derivation }
+    =
       get_all_defs
       |> defs_with_name
       |> combine,

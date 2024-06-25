@@ -12,7 +12,8 @@ files
         = true,
     },
   },
-  config | Schema = {
+  config | Schema
+    = {
       direnv,
       files =
         if direnv.enable then
