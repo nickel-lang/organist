@@ -211,6 +211,10 @@
     enrichedFlakeInputs =
       flakeInputs
       // {
+        # Dummy “flake input” used to pass some data through the Nickel
+        # evaluation.
+        # We should ideally get rid of that and find another more principled
+        # way, but that will do for now.
         "%%organist_internal".nickelLock = builtins.toFile "nickel.lock.ncl" (buildLockFileContents lockFileContents);
       };
   in
