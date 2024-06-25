@@ -116,8 +116,8 @@ let regenerate_files | Files -> nix.derivation.Derivation
         if filegen_hook.enable then
           {
             filegen_hook = nix-s%"
-            %{regenerate_files files}/bin/regenerate-files
-          "%
+              %{regenerate_files files}/bin/regenerate-files
+            "%
           }
         else
           {},
