@@ -165,7 +165,7 @@ in
         # We accept a single string fragment (a plain string, a derivation or a
         # Nix path). We normalize it by wrapping it as a one-element array
       else if predicate.is_string_fragment value then
-        mk_nix_string [std.contract.apply NixStringFragment label value]
+        mk_nix_string [value]
       else
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
         mk_nix_string fragments,
