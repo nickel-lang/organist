@@ -2,10 +2,6 @@ let type_field = "$__organist_type" in
 
 let nix_string = import "./nix-string.ncl" in
 
-let predicate | doc "Various predicates used to define contracts"
-  = {}
-  in
-
 let NixString = nix_string.NixString in
 
 {
