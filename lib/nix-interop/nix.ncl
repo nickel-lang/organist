@@ -5,6 +5,11 @@
       derivations from Nickel.
     "%
     = import "derivation.ncl",
+  nix_string
+    | doc m%"
+      Strings with interpolated Nix values.
+    "%
+    = import "nix-string.ncl",
   builders
     | doc m%"
       Library of standard builders used for writing derivations.

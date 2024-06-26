@@ -11,12 +11,12 @@ let File = {
     | doc m%"
         The content of the file.
       "%
-    | nix.derivation.NullOr nix.derivation.NixString
+    | nix.derivation.NullOr nix.nix_string.NixString
     | default
     = null,
   file
     | doc "File from which to read the body of the script"
-    | nix.derivation.NullOr nix.derivation.NixString
+    | nix.derivation.NullOr nix.nix_string.NixString
     | default
     =
       if content == null then
@@ -44,9 +44,27 @@ let NormaliseTargets = fun label files =>
 in
 let regenerate_files | Files -> nix.derivation.Derivation
   = fun files_to_generate =>
-    let regnerate_one | String -> File -> nix.derivation.NixString
+    let regenerate_function | String
+      = m%"
+        regenerate_function () {
+          COPY_COMMAND="$1"
+          SOURCE="$2"
+          TARGET="$3"
+          if [[ ! -f "$TARGET" ]] || [[ $(cat "$TARGET") != $(cat "$SOURCE") ]]; then
+            rm -f "$TARGET"
+            echo "Regenerating $TARGET"
+            target_dir=$(dirname "$TARGET")
+            test "${target_dir}" != "." && mkdir -p "${target_dir}"
+            # XXX: If `source.file` is set explicitely to a relative path
+            # and `materialisation_method` is `'Symlink`, this will link to the
+            # original file, not one in the store. Not sure that's what we want.
+            $COPY_COMMAND "$SOURCE" "$TARGET"
+          fi
+        }
+      "%
+      in
+    let regnerate_one | String -> File -> nix.nix_string.NixString
       = fun key file_descr =>
-        let target = file_descr.target in
         let copy_command =
           match {
             'Symlink => "ln -s",
@@ -54,34 +72,21 @@ let regenerate_files | Files -> nix.derivation.Derivation
           }
             file_descr.materialisation_method
         in
-        nix-s%"
-            if [[ ! -f "%{target}" ]] || [[ $(cat "%{target}") != $(cat "%{file_descr.file}") ]]; then
-              rm -f %{target}
-              echo "Regenerating %{target}"
-              target_dir=$(dirname "%{target}")
-              test "${target_dir}" != "." && mkdir -p "${target_dir}"
-              # XXX: If `source.file` is set explicitely to a relative path
-              # and `materialisation_method` is `'Symlink`, this will link to the
-              # original file, not one in the store. Not sure that's what we want.
-              %{copy_command} "%{file_descr.file}" "%{target}"
-            fi
-          "%
+        nix-s%"regenerate_function "%{copy_command}" "%{file_descr.file}" "%{file_descr.target}""%
       in
+    let regenerate_files = nix-s%"
+      %{regenerate_function}
+      %{
+        files_to_generate
+        |> std.record.map regnerate_one
+        |> std.record.values
+        |> nix.nix_string.join "\n"
+      }
+    "%
+    in
     {
       name = "regenerate-files",
-      content.text =
-        files_to_generate
-        |> std.record.to_array
-        |> std.array.map (fun { field, value } => regnerate_one field value)
-        |> std.array.fold_left
-          (
-            fun acc elt =>
-              nix-s%"
-                  %{acc}
-                  %{elt}
-                "%
-          )
-          "",
+      content.text = regenerate_files,
     }
       | nix.builders.ShellApplication
   in

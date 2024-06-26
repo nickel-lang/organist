@@ -38,7 +38,7 @@ let lockfile = import "lockfile.ncl" in
     packages | { _ | nix.derivation.Derivation } | optional,
     checks | { _ | nix.derivation.Derivation } | optional,
     devShells | { _ | nix.derivation.Derivation } | optional,
-    apps | { _ | { type = "app", program | nix.derivation.NixString } } | optional,
+    apps | { _ | { type = "app", program | nix.nix_string.NixString } } | optional,
   },
 
   # TODO: have the actual contract for the result of an expression. It's pretty

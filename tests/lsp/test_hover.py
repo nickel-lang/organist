@@ -61,7 +61,7 @@ organist.OrganistExpression & organist.tools.direnv
             file=test_uri,
             position=lsp.Position(line=8, character=28), # `content`
             checks= lambda hover_info: [
-                lsp.MarkedString_Type1(language='nickel', value='nix.derivation.NullOr nix.derivation.NixString') in hover_info.contents,
+                lsp.MarkedString_Type1(language='nickel', value='nix.derivation.NullOr nix.nix_string.NixString') in hover_info.contents,
                 # Test that the contents contain a plain string (the documentation), and that it's non empty
                 next(content for content in hover_info.contents if type(content) is str) != "",
             ]

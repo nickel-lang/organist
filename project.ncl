@@ -32,7 +32,7 @@ organist.OrganistExpression
           in
         {
           type = "app",
-          program | organist.nix.derivation.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
+          program | organist.nix.nix_string.NixString = nix-s%"%{testScript}/bin/run-test.sh"%
         },
 
       flake.packages = {
