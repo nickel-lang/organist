@@ -168,7 +168,12 @@ in
         mk_nix_string [value]
       else
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
-        mk_nix_string fragments,
+        mk_nix_string
+          (
+            std.array.flat_map
+              (fun elt => elt.fragments)
+              fragments
+          ),
 
   NixDerivation
     | doc m%"
