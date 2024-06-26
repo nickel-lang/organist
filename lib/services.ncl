@@ -1,9 +1,9 @@
 let nix = import "./nix-interop/nix.ncl" in
-let ProcfileCommand = nix.derivation.NixString
+let ProcfileCommand = nix.nix_string.NixString
 in
 let ProcfileSchema = { _ : ProcfileCommand }
 in
-let generate_procfile | ProcfileSchema -> nix.derivation.NixString
+let generate_procfile | ProcfileSchema -> nix.nix_string.NixString
   = fun schema =>
     schema
     |> std.record.to_array
@@ -34,7 +34,7 @@ let generate_procfile | ProcfileSchema -> nix.derivation.NixString
         }
         ```
       "%%%
-      | { _ : nix.derivation.NixString }
+      | { _ : nix.nix_string.NixString }
       | default
       = {},
     flake.apps,
@@ -47,7 +47,7 @@ let generate_procfile | ProcfileSchema -> nix.derivation.NixString
           let procfile = nix.builtins.to_file "Procfile" (generate_procfile services) in
           {
             start-services.type = "app",
-            start-services.program | nix.derivation.NixString
+            start-services.program | nix.nix_string.NixString
               =
                 let run =
                   nix.builders.ShellApplication

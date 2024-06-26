@@ -1,4 +1,5 @@
 let derivations = import "derivation.ncl" in
+let nix_string = import "nix-string.ncl" in
 {
   import_file
     | String -> derivations.NixPath
@@ -51,6 +52,6 @@ let derivations = import "derivation.ncl" in
       [toFile](https://nixos.org/manual/nix/stable/language/builtins.html#builtins-toFile)
       builtin.
     "%
-    | String -> derivations.NixString -> derivations.NixToFile
+    | String -> nix_string.NixString -> derivations.NixToFile
     = fun _name _text => { name = _name, text = _text },
 }

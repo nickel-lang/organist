@@ -11,12 +11,12 @@ let File = {
     | doc m%"
         The content of the file.
       "%
-    | nix.derivation.NullOr nix.derivation.NixString
+    | nix.derivation.NullOr nix.nix_string.NixString
     | default
     = null,
   file
     | doc "File from which to read the body of the script"
-    | nix.derivation.NullOr nix.derivation.NixString
+    | nix.derivation.NullOr nix.nix_string.NixString
     | default
     =
       if content == null then
@@ -63,7 +63,7 @@ let regenerate_files | Files -> nix.derivation.Derivation
         }
       "%
       in
-    let regnerate_one | String -> File -> nix.derivation.NixString
+    let regnerate_one | String -> File -> nix.nix_string.NixString
       = fun key file_descr =>
         let copy_command =
           match {

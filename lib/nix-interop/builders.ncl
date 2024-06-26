@@ -1,13 +1,7 @@
-let { NickelDerivation, Derivation, NixString, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
+let { NickelDerivation, Derivation, NixEnvironmentVariable, NullOr, .. } = import "derivation.ncl" in
+let nix_string = import "nix-string.ncl" in
 
 let nix_builtins = import "builtins.ncl" in
-
-let concat_strings_sep = fun sep values =>
-  if std.array.length values == 0 then
-    ""
-  else
-    std.array.reduce_left (fun acc value => nix-s%"%{acc}%{sep}%{value}"%) values
-in
 
 let MutExclusiveWith = fun other name other_name label value =>
   if value == null && other == null then
@@ -94,7 +88,7 @@ in
           echo "This derivation is not supposed to be built" 1>&2 1>/dev/null
           exit 1
         "%,
-        env.shellHook = concat_strings_sep "\n" (std.record.values hooks),
+        env.shellHook = nix_string.join "\n" (std.record.values hooks),
         structured_env.nativeBuildInputs = packages,
       }
         | NickelPkg,
@@ -121,12 +115,12 @@ in
           "%,
         content.text
           | doc "A string representing the body of the script"
-          | NullOr NixString
+          | NullOr nix_string.NixString
           | default
           = null,
         content.file
           | doc "File from which to read the body of the script"
-          | NullOr NixString
+          | NullOr nix_string.NixString
           | default
           =
             if content.text == null then
@@ -154,7 +148,7 @@ in
             The binary that will be run to execute the script.
             Needs to be bash-compatible.
           "%
-          | NixString
+          | nix_string.NixString
           | default
           = nix_builtins.import_nix "nixpkgs#runtimeShell",
 
@@ -176,7 +170,7 @@ in
                 runtime_inputs
                 |> std.record.values
                 |> std.array.map (fun s => nix-s%"%{s}/bin"%)
-                |> concat_strings_sep ":"
+                |> nix_string.join ":"
               in
               nix-s%"export PATH="%{paths}:$PATH""%
           in
