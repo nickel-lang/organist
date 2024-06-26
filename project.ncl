@@ -5,7 +5,8 @@ let import_nix = organist.nix.import_nix in
 organist.OrganistExpression
 & {
   Schema,
-  config | Schema = {
+  config | Schema
+    = {
 
       shells =
         organist.shells.Bash
@@ -18,7 +19,8 @@ organist.OrganistExpression
         },
 
       flake.apps.run-test =
-        let testScript | organist.nix.builders.ShellApplication = {
+        let testScript | organist.nix.builders.ShellApplication
+          = {
             name = "run-test.sh",
             content.file = organist.nix.builtins.import_file "run-test.sh",
             runtime_inputs = {

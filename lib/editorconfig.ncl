@@ -16,7 +16,8 @@ let ConfigEntry = {
 }
 in
 let Config = { _ : ConfigEntry } in
-let showConfigEntry | String -> ConfigEntry -> String = fun section_name entry =>
+let showConfigEntry | String -> ConfigEntry -> String
+  = fun section_name entry =>
     let content =
       entry
       |> std.record.map (fun key value => "%{key} = %{std.to_string value}")
@@ -80,7 +81,8 @@ files
       | default
       = {},
   },
-  config | Schema = {
+  config | Schema
+    = {
       editorconfig,
       files =
         if editorconfig.sections != {} then

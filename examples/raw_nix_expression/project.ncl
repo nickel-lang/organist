@@ -4,7 +4,8 @@ let organist = inputs.organist in
 organist.OrganistExpression
 & {
   Schema,
-  config | Schema = {
+  config | Schema
+    = {
       shells = organist.shells.Bash,
 
       shells.build = {

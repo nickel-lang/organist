@@ -34,7 +34,8 @@ std.record.map
   (import "./organist.ncl").shells
   | {
     _ : {
-      script | String | default =
+      script | String | default
+        =
           # Enable all usual bash error handling options
           # Also redirect stdout to stderr to avoid it interleaving when going through `parallel`
           let lines = std.string.join "\n" (std.record.values tests) in

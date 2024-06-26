@@ -64,7 +64,8 @@ let filegen = import "files.ncl" in
           | FlakeOutputs
           = {},
       },
-      config | Schema = {
+      config | Schema
+        = {
           shells,
           flake.devShells = shells,
         },

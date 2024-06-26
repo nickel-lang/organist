@@ -49,7 +49,8 @@ let Drv = Dyn in
       build_inputs | default = {},
       install_phase | String | default = "",
       build_phase | String | default = "",
-      build_script | String = m%"
+      build_script | String
+        = m%"
       %{build_phase}
       %{install_phase}
     "%,

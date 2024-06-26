@@ -19,9 +19,19 @@ ormoluFromHls = fun hls =>
             (map (dependency: { name = dependency.pname; value = dependency; }) p.passthru.getBuildInputs.haskellBuildInputs);
 
           hlsDependencies = getDependencies hls;
-          hlsOrmoluPluginDependencies = getDependencies hlsDependencies.hls-ormolu-plugin;
+
+          noOrmoluFound =
+            builtins.trace
+              "Couldn't find `ormolu` in the dependencies of `haskell-language-server`. It won't be available in the shell"
+              null;
         in
-        hlsOrmoluPluginDependencies.ormolu.bin
+        if hlsDependencies ? ormolu then
+          hlsDependencies.ormolu.bin or noOrmoluFound
+        else if hlsDependencies ? hls-ormolu-plugin then
+          let hlsOrmoluPluginDependencies = getDependencies hlsDependencies.hls-ormolu-plugin; in
+          hlsOrmoluPluginDependencies.ormolu.bin or noOrmoluFound
+        else
+          noOrmoluFound
     "%,
     args = hls,
   }

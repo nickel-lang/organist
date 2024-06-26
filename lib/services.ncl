@@ -3,7 +3,8 @@ let ProcfileCommand = nix.derivation.NixString
 in
 let ProcfileSchema = { _ : ProcfileCommand }
 in
-let generate_procfile | ProcfileSchema -> nix.derivation.NixString = fun schema =>
+let generate_procfile | ProcfileSchema -> nix.derivation.NixString
+  = fun schema =>
     schema
     |> std.record.to_array
     |> std.array.fold_left
@@ -38,14 +39,16 @@ let generate_procfile | ProcfileSchema -> nix.derivation.NixString = fun schema 
       = {},
     flake.apps,
   },
-  config | Schema = {
+  config | Schema
+    = {
       services,
       flake.apps =
         if services != {} then
           let procfile = nix.builtins.to_file "Procfile" (generate_procfile services) in
           {
             start-services.type = "app",
-            start-services.program | nix.derivation.NixString =
+            start-services.program | nix.derivation.NixString
+              =
                 let run =
                   nix.builders.ShellApplication
                   & {
