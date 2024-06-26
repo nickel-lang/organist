@@ -80,15 +80,7 @@ let regenerate_files | Files -> nix.derivation.Derivation
         files_to_generate
         |> std.record.map regnerate_one
         |> std.record.values
-        |> std.array.fold_left
-          (
-            fun acc elt =>
-              nix-s%"
-                  %{acc}
-                  %{elt}
-                "%
-          )
-          ""
+        |> nix.nix_string.join "\n"
       }
     "%
     in

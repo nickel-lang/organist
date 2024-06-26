@@ -6,16 +6,9 @@ in
 let generate_procfile | ProcfileSchema -> nix.nix_string.NixString
   = fun schema =>
     schema
-    |> std.record.to_array
-    |> std.array.fold_left
-      (
-        fun acc { field, value } =>
-          nix-s%"
-            %{acc}
-            %{field}: %{value}
-          "%
-      )
-      ""
+    |> std.record.map (fun field value => nix-s%"%{field}: %{value}"%)
+    |> std.record.values
+    |> nix.nix_string.join "\n"
   in
 {
   Schema = {
