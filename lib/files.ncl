@@ -11,7 +11,18 @@ let File = {
     | doc m%"
         The content of the file.
       "%
-    | nix.derivation.NixString,
+    | nix.derivation.NullOr nix.derivation.NixString
+    | default
+    = null,
+  file
+    | doc "File from which to read the body of the script"
+    | nix.derivation.NullOr nix.derivation.NixString
+    | default
+    =
+      if content == null then
+        null
+      else
+        nix.builtins.to_file "generated-content" content,
   materialisation_method
     : [| 'Symlink, 'Copy |]
     | doc m%"
@@ -35,7 +46,6 @@ let regenerate_files | Files -> nix.derivation.Derivation
   = fun files_to_generate =>
     let regnerate_one | String -> File -> nix.derivation.NixString
       = fun key file_descr =>
-        let file_content = file_descr.content in
         let target = file_descr.target in
         let copy_command =
           match {
@@ -44,17 +54,17 @@ let regenerate_files | Files -> nix.derivation.Derivation
           }
             file_descr.materialisation_method
         in
-        let file_in_store =
-          nix.builtins.to_file
-            (nix.utils.escape_drv_name key)
-            file_content
-        in
         nix-s%"
-            rm -f %{target}
-            echo "Regenerating %{target}"
-	    target_dir=$(dirname %{target})
-	    test "${target_dir}" != "." && mkdir -p "${target_dir}"
-            %{copy_command} %{file_in_store} %{target}
+            if [[ ! -f "%{target}" ]] || [[ $(cat "%{target}") != $(cat "%{file_descr.file}") ]]; then
+              rm -f %{target}
+              echo "Regenerating %{target}"
+              target_dir=$(dirname "%{target}")
+              test "${target_dir}" != "." && mkdir -p "${target_dir}"
+              # XXX: If `source.file` is set explicitely to a relative path
+              # and `materialisation_method` is `'Symlink`, this will link to the
+              # original file, not one in the store. Not sure that's what we want.
+              %{copy_command} "%{file_descr.file}" "%{target}"
+            fi
           "%
       in
     {
@@ -84,11 +94,32 @@ let regenerate_files | Files -> nix.derivation.Derivation
         Set of files that should be generated in the project's directory.
       "%
       = {},
+    filegen_hook.enable
+      | Bool
+      | doc m%"
+        Enable a hook that will automatically regenerate the files managed by
+        Nickel when entering the shell.
+      "%
+      | default
+      = true,
     flake.apps, # Forward declaration. Not great but would need some refactor to fix
+    shells,
   },
   config | Schema
     = {
       files,
+      filegen_hook,
+      shells,
       flake.apps.regenerate-files.program = nix-s%"%{regenerate_files files}/bin/regenerate-files"%,
+
+      shells.build.hooks =
+        if filegen_hook.enable then
+          {
+            filegen_hook = nix-s%"
+              %{regenerate_files files}/bin/regenerate-files
+            "%
+          }
+        else
+          {},
     },
 }

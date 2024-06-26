@@ -51,10 +51,10 @@ test_one_template () (
   sed -i "s/shells\.Bash/shells.$target/" project.ncl
   prepare_shell
 
-  STORED_LOCKFILE_CONTENTS="$(cat nickel.lock.ncl)"
   TEST_SCRIPT="$(nickel export --format raw <<<'(import "'"$PROJECT_ROOT"'/lib/shell-tests.ncl").'"$target"'.script')"
 
   echo "Running with incorrect nickel.lock.ncl" 1>&2
+  echo '{}' > nickel.lock.ncl
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
 
   if [[ $isFull == false ]]; then
@@ -62,17 +62,13 @@ test_one_template () (
   fi
 
   echo "Running without nickel.lock.ncl" 1>&2
-  rm nickel.lock.ncl
+  rm -f nickel.lock.ncl
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
 
   echo "Run with proper nickel.lock.ncl" 1>&2
-  nix run .\#regenerate-lockfile
-  PROPER_LOCKFILE_CONTENTS="$(cat nickel.lock.ncl)"
   nix develop --accept-flake-config --print-build-logs --command bash <<<"$TEST_SCRIPT"
 
   echo "Testing without flakes" 1>&2
-  # restore lockfile
-  cat > nickel.lock.ncl <<<"$STORED_LOCKFILE_CONTENTS"
   # pretend it's not flake anymore
   rm flake.*
   cat > shell.nix <<EOF
@@ -86,14 +82,15 @@ in
 EOF
 
   echo "Running with incorrect nickel.lock.ncl" 1>&2
+  rm -f nickel.lock.ncl
+  echo '{}' > nickel.lock.ncl
   nix develop --impure -f shell.nix -I nixpkgs="$NIXPKGS_PATH" --command bash <<<"$TEST_SCRIPT"
 
   echo "Running without nickel.lock.ncl" 1>&2
-  rm nickel.lock.ncl
+  rm -f nickel.lock.ncl
   nix develop --impure -f shell.nix -I nixpkgs="$NIXPKGS_PATH" --command bash <<<"$TEST_SCRIPT"
 
   echo "Run with proper nickel.lock.ncl" 1>&2
-  cat > nickel.lock.ncl <<<"$PROPER_LOCKFILE_CONTENTS"
   nix develop --impure -f shell.nix -I nixpkgs="$NIXPKGS_PATH" --command bash <<<"$TEST_SCRIPT"
 
   popd
@@ -120,7 +117,6 @@ test_example () (
   cp -r "$examplePath" ./example
   pushd ./example
   prepare_shell
-  nix run .\#regenerate-files --print-build-logs
   nix develop --print-build-logs --command bash test.sh
   popd
   popd
