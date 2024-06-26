@@ -165,13 +165,15 @@ in
         # We accept a single string fragment (a plain string, a derivation or a
         # Nix path). We normalize it by wrapping it as a one-element array
       else if predicate.is_string_fragment value then
-        mk_nix_string [std.contract.apply NixStringFragment label value]
+        mk_nix_string [value]
       else
-        # TODO: it's for debugging, but we should remove the serializing at some
-        # point.
-        let label = std.contract.label.append_note (std.serialize 'Json value) label in
         let { fragments, .. } = std.contract.apply NixSymbolicString label value in
-        mk_nix_string fragments,
+        mk_nix_string
+          (
+            std.array.flat_map
+              (fun elt => elt.fragments)
+              fragments
+          ),
 
   NixDerivation
     | doc m%"
