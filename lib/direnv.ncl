@@ -19,8 +19,8 @@ files
         if direnv.enable then
           {
             ".envrc".content = m%"
-            if ! has nix_direnv_version || ! nix_direnv_version 2.4.0; then
-              source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/2.4.0/direnvrc" "sha256-XQzUAvL6pysIJnRJyR7uVpmUSZfc7LSgWQwq/4mBr1U="
+            if ! has nix_direnv_version || ! nix_direnv_version 3.0.6; then
+              source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/3.0.6/direnvrc" "sha256-RYcUJaRMf8oF5LznDrlCXbkOQrywm0HDv1VjYGaJGdM="
             fi
             watch_file project.ncl nickel.lock.ncl
             source_env_if_exists ".envrc.private"
