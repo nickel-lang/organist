@@ -3,8 +3,10 @@ let RelativePath =
   std.contract.from_predicate (fun x => !(x |> std.string.characters |> std.array.at 0 == "/"))
 in
 let NoTraversal =
-  std.contract.from_predicate (fun x => !(x |> std.string.split "/" |> std.array.any (fun part => part == ".."))
-  )
+  std.contract.from_predicate
+    (
+      fun x => !(x |> std.string.split "/" |> std.array.any (fun part => part == ".."))
+    )
 in
 let File = {
   target
