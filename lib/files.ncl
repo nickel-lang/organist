@@ -1,18 +1,9 @@
 let nix = import "./nix-interop/nix.ncl" in
 let RelativePath =
-  std.contract.from_validator (fun x =>
-    if x |> std.string.characters |> std.array.at 0 == "/" then
-      'Error { message = m%"Absolute Path: Expecting a relative path, got an absolute path starting with "/"."% }
-    else
-      'Ok
-  )
+  std.contract.from_predicate (fun x => !(x |> std.string.characters |> std.array.at 0 == "/"))
 in
 let NoTraversal =
-  std.contract.from_validator (fun x =>
-    if x |> std.string.split "/" |> std.array.any (fun part => part == "..") then
-      'Error { message = m%"Invalid Traversal: Path contains ".."."% }
-    else
-      'Ok
+  std.contract.from_predicate (fun x => !(x |> std.string.split "/" |> std.array.any (fun part => part == ".."))
   )
 in
 let File = {
