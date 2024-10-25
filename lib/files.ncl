@@ -15,20 +15,15 @@ let NoTraversal =
       'Ok
   )
 in
-let
-# A ValidTarget eliminates these pathological targets:
-# - Empty target, i.e., "",
-# - Absolute target, e.g., `"/etc/passwd"`,
-# - Parent traversals, e.g,. `"../../../../../../../etc/passwd"`.
-ValidTarget = std.contract.all_of [std.string.NonEmpty, RelativePath, NoTraversal]
-in
 let File = {
   target
     | doc m%"
         The file to write to.
         If null, defaults to the attribute name of the file.
       "%
-    | ValidTarget
+    | std.string.NonEmpty # avoids ""
+    | RelativePath # avoids "/etc/passwd"
+    | NoTraversal # avoids "../../../../../../../etc/passwd"
     | optional,
   content
     | doc m%"
