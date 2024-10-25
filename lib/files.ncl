@@ -1,11 +1,34 @@
 let nix = import "./nix-interop/nix.ncl" in
+let RelativePath =
+  std.contract.from_validator (fun x =>
+    if x |> std.string.characters |> std.array.at 0 == "/" then
+      'Error { message = m%"Absolute Path: Expecting a relative path, got an absolute path starting with "/"."% }
+    else
+      'Ok
+  )
+in
+let NoTraversal =
+  std.contract.from_validator (fun x =>
+    if x |> std.string.split "/" |> std.array.any (fun part => part == "..") then
+      'Error { message = m%"Invalid Traversal: Path contains ".."."% }
+    else
+      'Ok
+  )
+in
+let
+# A ValidTarget eliminates these pathological targets:
+# - Empty target, i.e., "",
+# - Absolute target, e.g., `"/etc/passwd"`,
+# - Parent traversals, e.g,. `"../../../../../../../etc/passwd"`.
+ValidTarget = std.contract.all_of [std.string.NonEmpty, RelativePath, NoTraversal]
+in
 let File = {
   target
     | doc m%"
         The file to write to.
         If null, defaults to the attribute name of the file.
       "%
-    | String
+    | ValidTarget
     | optional,
   content
     | doc m%"
@@ -72,7 +95,12 @@ let regenerate_files | Files -> nix.derivation.Derivation
           }
             file_descr.materialisation_method
         in
-        nix-s%"regenerate_function "%{copy_command}" "%{file_descr.file}" "%{file_descr.target}""%
+        let shell_escape = fun path =>
+          path
+          |> std.string.replace "\\" "\\\\"
+          |> std.string.replace m%"""% m%"\""%
+        in
+        nix-s%"regenerate_function "%{copy_command}" "%{file_descr.file}" "%{shell_escape file_descr.target}""%
       in
     let regenerate_files = nix-s%"
       %{regenerate_function}
