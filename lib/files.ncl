@@ -1,11 +1,20 @@
 let nix = import "./nix-interop/nix.ncl" in
 let RelativePath =
-  std.contract.from_predicate (fun x => !(x |> std.string.characters |> std.array.at 0 == "/"))
-in
-let NoTraversal =
   std.contract.from_predicate
     (
-      fun x => !(x |> std.string.split "/" |> std.array.any (fun part => part == ".."))
+      fun x =>
+        x
+        |> std.string.characters
+        |> std.array.first != "/"
+    )
+in
+let NoParentTraversal =
+  std.contract.from_predicate
+    (
+      fun x =>
+        x
+        |> std.string.split "/"
+        |> std.array.all ((!=) "..")
     )
 in
 let File = {
@@ -16,7 +25,7 @@ let File = {
       "%
     | std.string.NonEmpty # avoids ""
     | RelativePath # avoids "/etc/passwd"
-    | NoTraversal # avoids "../../../../../../../etc/passwd"
+    | NoParentTraversal # avoids "../../../../../../../etc/passwd"
     | optional,
   content
     | doc m%"
@@ -86,9 +95,9 @@ let regenerate_files | Files -> nix.derivation.Derivation
         let shell_escape = fun path =>
           path
           |> std.string.replace "\\" "\\\\"
-          |> std.string.replace m%"""% m%"\""%
+          |> std.string.replace m%"'"% m%"\'"%
         in
-        nix-s%"regenerate_function "%{copy_command}" "%{file_descr.file}" "%{shell_escape file_descr.target}""%
+        nix-s%"regenerate_function '%{copy_command}' '%{file_descr.file}' $'%{shell_escape file_descr.target}'"%
       in
     let regenerate_files = nix-s%"
       %{regenerate_function}
