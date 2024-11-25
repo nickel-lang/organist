@@ -1,11 +1,31 @@
 let nix = import "./nix-interop/nix.ncl" in
+let RelativePath =
+  std.contract.from_predicate
+    (
+      fun x =>
+        x
+        |> std.string.characters
+        |> std.array.first != "/"
+    )
+in
+let NoParentTraversal =
+  std.contract.from_predicate
+    (
+      fun x =>
+        x
+        |> std.string.split "/"
+        |> std.array.all ((!=) "..")
+    )
+in
 let File = {
   target
     | doc m%"
         The file to write to.
         If null, defaults to the attribute name of the file.
       "%
-    | String
+    | std.string.NonEmpty # avoids ""
+    | RelativePath # avoids "/etc/passwd"
+    | NoParentTraversal # avoids "../../../../../../../etc/passwd"
     | optional,
   content
     | doc m%"
@@ -72,7 +92,12 @@ let regenerate_files | Files -> nix.derivation.Derivation
           }
             file_descr.materialisation_method
         in
-        nix-s%"regenerate_function "%{copy_command}" "%{file_descr.file}" "%{file_descr.target}""%
+        let shell_escape = fun path =>
+          path
+          |> std.string.replace "\\" "\\\\"
+          |> std.string.replace m%"'"% m%"\'"%
+        in
+        nix-s%"regenerate_function '%{copy_command}' '%{file_descr.file}' $'%{shell_escape file_descr.target}'"%
       in
     let regenerate_files = nix-s%"
       %{regenerate_function}
